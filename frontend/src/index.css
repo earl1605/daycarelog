@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { @apply antialiased text-gray-900; }
+}
+
+@layer utilities {
+  .animation-delay-100  { animation-delay: 0.1s; }
+  .animation-delay-200  { animation-delay: 0.2s; }
+  .animation-delay-300  { animation-delay: 0.3s; }
+  .animation-delay-400  { animation-delay: 0.4s; }
+  .animation-delay-500  { animation-delay: 0.5s; }
+  .animation-delay-600  { animation-delay: 0.6s; }
+  .animation-delay-700  { animation-delay: 0.7s; }
+  .animation-delay-800  { animation-delay: 0.8s; }
+  .animation-delay-1000 { animation-delay: 1.0s; }
+  .animation-delay-1200 { animation-delay: 1.2s; }
+  .animation-delay-1500 { animation-delay: 1.5s; }
+  .animation-delay-2000 { animation-delay: 2.0s; }
+
+  .anim-hidden { opacity: 0; }
+}
+
+/* Gradient animated background */
+.bg-animated-gradient {
+  background: linear-gradient(135deg, #14532d, #166534, #15803d, #16a34a, #0d9488, #0891b2);
+  background-size: 400% 400%;
+  animation: gradientShift 10s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Scroll animation helper */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Card hover effects */
+.feature-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+}

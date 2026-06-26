@@ -1,0 +1,47 @@
+package com.daycarelog.service;
+
+import com.daycarelog.dto.AttendanceRequest;
+import com.daycarelog.model.Attendance;
+import com.daycarelog.repository.AttendanceRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class AttendanceService {
+
+    private final AttendanceRepository attendanceRepository;
+
+    public List<Attendance> findByDate(LocalDate date) {
+        return attendanceRepository.findByDate(date);
+    }
+
+    public List<Attendance> findByChild(Long childId) {
+        return attendanceRepository.findByChildIdOrderByDateDesc(childId);
+    }
+
+    public List<Attendance> findByDateRange(LocalDate start, LocalDate end) {
+        return attendanceRepository.findByDateBetween(start, end);
+    }
+
+    public Attendance upsert(AttendanceRequest req, Long userId) {
+        Attendance att = attendanceRepository.findByChildIdAndDate(req.getChildId(), req.getDate())
+                .orElse(Attendance.builder()
+                        .childId(req.getChildId())
+                        .date(req.getDate())
+                        .recordedBy(userId)
+                        .build());
+        att.setStatus(req.getStatus());
+        att.setTimeIn(req.getTimeIn());
+        att.setTimeOut(req.getTimeOut());
+        att.setRecordedBy(userId);
+        return attendanceRepository.save(att);
+    }
+
+    public List<Attendance> bulkUpsert(List<AttendanceRequest> requests, Long userId) {
+        return requests.stream().map(r -> upsert(r, userId)).toList();
+    }
+}
