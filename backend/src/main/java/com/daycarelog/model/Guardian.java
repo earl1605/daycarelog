@@ -1,14 +1,9 @@
 package com.daycarelog.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
 @Table(name = "guardians")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Guardian {
 
     @Id
@@ -27,6 +22,25 @@ public class Guardian {
     private String contactNumber;
 
     @Column(name = "is_primary")
-    @Builder.Default
     private Boolean isPrimary = false;
+
+    public Guardian() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getChildId() { return childId; }
+    public void setChildId(Long childId) { this.childId = childId; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getRelationship() { return relationship; }
+    public void setRelationship(String relationship) { this.relationship = relationship; }
+
+    public String getContactNumber() { return contactNumber; }
+    public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
+
+    public Boolean getIsPrimary() { return isPrimary; }
+    public void setIsPrimary(Boolean isPrimary) { this.isPrimary = isPrimary; }
 }

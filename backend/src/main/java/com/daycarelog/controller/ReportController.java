@@ -6,7 +6,6 @@ import com.daycarelog.model.HealthRecord;
 import com.daycarelog.repository.AttendanceRepository;
 import com.daycarelog.repository.ChildRepository;
 import com.daycarelog.repository.HealthRecordRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -14,22 +13,28 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/reports")
-@RequiredArgsConstructor
 public class ReportController {
 
     private final ChildRepository childRepository;
     private final AttendanceRepository attendanceRepository;
     private final HealthRecordRepository healthRecordRepository;
 
+    public ReportController(ChildRepository childRepository,
+                            AttendanceRepository attendanceRepository,
+                            HealthRecordRepository healthRecordRepository) {
+        this.childRepository = childRepository;
+        this.attendanceRepository = attendanceRepository;
+        this.healthRecordRepository = healthRecordRepository;
+    }
+
     @GetMapping("/monthly")
     public Map<String, Object> monthly(@RequestParam String month) {
-        // month format: YYYY-MM
         LocalDate start = LocalDate.parse(month + "-01");
         LocalDate end   = start.withDayOfMonth(start.lengthOfMonth());
 
-        List<Child>        children  = childRepository.findByEnrollmentStatus("active");
-        List<Attendance>   att       = attendanceRepository.findByDateBetween(start, end);
-        List<HealthRecord> health    = healthRecordRepository.findByMeasurementDateBetween(start, end);
+        List<Child>        children = childRepository.findByEnrollmentStatus("active");
+        List<Attendance>   att      = attendanceRepository.findByDateBetween(start, end);
+        List<HealthRecord> health   = healthRecordRepository.findByMeasurementDateBetween(start, end);
 
         int total   = children.size();
         int present = (int) att.stream().filter(a -> "present".equals(a.getStatus())).count();
@@ -37,7 +42,6 @@ public class ReportController {
         long days   = att.stream().map(Attendance::getDate).distinct().count();
         int rate    = (total > 0 && days > 0) ? (int) Math.round((double) present / (total * days) * 100) : 0;
 
-        // Nutritional status breakdown
         Map<Long, HealthRecord> latestHealth = new HashMap<>();
         health.forEach(r -> latestHealth.merge(r.getChildId(), r,
                 (a, b) -> a.getMeasurementDate().isAfter(b.getMeasurementDate()) ? a : b));
@@ -55,13 +59,13 @@ public class ReportController {
         });
 
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("total",           total);
-        result.put("presentCount",    present);
-        result.put("absentCount",     absent);
-        result.put("schoolDays",      days);
-        result.put("attendanceRate",  rate);
+        result.put("total",             total);
+        result.put("presentCount",      present);
+        result.put("absentCount",       absent);
+        result.put("schoolDays",        days);
+        result.put("attendanceRate",    rate);
         result.put("nutritionalStatus", statusCounts);
-        result.put("children",        children);
+        result.put("children",          children);
         return result;
     }
 }

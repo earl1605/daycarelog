@@ -59,7 +59,7 @@ export default function Landing() {
 
       {/* ── Nav ── */}
       <nav className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 md:px-12 py-4 z-20 bg-black/10 backdrop-blur-sm">
-        <span className="text-white font-bold text-lg tracking-wide text-shadow-soft">
+        <span className="text-white font-extrabold text-3xl tracking-wide text-shadow-soft">
           {'DaycareLog'.split('').map((char, i) => (
             <span key={i} className="wave-letter">{char}</span>
           ))}

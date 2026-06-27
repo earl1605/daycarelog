@@ -4,7 +4,6 @@ import com.daycarelog.dto.AttendanceRequest;
 import com.daycarelog.model.Attendance;
 import com.daycarelog.security.JwtUtil;
 import com.daycarelog.service.AttendanceService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +14,15 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attendance")
-@RequiredArgsConstructor
 public class AttendanceController {
 
     private final AttendanceService attendanceService;
     private final JwtUtil jwtUtil;
+
+    public AttendanceController(AttendanceService attendanceService, JwtUtil jwtUtil) {
+        this.attendanceService = attendanceService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @GetMapping
     public List<Attendance> getByDate(

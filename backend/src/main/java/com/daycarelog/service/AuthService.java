@@ -4,17 +4,21 @@ import com.daycarelog.dto.*;
 import com.daycarelog.model.User;
 import com.daycarelog.repository.UserRepository;
 import com.daycarelog.security.JwtUtil;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
 
     public AuthResponse register(RegisterRequest req) {
         if (userRepository.existsByEmail(req.getEmail())) {
@@ -23,7 +27,10 @@ public class AuthService {
         User user = User.builder()
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
-                .fullName(req.getFullName())
+                .firstName(req.getFirstName())
+                .lastName(req.getLastName())
+                .middleName(req.getMiddleName())
+                .suffix(req.getSuffix())
                 .role("staff")
                 .build();
         user = userRepository.save(user);
@@ -42,7 +49,9 @@ public class AuthService {
     private AuthResponse buildResponse(User user) {
         String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getRole());
         AuthResponse.UserDto dto = new AuthResponse.UserDto(
-                user.getId(), user.getEmail(), user.getFullName(), user.getRole());
+                user.getId(), user.getEmail(), user.getFullName(),
+                user.getFirstName(), user.getLastName(), user.getMiddleName(), user.getSuffix(),
+                user.getRole(), user.getProfilePhoto());
         return new AuthResponse(token, dto);
     }
 }

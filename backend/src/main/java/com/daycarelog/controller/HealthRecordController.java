@@ -4,7 +4,6 @@ import com.daycarelog.dto.HealthRecordRequest;
 import com.daycarelog.model.HealthRecord;
 import com.daycarelog.security.JwtUtil;
 import com.daycarelog.service.HealthRecordService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,11 +12,15 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/health-records")
-@RequiredArgsConstructor
 public class HealthRecordController {
 
     private final HealthRecordService healthRecordService;
     private final JwtUtil jwtUtil;
+
+    public HealthRecordController(HealthRecordService healthRecordService, JwtUtil jwtUtil) {
+        this.healthRecordService = healthRecordService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @GetMapping
     public List<HealthRecord> getAll() {
