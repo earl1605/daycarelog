@@ -113,8 +113,15 @@ export default function Register() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Suffix</label>
-                <input type="text" value={suffix} onChange={e => setSuffix(e.target.value)}
-                  placeholder="Jr." className={inputClass} />
+                <select value={suffix} onChange={e => setSuffix(e.target.value)} className={inputClass}>
+                  <option value="">— None —</option>
+                  <option value="Jr.">Jr.</option>
+                  <option value="Sr.">Sr.</option>
+                  <option value="II">II</option>
+                  <option value="III">III</option>
+                  <option value="IV">IV</option>
+                  <option value="V">V</option>
+                </select>
               </div>
             </div>
 
