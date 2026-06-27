@@ -24,9 +24,9 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function signUp(email, password, fullName) {
+  async function signUp(email, password, firstName, lastName, middleName, suffix) {
     try {
-      const res = await api.auth.register(email, password, fullName)
+      const res = await api.auth.register(email, password, firstName, lastName, middleName, suffix)
       return { data: res, error: null }
     } catch (e) {
       return { data: null, error: { message: e.message } }

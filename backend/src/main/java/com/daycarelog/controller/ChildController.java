@@ -4,9 +4,7 @@ import com.daycarelog.dto.ChildRequest;
 import com.daycarelog.model.Child;
 import com.daycarelog.security.JwtUtil;
 import com.daycarelog.service.ChildService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,11 +12,15 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/children")
-@RequiredArgsConstructor
 public class ChildController {
 
     private final ChildService childService;
     private final JwtUtil jwtUtil;
+
+    public ChildController(ChildService childService, JwtUtil jwtUtil) {
+        this.childService = childService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @GetMapping
     public List<Child> getAll() {

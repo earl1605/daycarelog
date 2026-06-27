@@ -3,16 +3,18 @@ package com.daycarelog.service;
 import com.daycarelog.dto.HealthRecordRequest;
 import com.daycarelog.model.HealthRecord;
 import com.daycarelog.repository.HealthRecordRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class HealthRecordService {
 
     private final HealthRecordRepository healthRecordRepository;
+
+    public HealthRecordService(HealthRecordRepository healthRecordRepository) {
+        this.healthRecordRepository = healthRecordRepository;
+    }
 
     public List<HealthRecord> findAll() {
         return healthRecordRepository.findAllByOrderByMeasurementDateDesc();

@@ -49,7 +49,7 @@ export default function Users() {
               {users.map(u => (
                 <tr key={u.id}>
                   <td className="px-4 py-3 font-medium text-gray-900">
-                    {u.fullName || 'Unnamed'}
+                    {u.fullName || u.email.split('@')[0]}
                     {u.id === user?.id && <span className="ml-2 text-xs text-primary-600 font-normal">(you)</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500">{u.email}</td>

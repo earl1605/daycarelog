@@ -28,7 +28,7 @@ async function request(path, options = {}) {
 export const api = {
   auth: {
     login:    (email, password)              => request('/auth/login',    { method: 'POST', body: JSON.stringify({ email, password }) }),
-    register: (email, password, fullName)    => request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, fullName }) }),
+    register: (email, password, firstName, lastName, middleName, suffix) => request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, firstName, lastName, middleName, suffix }) }),
   },
   children: {
     list:   ()          => request('/children'),

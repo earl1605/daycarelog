@@ -3,16 +3,18 @@ package com.daycarelog.service;
 import com.daycarelog.dto.ChildRequest;
 import com.daycarelog.model.Child;
 import com.daycarelog.repository.ChildRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ChildService {
 
     private final ChildRepository childRepository;
+
+    public ChildService(ChildRepository childRepository) {
+        this.childRepository = childRepository;
+    }
 
     public List<Child> findAll() {
         return childRepository.findAllByOrderByLastNameAsc();
