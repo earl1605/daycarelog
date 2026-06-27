@@ -27,9 +27,6 @@ export function AuthProvider({ children }) {
   async function signUp(email, password, fullName) {
     try {
       const res = await api.auth.register(email, password, fullName)
-      localStorage.setItem('dcl_token', res.token)
-      localStorage.setItem('dcl_user',  JSON.stringify(res.user))
-      setUser(res.user)
       return { data: res, error: null }
     } catch (e) {
       return { data: null, error: { message: e.message } }

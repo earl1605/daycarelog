@@ -37,12 +37,13 @@ export default function Sidebar({ open, onClose }) {
       <aside className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-100 z-30 flex flex-col transform transition-transform duration-300
         ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:z-auto`}>
 
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-          <div className="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center text-white font-bold text-lg">D</div>
-          <div>
-            <p className="font-bold text-gray-900 text-sm leading-tight">DaycareLog</p>
-            <p className="text-xs text-gray-400">Barangay System</p>
-          </div>
+        <div className="flex flex-col items-center justify-center px-6 py-5 border-b border-gray-100">
+          <p className="font-bold text-gray-900 text-base leading-tight tracking-wide">
+            {'DaycareLog'.split('').map((char, i) => (
+              <span key={i} className="wave-letter">{char}</span>
+            ))}
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">Barangay System</p>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">

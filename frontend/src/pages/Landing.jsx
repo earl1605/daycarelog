@@ -44,66 +44,60 @@ export default function Landing() {
   const ctaRef   = useReveal()
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
+    <div className="min-h-screen bg-animated-gradient text-white overflow-x-hidden">
+
+      {/* Global floating circles — kept very subtle so text stays readable */}
+      <div className="fixed inset-0 pointer-events-none select-none overflow-hidden z-0">
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/[0.03] animate-float-slow" />
+        <div className="absolute top-1/3 -right-20 w-72 h-72 rounded-full bg-white/[0.03] animate-float animation-delay-400" />
+        <div className="absolute bottom-0 left-1/4 w-56 h-56 rounded-full bg-white/[0.03] animate-float-fast animation-delay-700" />
+        <div className="absolute top-20 right-1/3 w-32 h-32 rounded-full bg-white/[0.05] animate-float animation-delay-200" />
+        <div className="absolute bottom-20 right-10 w-24 h-24 rounded-full bg-white/[0.05] animate-float-slow animation-delay-600" />
+        <div className="absolute top-2/3 left-10 w-48 h-48 rounded-full bg-white/[0.03] animate-float animation-delay-1000" />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full bg-white/[0.03] animate-float-slow animation-delay-800" />
+      </div>
+
+      {/* ── Nav ── */}
+      <nav className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 md:px-12 py-4 z-20 bg-black/10 backdrop-blur-sm">
+        <span className="text-white font-bold text-lg tracking-wide text-shadow-soft">
+          {'DaycareLog'.split('').map((char, i) => (
+            <span key={i} className="wave-letter">{char}</span>
+          ))}
+        </span>
+        <div className="flex items-center gap-3">
+          <Link to="/login"    className="glass text-white text-sm px-4 py-2 rounded-xl hover:bg-white/20 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all duration-200">Sign In</Link>
+          <Link to="/register" className="bg-white text-primary-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-xl active:scale-95 transition-all duration-200 shadow-lg">Get Started</Link>
+        </div>
+      </nav>
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center bg-animated-gradient overflow-hidden">
-
-        {/* Floating background circles */}
-        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
-          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5 animate-float-slow" />
-          <div className="absolute top-1/3 -right-20 w-72 h-72 rounded-full bg-white/5 animate-float animation-delay-400" />
-          <div className="absolute bottom-0 left-1/4 w-56 h-56 rounded-full bg-white/5 animate-float-fast animation-delay-700" />
-          <div className="absolute top-20 right-1/3 w-32 h-32 rounded-full bg-white/10 animate-float animation-delay-200" />
-          <div className="absolute bottom-20 right-10 w-24 h-24 rounded-full bg-white/10 animate-float-slow animation-delay-600" />
-        </div>
-
-        {/* Nav */}
-        <nav className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 md:px-12 py-5 z-10">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-lg">D</div>
-            <span className="text-white font-bold text-lg tracking-tight">DaycareLog</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link to="/login"    className="glass text-white text-sm px-4 py-2 rounded-xl hover:bg-white/20 transition-colors">Sign In</Link>
-            <Link to="/register" className="bg-white text-primary-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors shadow-lg">Get Started</Link>
-          </div>
-        </nav>
-
-        {/* Hero content */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center z-10 pt-24">
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white text-sm font-medium px-4 py-2 rounded-full mb-8 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-black/20 backdrop-blur-sm text-white text-sm font-medium px-4 py-2 rounded-full mb-6 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
             Trusted by Barangay Health Workers across the Philippines
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 anim-hidden animate-fade-in-up animation-delay-200">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 anim-hidden animate-fade-in-up animation-delay-200 text-shadow-strong">
             Modern Daycare
             <br />
             <span className="text-green-200">Management System</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-green-100 max-w-2xl mx-auto mb-10 anim-hidden animate-fade-in-up animation-delay-400">
+          <p className="text-lg md:text-xl text-white max-w-2xl mx-auto mb-10 anim-hidden animate-fade-in-up animation-delay-400 text-shadow-soft">
             Digital enrollment, health tracking, and attendance monitoring for barangay daycare centers — built for Philippine LGUs.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center anim-hidden animate-fade-in-up animation-delay-600">
-            <Link
-              to="/register"
-              className="bg-white text-primary-700 font-bold text-base px-8 py-4 rounded-2xl hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 duration-200"
-            >
+            <Link to="/register" className="bg-white text-primary-700 font-bold text-base px-8 py-4 rounded-2xl hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 duration-200">
               Start Free Today →
             </Link>
-            <Link
-              to="/login"
-              className="glass text-white font-semibold text-base px-8 py-4 rounded-2xl hover:bg-white/20 transition-all duration-200"
-            >
+            <Link to="/login" className="glass text-white font-semibold text-base px-8 py-4 rounded-2xl hover:bg-white/20 transition-all duration-200">
               Sign In to Dashboard
             </Link>
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/60 text-xs animate-bounce-slow">
           <span>Scroll down</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,35 +107,31 @@ export default function Landing() {
       </section>
 
       {/* ── Stats ── */}
-      <section className="bg-primary-700 py-10">
+      <section className="relative z-10 py-12">
         <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((s, i) => (
-            <div key={i} className="text-center">
-              <p className="text-3xl font-extrabold text-white">{s.value}</p>
-              <p className="text-primary-200 text-sm mt-1">{s.label}</p>
+            <div key={i} className="text-center bg-black/25 backdrop-blur-sm rounded-2xl border border-white/25 py-6 px-4">
+              <p className="text-3xl font-extrabold text-white text-shadow-strong">{s.value}</p>
+              <p className="text-green-200 text-sm mt-1 font-medium">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── Features ── */}
-      <section ref={featRef} className="py-24 px-6">
+      <section ref={featRef} className="relative z-10 py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 reveal">
-            <span className="text-primary-600 font-semibold text-sm uppercase tracking-widest">Features</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2">Everything you need in one place</h2>
-            <p className="text-gray-500 mt-3 max-w-xl mx-auto">Designed specifically for Philippine barangay daycare centers and health workers.</p>
+            <span className="text-green-300 font-semibold text-sm uppercase tracking-widest text-shadow-soft">Features</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white mt-2 text-shadow-strong">Everything you need in one place</h2>
+            <p className="text-green-100 mt-3 max-w-xl mx-auto font-medium">Designed specifically for Philippine barangay daycare centers and health workers.</p>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
-              <div
-                key={i}
-                className={`feature-card bg-white rounded-2xl border border-gray-100 shadow-sm p-6 reveal animation-delay-${(i % 4) * 100 + 100}`}
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center text-2xl mb-4">{f.icon}</div>
-                <h3 className="font-bold text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+              <div key={i} className={`feature-card bg-black/25 backdrop-blur-sm rounded-2xl border border-white/25 hover:bg-black/35 hover:border-green-300 p-6 reveal animation-delay-${(i % 4) * 100 + 100} transition-all duration-300`}>
+                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl mb-4">{f.icon}</div>
+                <h3 className="font-bold text-white mb-2 text-shadow-soft">{f.title}</h3>
+                <p className="text-green-100 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -149,19 +139,18 @@ export default function Landing() {
       </section>
 
       {/* ── How it works ── */}
-      <section ref={stepsRef} className="py-24 px-6 bg-gray-50">
+      <section ref={stepsRef} className="relative z-10 py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16 reveal">
-            <span className="text-primary-600 font-semibold text-sm uppercase tracking-widest">Process</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2">How it works</h2>
+            <span className="text-green-300 font-semibold text-sm uppercase tracking-widest text-shadow-soft">Process</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white mt-2 text-shadow-strong">How it works</h2>
           </div>
-
           <div className="grid md:grid-cols-3 gap-8">
             {steps.map((s, i) => (
-              <div key={i} className={`reveal animation-delay-${i * 200 + 100}`}>
-                <div className="text-5xl font-extrabold text-primary-100 mb-3">{s.num}</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{s.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
+              <div key={i} className={`reveal animation-delay-${i * 200 + 100} bg-black/25 backdrop-blur-sm rounded-2xl p-6 border border-white/25 hover:bg-black/35 transition-all duration-300`}>
+                <div className="text-5xl font-extrabold text-white mb-3 text-shadow-strong">{s.num}</div>
+                <h3 className="text-lg font-bold text-white mb-2 text-shadow-soft">{s.title}</h3>
+                <p className="text-green-100 text-sm leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -169,28 +158,25 @@ export default function Landing() {
       </section>
 
       {/* ── CTA ── */}
-      <section ref={ctaRef} className="py-24 px-6 bg-animated-gradient">
+      <section ref={ctaRef} className="relative z-10 py-24 px-6">
         <div className="max-w-2xl mx-auto text-center reveal">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 text-shadow-strong">
             Ready to modernize your daycare center?
           </h2>
-          <p className="text-green-100 mb-10">
+          <p className="text-white mb-10 font-medium text-shadow-soft">
             Join hundreds of barangay health workers already using DaycareLog.
           </p>
-          <Link
-            to="/register"
-            className="inline-block bg-white text-primary-700 font-bold text-lg px-10 py-4 rounded-2xl hover:bg-gray-50 transition-all shadow-2xl hover:-translate-y-1 duration-200 animate-pulse-ring"
-          >
+          <Link to="/register" className="inline-block bg-white text-primary-700 font-bold text-lg px-10 py-4 rounded-2xl hover:bg-gray-50 transition-all shadow-2xl hover:-translate-y-1 duration-200">
             Create Your Free Account
           </Link>
         </div>
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-primary-900 text-primary-300 py-8 px-6 text-center text-sm">
+      <footer className="relative z-10 bg-black/20 backdrop-blur-sm text-green-100 py-8 px-6 text-center text-sm">
         <p className="text-white font-semibold mb-1">DaycareLog</p>
         <p>Barangay Enrollment & Health Tracking System · Philippines</p>
-        <p className="mt-2 text-primary-400 text-xs">© {new Date().getFullYear()} DaycareLog. All rights reserved.</p>
+        <p className="mt-2 text-green-200 text-xs">© {new Date().getFullYear()} DaycareLog. All rights reserved.</p>
       </footer>
     </div>
   )
