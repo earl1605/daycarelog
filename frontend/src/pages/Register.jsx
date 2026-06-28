@@ -16,7 +16,7 @@ function EyeIcon({ open }) {
   )
 }
 
-const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+const inputClass = "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
 
 export default function Register() {
   const { signUp }     = useAuth()
@@ -75,46 +75,46 @@ export default function Register() {
         <p className="text-green-200 text-sm">© {new Date().getFullYear()} DaycareLog · Philippines</p>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 animate-scale-in">
-          <div className="flex lg:hidden items-center mb-6">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-7 py-5 animate-scale-in">
+          <div className="flex lg:hidden items-center mb-3">
             <span className="font-extrabold text-primary-700 text-xl tracking-wide">
               {'DaycareLog'.split('').map((char, i) => (
                 <span key={i} className="wave-letter">{char}</span>
               ))}
             </span>
           </div>
-          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-primary-600 transition-all duration-200 mb-6 group">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-primary-600 transition-all duration-200 mb-2 group">
             <span className="group-hover:-translate-x-1 transition-transform duration-200 inline-block">←</span> Back to Home
           </Link>
-          <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Create your account</h1>
-          <p className="text-gray-500 text-sm mb-6">Get started with DaycareLog for free</p>
+          <h1 className="text-xl font-extrabold text-gray-900 mb-0.5">Create your account</h1>
+          <p className="text-gray-500 text-xs mb-3">Get started with DaycareLog for free</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-2.5">
 
             {/* Name row 1 */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name <span className="text-red-400">*</span></label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">First Name <span className="text-red-400">*</span></label>
                 <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
                   placeholder="Juan" className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name <span className="text-red-400">*</span></label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Last Name <span className="text-red-400">*</span></label>
                 <input type="text" value={lastName} onChange={e => setLastName(e.target.value)}
                   placeholder="dela Cruz" className={inputClass} />
               </div>
             </div>
 
             {/* Name row 2 */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle Name</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Middle Name</label>
                 <input type="text" value={middleName} onChange={e => setMiddleName(e.target.value)}
                   placeholder="Santos" className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Suffix</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Suffix</label>
                 <select value={suffix} onChange={e => setSuffix(e.target.value)} className={inputClass}>
                   <option value="">— None —</option>
                   <option value="Jr.">Jr.</option>
@@ -129,26 +129,24 @@ export default function Register() {
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Role <span className="text-red-400">*</span></label>
-              <div className="grid grid-cols-3 gap-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Role <span className="text-red-400">*</span></label>
+              <div className="flex gap-2">
                 {[
-                  { value: 'admin',   label: 'Admin',   desc: 'Center Administrator',  icon: '🛡️' },
-                  { value: 'teacher', label: 'Teacher', desc: 'Daycare Worker',         icon: '📚' },
-                  { value: 'staff',   label: 'Staff',   desc: 'Support Personnel',      icon: '👤' },
+                  { value: 'admin',   label: 'Admin',   icon: '🛡️' },
+                  { value: 'teacher', label: 'Teacher', icon: '📚' },
+                  { value: 'staff',   label: 'Staff',   icon: '👤' },
                 ].map(r => (
                   <button
                     key={r.value}
                     type="button"
                     onClick={() => setRole(r.value)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-center transition-all duration-150 ${
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border-2 text-xs font-semibold transition-all duration-150 ${
                       role === r.value
                         ? 'border-primary-500 bg-primary-50 text-primary-700'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-500'
                     }`}
                   >
-                    <span className="text-xl">{r.icon}</span>
-                    <span className="text-xs font-semibold leading-tight">{r.label}</span>
-                    <span className="text-[10px] text-gray-400 leading-tight">{r.desc}</span>
+                    <span>{r.icon}</span>{r.label}
                   </button>
                 ))}
               </div>
@@ -156,46 +154,46 @@ export default function Register() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address <span className="text-red-400">*</span></label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Email address <span className="text-red-400">*</span></label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com" className={inputClass} />
             </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password <span className="text-red-400">*</span></label>
-              <div className="relative">
-                <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="Min. 6 characters" className={`${inputClass} pr-11`} />
-                <button type="button" onClick={() => setShowPass(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <EyeIcon open={showPass} />
-                </button>
+            {/* Password + Confirm side by side */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Password <span className="text-red-400">*</span></label>
+                <div className="relative">
+                  <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="Min. 6 chars" className={`${inputClass} pr-9`} />
+                  <button type="button" onClick={() => setShowPass(p => !p)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    <EyeIcon open={showPass} />
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {/* Confirm password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password <span className="text-red-400">*</span></label>
-              <div className="relative">
-                <input type={showConfirm ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)}
-                  placeholder="Re-enter password" className={`${inputClass} pr-11`} />
-                <button type="button" onClick={() => setShowConfirm(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <EyeIcon open={showConfirm} />
-                </button>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Confirm <span className="text-red-400">*</span></label>
+                <div className="relative">
+                  <input type={showConfirm ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)}
+                    placeholder="Re-enter" className={`${inputClass} pr-9`} />
+                  <button type="button" onClick={() => setShowConfirm(p => !p)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    <EyeIcon open={showConfirm} />
+                  </button>
+                </div>
               </div>
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm mt-2">
+              className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors shadow-sm">
               {loading
                 ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Creating account…</span>
                 : 'Create Account'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-xs text-gray-500 mt-3">
             Already have an account?{' '}
             <Link to="/login" className="text-primary-600 font-semibold hover:underline">Sign in</Link>
           </p>
