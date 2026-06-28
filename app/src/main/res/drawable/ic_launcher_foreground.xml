@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+        Safe zone: 18–90 in this 108dp viewport.
+        Figure is inset 6dp inside safe zone (24–84) so no edge is ever clipped
+        by circular / squircle launcher masks.
+    -->
+
+    <!-- Head — circle center (54,36) radius 12 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24
+            C60.63,24 66,29.37 66,36
+            C66,42.63 60.63,48 54,48
+            C47.37,48 42,42.63 42,36
+            C42,29.37 47.37,24 54,24 Z"/>
+
+    <!-- Body / torso — same width as head spread, centered -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,52 L40,70 L68,70 L68,52 Z"/>
+
+    <!-- Left leg -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,70 L40,84 L51,84 L51,70 Z"/>
+
+    <!-- Right leg -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M57,70 L57,84 L68,84 L68,70 Z"/>
+
+</vector>
