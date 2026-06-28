@@ -41,7 +41,7 @@ export default function Sidebar({ open, onClose }) {
         ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:z-auto`}>
 
         <div className="flex flex-col items-center justify-center px-4 py-6 border-b border-gray-100">
-          <p className="font-extrabold text-gray-900 text-2xl leading-tight tracking-wide w-full text-center">
+          <p className="font-extrabold text-gray-900 text-3xl leading-tight tracking-wide w-full text-center">
             {'DaycareLog'.split('').map((char, i) => (
               <span key={i} className="wave-letter">{char}</span>
             ))}
