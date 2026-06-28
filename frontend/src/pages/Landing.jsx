@@ -59,10 +59,13 @@ export default function Landing() {
 
       {/* ── Nav ── */}
       <nav className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 md:px-12 py-3 md:py-4 z-20 bg-black/10 backdrop-blur-sm">
-        <span className="text-white font-extrabold text-2xl sm:text-4xl tracking-wide text-shadow-soft">
-          {'DaycareLog'.split('').map((char, i) => (
-            <span key={i} className="wave-letter">{char}</span>
-          ))}
+        <span className="flex items-center gap-2 sm:gap-3">
+          <img src="/favicon.svg" alt="DaycareLog" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
+          <span className="text-white font-extrabold text-2xl sm:text-4xl tracking-wide text-shadow-soft">
+            {'DaycareLog'.split('').map((char, i) => (
+              <span key={i} className="wave-letter">{char}</span>
+            ))}
+          </span>
         </span>
         <div className="flex items-center gap-2">
           <Link to="/login"    className="glass text-white text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-white/20 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all duration-200">Sign In</Link>
@@ -174,7 +177,10 @@ export default function Landing() {
 
       {/* ── Footer ── */}
       <footer className="relative z-10 bg-black/20 backdrop-blur-sm text-green-100 py-8 px-6 text-center text-sm">
-        <p className="text-white font-semibold mb-1">DaycareLog</p>
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <img src="/favicon.svg" alt="" className="w-6 h-6" />
+          <p className="text-white font-semibold">DaycareLog</p>
+        </div>
         <p>Barangay Enrollment & Health Tracking System · Philippines</p>
         <p className="mt-2 text-green-200 text-xs">© {new Date().getFullYear()} DaycareLog. All rights reserved.</p>
       </footer>

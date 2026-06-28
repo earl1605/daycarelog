@@ -24,7 +24,8 @@ export default function Login() {
   return (
     <div className="min-h-screen flex bg-animated-gradient">
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 text-white">
-        <Link to="/" className="flex items-center">
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/favicon.svg" alt="DaycareLog" className="w-11 h-11 flex-shrink-0" />
           <span className="font-extrabold text-4xl tracking-wide">
             {'DaycareLog'.split('').map((char, i) => (
               <span key={i} className="wave-letter">{char}</span>
@@ -45,7 +46,8 @@ export default function Login() {
 
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 sm:p-8 animate-scale-in">
-          <div className="flex lg:hidden items-center mb-6">
+          <div className="flex lg:hidden items-center gap-2.5 mb-6">
+            <img src="/favicon.svg" alt="DaycareLog" className="w-9 h-9 flex-shrink-0" />
             <span className="font-extrabold text-primary-700 text-3xl tracking-wide">
               {'DaycareLog'.split('').map((char, i) => (
                 <span key={i} className="wave-letter">{char}</span>

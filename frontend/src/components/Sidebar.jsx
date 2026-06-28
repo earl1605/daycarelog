@@ -40,13 +40,16 @@ export default function Sidebar({ open, onClose }) {
       <aside className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-100 z-30 flex flex-col transform transition-transform duration-300
         ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:z-auto`}>
 
-        <div className="flex flex-col items-center justify-center px-4 py-6 border-b border-gray-100">
-          <p className="font-extrabold text-gray-900 text-3xl leading-tight tracking-wide w-full text-center">
-            {'DaycareLog'.split('').map((char, i) => (
-              <span key={i} className="wave-letter">{char}</span>
-            ))}
-          </p>
-          <p className="text-xs text-gray-400 mt-1 tracking-widest uppercase">Barangay System</p>
+        <div className="flex flex-col items-center justify-center px-4 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-2.5 mb-1">
+            <img src="/favicon.svg" alt="DaycareLog" className="w-9 h-9 flex-shrink-0" />
+            <p className="font-extrabold text-gray-900 text-2xl leading-tight tracking-wide">
+              {'DaycareLog'.split('').map((char, i) => (
+                <span key={i} className="wave-letter">{char}</span>
+              ))}
+            </p>
+          </div>
+          <p className="text-xs text-gray-400 tracking-widest uppercase">Barangay System</p>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">

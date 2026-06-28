@@ -51,7 +51,8 @@ export default function Register() {
   return (
     <div className="min-h-screen flex bg-animated-gradient">
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 text-white">
-        <Link to="/" className="flex items-center">
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/favicon.svg" alt="DaycareLog" className="w-11 h-11 flex-shrink-0" />
           <span className="font-extrabold text-4xl tracking-wide">
             {'DaycareLog'.split('').map((char, i) => (
               <span key={i} className="wave-letter">{char}</span>
@@ -77,7 +78,8 @@ export default function Register() {
 
       <div className="flex-1 flex items-start sm:items-center justify-center p-4 py-6 overflow-y-auto">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-5 sm:px-7 py-5 animate-scale-in">
-          <div className="flex lg:hidden items-center mb-3">
+          <div className="flex lg:hidden items-center gap-2.5 mb-3">
+            <img src="/favicon.svg" alt="DaycareLog" className="w-9 h-9 flex-shrink-0" />
             <span className="font-extrabold text-primary-700 text-3xl tracking-wide">
               {'DaycareLog'.split('').map((char, i) => (
                 <span key={i} className="wave-letter">{char}</span>
