@@ -24,6 +24,13 @@ public class AuthService {
         if (userRepository.existsByEmail(req.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
+        String role = "staff";
+        if (req.getRole() != null) {
+            String r = req.getRole().toLowerCase().trim();
+            if (r.equals("admin") || r.equals("teacher") || r.equals("staff")) {
+                role = r;
+            }
+        }
         User user = User.builder()
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
@@ -31,7 +38,7 @@ public class AuthService {
                 .lastName(req.getLastName())
                 .middleName(req.getMiddleName())
                 .suffix(req.getSuffix())
-                .role("staff")
+                .role(role)
                 .build();
         user = userRepository.save(user);
         return buildResponse(user);

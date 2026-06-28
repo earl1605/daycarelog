@@ -29,6 +29,7 @@ export default function Register() {
   const [password,    setPassword]    = useState('')
   const [confirm,     setConfirm]     = useState('')
   const [loading,     setLoading]     = useState(false)
+  const [role,        setRole]        = useState('staff')
   const [showPass,    setShowPass]    = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
@@ -37,10 +38,11 @@ export default function Register() {
     if (!firstName.trim() || !lastName.trim() || !email || !password || !confirm) {
       toast.error('Please fill in all required fields'); return
     }
+    if (!role) { toast.error('Please select a role'); return }
     if (password.length < 6) { toast.error('Password must be at least 6 characters'); return }
     if (password !== confirm) { toast.error('Passwords do not match'); return }
     setLoading(true)
-    const { error } = await signUp(email, password, firstName.trim(), lastName.trim(), middleName.trim(), suffix.trim())
+    const { error } = await signUp(email, password, firstName.trim(), lastName.trim(), middleName.trim(), suffix.trim(), role)
     setLoading(false)
     if (error) toast.error(error.message)
     else { toast.success('Account created! Please sign in to continue.'); navigate('/login') }
@@ -122,6 +124,33 @@ export default function Register() {
                   <option value="IV">IV</option>
                   <option value="V">V</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Role */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Role <span className="text-red-400">*</span></label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'admin',   label: 'Admin',   desc: 'Center Administrator',  icon: '🛡️' },
+                  { value: 'teacher', label: 'Teacher', desc: 'Daycare Worker',         icon: '📚' },
+                  { value: 'staff',   label: 'Staff',   desc: 'Support Personnel',      icon: '👤' },
+                ].map(r => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setRole(r.value)}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-center transition-all duration-150 ${
+                      role === r.value
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    }`}
+                  >
+                    <span className="text-xl">{r.icon}</span>
+                    <span className="text-xs font-semibold leading-tight">{r.label}</span>
+                    <span className="text-[10px] text-gray-400 leading-tight">{r.desc}</span>
+                  </button>
+                ))}
               </div>
             </div>
 

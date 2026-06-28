@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false)
 
   const isAdmin = user?.role === 'admin'
-  const isStaff = user?.role === 'admin' || user?.role === 'staff'
+  const isStaff = user?.role === 'admin' || user?.role === 'staff' || user?.role === 'teacher'
 
   async function signIn(email, password) {
     try {
@@ -24,9 +24,9 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function signUp(email, password, firstName, lastName, middleName, suffix) {
+  async function signUp(email, password, firstName, lastName, middleName, suffix, role) {
     try {
-      const res = await api.auth.register(email, password, firstName, lastName, middleName, suffix)
+      const res = await api.auth.register(email, password, firstName, lastName, middleName, suffix, role)
       return { data: res, error: null }
     } catch (e) {
       return { data: null, error: { message: e.message } }
