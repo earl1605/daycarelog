@@ -52,7 +52,7 @@ export default function Register() {
     <div className="min-h-screen flex bg-animated-gradient">
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 text-white">
         <Link to="/" className="flex items-center">
-          <span className="font-extrabold text-3xl tracking-wide">
+          <span className="font-extrabold text-4xl tracking-wide">
             {'DaycareLog'.split('').map((char, i) => (
               <span key={i} className="wave-letter">{char}</span>
             ))}
@@ -78,7 +78,7 @@ export default function Register() {
       <div className="flex-1 flex items-start sm:items-center justify-center p-4 py-6 overflow-y-auto">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-5 sm:px-7 py-5 animate-scale-in">
           <div className="flex lg:hidden items-center mb-3">
-            <span className="font-extrabold text-primary-700 text-2xl tracking-wide">
+            <span className="font-extrabold text-primary-700 text-3xl tracking-wide">
               {'DaycareLog'.split('').map((char, i) => (
                 <span key={i} className="wave-letter">{char}</span>
               ))}
