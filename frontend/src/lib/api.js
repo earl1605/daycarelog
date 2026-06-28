@@ -1,4 +1,6 @@
-const BASE = '/api'
+const BASE = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? 'https://daycarelog-production.up.railway.app/api'
+  : '/api'
 
 function getToken() {
   return localStorage.getItem('dcl_token')
