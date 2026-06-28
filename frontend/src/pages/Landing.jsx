@@ -58,15 +58,15 @@ export default function Landing() {
       </div>
 
       {/* ── Nav ── */}
-      <nav className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 md:px-12 py-4 z-20 bg-black/10 backdrop-blur-sm">
-        <span className="text-white font-extrabold text-3xl tracking-wide text-shadow-soft">
+      <nav className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 md:px-12 py-3 md:py-4 z-20 bg-black/10 backdrop-blur-sm">
+        <span className="text-white font-extrabold text-xl sm:text-3xl tracking-wide text-shadow-soft">
           {'DaycareLog'.split('').map((char, i) => (
             <span key={i} className="wave-letter">{char}</span>
           ))}
         </span>
-        <div className="flex items-center gap-3">
-          <Link to="/login"    className="glass text-white text-sm px-4 py-2 rounded-xl hover:bg-white/20 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all duration-200">Sign In</Link>
-          <Link to="/register" className="bg-white text-primary-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-xl active:scale-95 transition-all duration-200 shadow-lg">Get Started</Link>
+        <div className="flex items-center gap-2">
+          <Link to="/login"    className="glass text-white text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-white/20 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all duration-200">Sign In</Link>
+          <Link to="/register" className="bg-white text-primary-700 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-xl active:scale-95 transition-all duration-200 shadow-lg">Get Started</Link>
         </div>
       </nav>
 

@@ -75,8 +75,8 @@ export default function Register() {
         <p className="text-green-200 text-sm">© {new Date().getFullYear()} DaycareLog · Philippines</p>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-7 py-5 animate-scale-in">
+      <div className="flex-1 flex items-start sm:items-center justify-center p-4 py-6 overflow-y-auto">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-5 sm:px-7 py-5 animate-scale-in">
           <div className="flex lg:hidden items-center mb-3">
             <span className="font-extrabold text-primary-700 text-xl tracking-wide">
               {'DaycareLog'.split('').map((char, i) => (
@@ -159,8 +159,8 @@ export default function Register() {
                 placeholder="you@example.com" className={inputClass} />
             </div>
 
-            {/* Password + Confirm side by side */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Password + Confirm side by side on sm+, stacked on mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Password <span className="text-red-400">*</span></label>
                 <div className="relative">

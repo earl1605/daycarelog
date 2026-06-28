@@ -43,8 +43,8 @@ export default function Login() {
         <p className="text-green-200 text-sm">© {new Date().getFullYear()} DaycareLog · Philippines</p>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 animate-scale-in">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 sm:p-8 animate-scale-in">
           <div className="flex lg:hidden items-center mb-6">
             <span className="font-extrabold text-primary-700 text-xl tracking-wide">
               {'DaycareLog'.split('').map((char, i) => (

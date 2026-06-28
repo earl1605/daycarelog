@@ -3,7 +3,7 @@ import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import toast from 'react-hot-toast'
 
-const ROLES = ['admin', 'staff', 'parent']
+const ROLES = ['admin', 'teacher', 'staff']
 
 export default function Users() {
   const { isAdmin, user } = useAuth()
@@ -35,8 +35,8 @@ export default function Users() {
       {loading ? (
         <div className="flex items-center justify-center h-48"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm min-w-[480px]">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
               <tr>
                 <th className="text-left px-4 py-3">Name</th>
