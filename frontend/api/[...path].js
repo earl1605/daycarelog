@@ -2,15 +2,19 @@ const RAILWAY = 'https://daycarelog-production.up.railway.app'
 
 module.exports = async function handler(req, res) {
   try {
-    // req.url is the full original path e.g. /api/auth/register
     const target = RAILWAY + req.url
 
-    const headers = { 'content-type': 'application/json', accept: 'application/json' }
-    if (req.headers.authorization) headers.authorization = req.headers.authorization
+    const headers = { accept: 'application/json' }
+    if (req.headers['content-type'])   headers['content-type']   = req.headers['content-type']
+    if (req.headers['authorization'])  headers['authorization']  = req.headers['authorization']
 
     const opts = { method: req.method, headers }
+
     if (req.method !== 'GET' && req.method !== 'HEAD') {
-      opts.body = JSON.stringify(req.body ?? {})
+      const chunks = []
+      for await (const chunk of req) chunks.push(chunk)
+      const raw = Buffer.concat(chunks).toString('utf-8')
+      if (raw) opts.body = raw
     }
 
     const upstream = await fetch(target, opts)
@@ -22,3 +26,5 @@ module.exports = async function handler(req, res) {
     res.status(502).json({ message: err.message })
   }
 }
+
+module.exports.config = { api: { bodyParser: false } }
