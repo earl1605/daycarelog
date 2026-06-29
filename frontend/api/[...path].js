@@ -1,31 +1,34 @@
-const RAILWAY = 'https://daycarelog-production.up.railway.app/api'
+const RAILWAY = 'https://daycarelog-production.up.railway.app'
 
-export default async function handler(req, res) {
-  const segments = req.query.path || []
-  const pathStr = Array.isArray(segments) ? segments.join('/') : segments
-
-  const targetUrl = new URL(`${RAILWAY}/${pathStr}`)
-  const qs = { ...req.query }
-  delete qs.path
-  Object.entries(qs).forEach(([k, v]) => targetUrl.searchParams.set(k, v))
-
-  const headers = {}
-  if (req.headers['authorization']) headers['authorization'] = req.headers['authorization']
-  headers['content-type'] = 'application/json'
-
-  const opts = { method: req.method, headers }
-  if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
-    opts.body = JSON.stringify(req.body)
-  }
-
+module.exports = async function handler(req, res) {
   try {
-    const upstream = await fetch(targetUrl.toString(), opts)
-    const ct = upstream.headers.get('content-type') || ''
+    const segments = req.query.path
+    const apiPath = Array.isArray(segments) ? segments.join('/') : (segments || '')
+
+    const qs = Object.entries(req.query)
+      .filter(([k]) => k !== 'path')
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .join('&')
+
+    const url = `${RAILWAY}/api/${apiPath}${qs ? '?' + qs : ''}`
+
+    const headers = { 'content-type': 'application/json', accept: 'application/json' }
+    if (req.headers.authorization) headers.authorization = req.headers.authorization
+
+    const opts = { method: req.method, headers }
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      opts.body = JSON.stringify(req.body ?? {})
+    }
+
+    const upstream = await fetch(url, opts)
+    const text = await upstream.text()
+
     res.status(upstream.status)
-    if (ct.includes('application/json')) {
-      res.json(await upstream.json())
-    } else {
-      res.send(await upstream.text())
+    res.setHeader('Content-Type', 'application/json')
+    try {
+      res.json(JSON.parse(text))
+    } catch {
+      res.end(text)
     }
   } catch (err) {
     res.status(502).json({ message: err.message })
