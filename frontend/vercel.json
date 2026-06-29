@@ -1,11 +1,9 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://daycarelog-production.up.railway.app/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "build": {
-    "env": {
-      "VITE_API_URL": "https://daycarelog-production.up.railway.app/api"
-    }
-  }
+  "installCommand": "npm install"
 }
