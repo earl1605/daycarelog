@@ -59,13 +59,13 @@ export default function Users() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
-          <table className="w-full text-sm min-w-[560px]">
+          <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
               <tr>
                 <th className="text-left px-4 py-3">Name</th>
-                <th className="text-left px-4 py-3">Email</th>
+                <th className="text-left px-4 py-3 hidden sm:table-cell">Email</th>
                 <th className="text-left px-4 py-3">Role</th>
-                <th className="text-left px-4 py-3">Joined</th>
+                <th className="text-left px-4 py-3 hidden md:table-cell">Joined</th>
                 <th className="text-left px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -78,7 +78,7 @@ export default function Users() {
                       {u.fullName || u.email.split('@')[0]}
                       {isSelf && <span className="ml-2 text-xs text-primary-600 font-normal">(you)</span>}
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{u.email}</td>
+                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{u.email}</td>
                     <td className="px-4 py-3">
                       <select
                         value={u.role}
@@ -89,7 +89,7 @@ export default function Users() {
                         {ROLES.map(r => <option key={r}>{r}</option>)}
                       </select>
                     </td>
-                    <td className="px-4 py-3 text-gray-400">{new Date(u.createdAt).toLocaleDateString('en-PH')}</td>
+                    <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{new Date(u.createdAt).toLocaleDateString('en-PH')}</td>
                     <td className="px-4 py-3">
                       {!isSelf && (
                         <button
