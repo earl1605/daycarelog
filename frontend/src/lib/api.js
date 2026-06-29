@@ -57,5 +57,6 @@ export const api = {
     list:           ()          => request('/users'),
     updateRole:     (id, role)  => request(`/users/${id}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
     updateProfile:  (id, data)  => request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete:         id          => request(`/users/${id}`, { method: 'DELETE' }),
   },
 }
