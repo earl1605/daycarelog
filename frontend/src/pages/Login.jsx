@@ -8,17 +8,24 @@ export default function Login() {
   const navigate      = useNavigate()
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
-  const [loading,  setLoading]  = useState(false)
-  const [showPass, setShowPass] = useState(false)
+  const [loading,   setLoading]   = useState(false)
+  const [showPass,  setShowPass]  = useState(false)
+  const [formError, setFormError] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!email || !password) { toast.error('Please fill in all fields'); return }
+    setFormError('')
+    if (!email || !password) { setFormError('Please fill in all fields'); return }
     setLoading(true)
     const { error } = await signIn(email, password)
     setLoading(false)
-    if (error) toast.error(error.message)
-    else { toast.success('Welcome back!'); navigate('/dashboard') }
+    if (error) {
+      setFormError(error.message)
+      toast.error(error.message)
+    } else {
+      toast.success('Welcome back!')
+      navigate('/dashboard')
+    }
   }
 
   return (
@@ -58,7 +65,13 @@ export default function Login() {
             <span className="group-hover:-translate-x-1 transition-transform duration-200 inline-block">←</span> Back to Home
           </Link>
           <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Welcome back</h1>
-          <p className="text-gray-500 text-sm mb-8">Sign in to your account to continue</p>
+          <p className="text-gray-500 text-sm mb-4">Sign in to your account to continue</p>
+
+          {formError && (
+            <div className="mb-4 px-3 py-2.5 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+              {formError}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>

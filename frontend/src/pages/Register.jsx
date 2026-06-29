@@ -32,20 +32,27 @@ export default function Register() {
   const [role,        setRole]        = useState('staff')
   const [showPass,    setShowPass]    = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [formError,   setFormError]   = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
+    setFormError('')
     if (!firstName.trim() || !lastName.trim() || !email || !password || !confirm) {
-      toast.error('Please fill in all required fields'); return
+      setFormError('Please fill in all required fields'); return
     }
-    if (!role) { toast.error('Please select a role'); return }
-    if (password.length < 6) { toast.error('Password must be at least 6 characters'); return }
-    if (password !== confirm) { toast.error('Passwords do not match'); return }
+    if (!role) { setFormError('Please select a role'); return }
+    if (password.length < 6) { setFormError('Password must be at least 6 characters'); return }
+    if (password !== confirm) { setFormError('Passwords do not match'); return }
     setLoading(true)
     const { error } = await signUp(email, password, firstName.trim(), lastName.trim(), middleName.trim(), suffix.trim(), role)
     setLoading(false)
-    if (error) toast.error(error.message)
-    else { toast.success('Account created! Please sign in to continue.'); navigate('/login') }
+    if (error) {
+      setFormError(error.message)
+      toast.error(error.message)
+    } else {
+      toast.success('Account created! Please sign in.')
+      navigate('/login')
+    }
   }
 
   return (
@@ -76,8 +83,8 @@ export default function Register() {
         <p className="text-green-200 text-sm">© {new Date().getFullYear()} DaycareLog · Philippines</p>
       </div>
 
-      <div className="flex-1 flex items-start sm:items-center justify-center p-4 py-6 overflow-y-auto">
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-5 sm:px-7 py-5 animate-scale-in">
+      <div className="flex-1 flex items-start justify-center p-4 py-6 overflow-y-auto">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-5 sm:px-7 py-5 animate-scale-in my-auto">
           <div className="flex lg:hidden items-center gap-2.5 mb-3">
             <img src="/favicon.svg" alt="DaycareLog" className="w-9 h-9 flex-shrink-0" />
             <span className="font-extrabold text-primary-700 text-3xl tracking-wide">
@@ -92,6 +99,12 @@ export default function Register() {
           <h1 className="text-xl font-extrabold text-gray-900 mb-0.5">Create your account</h1>
           <p className="text-gray-500 text-xs mb-3">Get started with DaycareLog for free</p>
 
+          {formError && (
+            <div className="mb-3 px-3 py-2.5 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+              {formError}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-2.5">
 
             {/* Name row 1 */}
@@ -99,12 +112,12 @@ export default function Register() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">First Name <span className="text-red-400">*</span></label>
                 <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
-                  placeholder="Juan" className={inputClass} />
+                  placeholder="Juan" className={inputClass} autoComplete="given-name" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Last Name <span className="text-red-400">*</span></label>
                 <input type="text" value={lastName} onChange={e => setLastName(e.target.value)}
-                  placeholder="dela Cruz" className={inputClass} />
+                  placeholder="dela Cruz" className={inputClass} autoComplete="family-name" />
               </div>
             </div>
 
@@ -113,7 +126,7 @@ export default function Register() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Middle Name</label>
                 <input type="text" value={middleName} onChange={e => setMiddleName(e.target.value)}
-                  placeholder="Santos" className={inputClass} />
+                  placeholder="Santos" className={inputClass} autoComplete="additional-name" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Suffix</label>
@@ -158,16 +171,16 @@ export default function Register() {
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Email address <span className="text-red-400">*</span></label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com" className={inputClass} />
+                placeholder="you@example.com" className={inputClass} autoComplete="email" />
             </div>
 
-            {/* Password + Confirm side by side on sm+, stacked on mobile */}
+            {/* Password + Confirm stacked on mobile */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Password <span className="text-red-400">*</span></label>
                 <div className="relative">
                   <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="Min. 6 chars" className={`${inputClass} pr-9`} />
+                    placeholder="Min. 6 chars" className={`${inputClass} pr-9`} autoComplete="new-password" />
                   <button type="button" onClick={() => setShowPass(p => !p)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
                     <EyeIcon open={showPass} />
@@ -178,7 +191,7 @@ export default function Register() {
                 <label className="block text-xs font-medium text-gray-700 mb-1">Confirm <span className="text-red-400">*</span></label>
                 <div className="relative">
                   <input type={showConfirm ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)}
-                    placeholder="Re-enter" className={`${inputClass} pr-9`} />
+                    placeholder="Re-enter" className={`${inputClass} pr-9`} autoComplete="new-password" />
                   <button type="button" onClick={() => setShowConfirm(p => !p)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
                     <EyeIcon open={showConfirm} />
