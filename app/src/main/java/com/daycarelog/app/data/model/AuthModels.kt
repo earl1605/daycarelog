@@ -9,7 +9,6 @@ data class RegisterRequest(
     val lastName: String,
     val middleName: String,
     val suffix: String,
-    val role: String,
 )
 
 data class UserDto(
@@ -22,6 +21,7 @@ data class UserDto(
     val suffix: String?,
     val role: String,
     val profilePhoto: String?,
+    val isActive: Boolean = true,
 )
 
 data class AuthResponse(
@@ -30,3 +30,22 @@ data class AuthResponse(
 )
 
 data class UpdateProfileRequest(val profilePhoto: String)
+
+// Admin-only user management
+data class CreateUserRequest(
+    val email: String,
+    val firstName: String,
+    val lastName: String,
+    val middleName: String,
+    val suffix: String,
+    val role: String,
+)
+
+data class CreateUserResponse(
+    val user: UserDto,
+    val tempPassword: String,
+)
+
+data class UpdateRoleRequest(val role: String)
+
+data class ResetPasswordResponse(val tempPassword: String)

@@ -1,8 +1,6 @@
 package com.daycarelog.app.ui.auth
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -23,12 +20,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-
-private val roles = listOf(
-    Triple("admin",   "🛡️", "Admin"),
-    Triple("teacher", "📚", "Teacher"),
-    Triple("staff",   "👤", "Staff"),
-)
 
 private val suffixes = listOf("", "Jr.", "Sr.", "II", "III", "IV", "V")
 
@@ -49,7 +40,6 @@ fun RegisterScreen(
     var email      by remember { mutableStateOf("") }
     var password   by remember { mutableStateOf("") }
     var confirm    by remember { mutableStateOf("") }
-    var role       by remember { mutableStateOf("staff") }
     var showPass   by remember { mutableStateOf(false) }
     var showConfirm by remember { mutableStateOf(false) }
     var suffixExpanded by remember { mutableStateOf(false) }
@@ -139,30 +129,6 @@ fun RegisterScreen(
                         }
                     }
 
-                    // Role picker
-                    Text("Role *", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color(0xFF374151))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        roles.forEach { (value, icon, label) ->
-                            val selected = role == value
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (selected) Color(0xFFdcfce7) else Color(0xFFf9fafb))
-                                    .border(2.dp, if (selected) Color(0xFF16a34a) else Color(0xFFe5e7eb), RoundedCornerShape(12.dp))
-                                    .clickable { role = value }
-                                    .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(icon, fontSize = 18.sp)
-                                    Text(label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
-                                        color = if (selected) Color(0xFF15803d) else Color(0xFF6b7280))
-                                }
-                            }
-                        }
-                    }
-
                     // Email
                     OutlinedTextField(
                         value = email, onValueChange = { email = it; errorMsg = null },
@@ -198,7 +164,7 @@ fun RegisterScreen(
                                 email.isBlank()     -> errorMsg = "Email is required"
                                 password.length < 6 -> errorMsg = "Password must be at least 6 characters"
                                 password != confirm -> errorMsg = "Passwords do not match"
-                                else -> authViewModel.register(context, email.trim(), password, firstName.trim(), lastName.trim(), middleName.trim(), suffix, role)
+                                else -> authViewModel.register(context, email.trim(), password, firstName.trim(), lastName.trim(), middleName.trim(), suffix)
                             }
                         },
                         enabled = state !is AuthState.Loading,

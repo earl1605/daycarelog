@@ -26,6 +26,7 @@ import com.daycarelog.app.ui.health.HealthFormScreen
 import com.daycarelog.app.ui.health.HealthScreen
 import com.daycarelog.app.ui.reports.ReportsScreen
 import com.daycarelog.app.ui.settings.SettingsScreen
+import com.daycarelog.app.ui.users.UsersScreen
 
 private val Green500 = Color(0xFF16a34a)
 
@@ -38,6 +39,7 @@ object InnerRoutes {
     const val HEALTH_FORM = "health_form"
     const val REPORTS     = "reports"
     const val SETTINGS    = "settings"
+    const val USERS       = "users"
 }
 
 private data class NavItem(val route: String, val label: String, val emoji: String)
@@ -127,9 +129,13 @@ fun MainScreen(onSignOut: () -> Unit) {
             }
             composable(InnerRoutes.SETTINGS) {
                 SettingsScreen(
-                    onSignOut = onSignOut,
-                    onBack    = { innerNav.popBackStack() },
+                    onSignOut      = onSignOut,
+                    onBack         = { innerNav.popBackStack() },
+                    onManageStaff  = { innerNav.navigate(InnerRoutes.USERS) },
                 )
+            }
+            composable(InnerRoutes.USERS) {
+                UsersScreen(onBack = { innerNav.popBackStack() })
             }
         }
     }

@@ -93,7 +93,7 @@ private fun decodeBase64Bitmap(dataUrl: String): Bitmap? = try {
 } catch (_: Exception) { null }
 
 @Composable
-fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit) {
+fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () -> Unit) {
     val ctx   = LocalContext.current
     val scope = rememberCoroutineScope()
     var user  by remember { mutableStateOf<UserDto?>(null) }
@@ -302,6 +302,24 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit) {
                     if (!user?.middleName.isNullOrBlank())
                         SettingRow("Middle Name", user!!.middleName!!)
                     SettingRow("Role", user?.role?.replaceFirstChar { it.uppercase() } ?: "—")
+                }
+            }
+
+            if (user?.role == "admin") {
+                Card(
+                    modifier = Modifier.fillMaxWidth().clickable(onClick = onManageStaff),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(2.dp),
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("👥", fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
+                        Text("Manage Staff", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Green900, modifier = Modifier.weight(1f))
+                        Text("›", fontSize = 18.sp, color = Color.Gray)
+                    }
                 }
             }
 

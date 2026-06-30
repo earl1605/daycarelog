@@ -46,13 +46,12 @@ class AuthViewModel : ViewModel() {
         email: String, password: String,
         firstName: String, lastName: String,
         middleName: String, suffix: String,
-        role: String,
     ) {
         viewModelScope.launch {
             _state.value = AuthState.Loading
             try {
                 RetrofitClient.api.register(
-                    RegisterRequest(email, password, firstName, lastName, middleName, suffix, role)
+                    RegisterRequest(email, password, firstName, lastName, middleName, suffix)
                 )
                 _state.value = AuthState.Registered
             } catch (e: Exception) {
