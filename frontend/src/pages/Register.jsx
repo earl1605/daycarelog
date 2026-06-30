@@ -29,7 +29,6 @@ export default function Register() {
   const [password,    setPassword]    = useState('')
   const [confirm,     setConfirm]     = useState('')
   const [loading,     setLoading]     = useState(false)
-  const [role,        setRole]        = useState('staff')
   const [showPass,    setShowPass]    = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [formError,   setFormError]   = useState('')
@@ -40,11 +39,10 @@ export default function Register() {
     if (!firstName.trim() || !lastName.trim() || !email || !password || !confirm) {
       setFormError('Please fill in all required fields'); return
     }
-    if (!role) { setFormError('Please select a role'); return }
     if (password.length < 6) { setFormError('Password must be at least 6 characters'); return }
     if (password !== confirm) { setFormError('Passwords do not match'); return }
     setLoading(true)
-    const { error } = await signUp(email, password, firstName.trim(), lastName.trim(), middleName.trim(), suffix.trim(), role)
+    const { error } = await signUp(email, password, firstName.trim(), lastName.trim(), middleName.trim(), suffix.trim())
     setLoading(false)
     if (error) {
       setFormError(error.message)
@@ -139,31 +137,6 @@ export default function Register() {
                   <option value="IV">IV</option>
                   <option value="V">V</option>
                 </select>
-              </div>
-            </div>
-
-            {/* Role */}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Role <span className="text-red-400">*</span></label>
-              <div className="flex gap-2">
-                {[
-                  { value: 'admin',   label: 'Admin',   icon: '🛡️' },
-                  { value: 'teacher', label: 'Teacher', icon: '📚' },
-                  { value: 'staff',   label: 'Staff',   icon: '👤' },
-                ].map(r => (
-                  <button
-                    key={r.value}
-                    type="button"
-                    onClick={() => setRole(r.value)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border-2 text-xs font-semibold transition-all duration-150 ${
-                      role === r.value
-                        ? 'border-primary-500 bg-primary-50 text-primary-700'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-500'
-                    }`}
-                  >
-                    <span>{r.icon}</span>{r.label}
-                  </button>
-                ))}
               </div>
             </div>
 

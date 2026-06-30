@@ -30,7 +30,7 @@ async function request(path, options = {}) {
 export const api = {
   auth: {
     login:    (email, password)              => request('/auth/login',    { method: 'POST', body: JSON.stringify({ email, password }) }),
-    register: (email, password, firstName, lastName, middleName, suffix, role) => request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, firstName, lastName, middleName, suffix, role }) }),
+    register: (email, password, firstName, lastName, middleName, suffix) => request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, firstName, lastName, middleName, suffix }) }),
   },
   children: {
     list:   ()          => request('/children'),
@@ -55,8 +55,12 @@ export const api = {
   },
   users: {
     list:           ()          => request('/users'),
+    create:         data        => request('/users', { method: 'POST', body: JSON.stringify(data) }),
     updateRole:     (id, role)  => request(`/users/${id}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
     updateProfile:  (id, data)  => request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deactivate:     id          => request(`/users/${id}/deactivate`, { method: 'PUT' }),
+    reactivate:     id          => request(`/users/${id}/reactivate`, { method: 'PUT' }),
+    resetPassword:  id          => request(`/users/${id}/reset-password`, { method: 'PUT' }),
     delete:         id          => request(`/users/${id}`, { method: 'DELETE' }),
   },
 }

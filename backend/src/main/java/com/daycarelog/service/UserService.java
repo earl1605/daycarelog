@@ -1,15 +1,22 @@
 package com.daycarelog.service;
 
+import com.daycarelog.dto.CreateUserRequest;
 import com.daycarelog.dto.UpdateProfileRequest;
 import com.daycarelog.model.User;
 import com.daycarelog.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
+
+    private static final Set<String> ALLOWED_ROLES = Set.of("admin", "staff");
+    private static final String TEMP_PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -24,10 +31,72 @@ public class UserService {
     }
 
     public User updateRole(Long id, String role) {
+        if (role == null || !ALLOWED_ROLES.contains(role.toLowerCase().trim())) {
+            throw new RuntimeException("Role must be 'admin' or 'staff'");
+        }
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setRole(role);
+        user.setRole(role.toLowerCase().trim());
         return userRepository.save(user);
     }
+
+    public CreatedUser createUser(CreateUserRequest req) {
+        if (req.getEmail() == null || req.getEmail().isBlank()) {
+            throw new RuntimeException("Email is required");
+        }
+        if (userRepository.existsByEmail(req.getEmail())) {
+            throw new RuntimeException("Email already in use");
+        }
+        String role = req.getRole() == null ? "staff" : req.getRole().toLowerCase().trim();
+        if (!ALLOWED_ROLES.contains(role)) {
+            throw new RuntimeException("Role must be 'admin' or 'staff'");
+        }
+        String tempPassword = generateTempPassword();
+        User user = User.builder()
+                .email(req.getEmail())
+                .password(passwordEncoder.encode(tempPassword))
+                .firstName(req.getFirstName())
+                .lastName(req.getLastName())
+                .middleName(req.getMiddleName())
+                .suffix(req.getSuffix())
+                .role(role)
+                .build();
+        user = userRepository.save(user);
+        return new CreatedUser(user, tempPassword);
+    }
+
+    public User deactivateUser(Long targetId, Long requesterId) {
+        if (targetId.equals(requesterId)) throw new RuntimeException("You cannot deactivate your own account");
+        User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("User not found"));
+        if ("admin".equals(target.getRole()) && userRepository.countByRoleAndIsActiveTrue("admin") <= 1) {
+            throw new RuntimeException("Cannot deactivate the only active admin account");
+        }
+        target.setIsActive(false);
+        return userRepository.save(target);
+    }
+
+    public User reactivateUser(Long targetId) {
+        User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("User not found"));
+        target.setIsActive(true);
+        return userRepository.save(target);
+    }
+
+    public String resetPassword(Long targetId) {
+        User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("User not found"));
+        String tempPassword = generateTempPassword();
+        target.setPassword(passwordEncoder.encode(tempPassword));
+        userRepository.save(target);
+        return tempPassword;
+    }
+
+    private String generateTempPassword() {
+        StringBuilder sb = new StringBuilder(12);
+        for (int i = 0; i < 12; i++) {
+            sb.append(TEMP_PASSWORD_CHARS.charAt(RANDOM.nextInt(TEMP_PASSWORD_CHARS.length())));
+        }
+        return sb.toString();
+    }
+
+    public record CreatedUser(User user, String tempPassword) {}
 
     public User updateProfile(Long id, UpdateProfileRequest req) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));

@@ -24,13 +24,8 @@ public class AuthService {
         if (userRepository.existsByEmail(req.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
-        String role = "staff";
-        if (req.getRole() != null) {
-            String r = req.getRole().toLowerCase().trim();
-            if (r.equals("admin") || r.equals("teacher") || r.equals("staff")) {
-                role = r;
-            }
-        }
+        // Self-registration always yields STAFF. ADMIN accounts can only be created
+        // by an existing admin (UserController/UserService) or the first-admin seed runner.
         User user = User.builder()
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
@@ -38,7 +33,7 @@ public class AuthService {
                 .lastName(req.getLastName())
                 .middleName(req.getMiddleName())
                 .suffix(req.getSuffix())
-                .role(role)
+                .role("staff")
                 .build();
         user = userRepository.save(user);
         return buildResponse(user);
@@ -49,6 +44,9 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid email or password");
+        }
+        if (!user.getIsActive()) {
+            throw new RuntimeException("This account has been deactivated. Contact an administrator.");
         }
         return buildResponse(user);
     }

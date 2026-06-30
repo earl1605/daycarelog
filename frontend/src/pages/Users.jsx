@@ -3,13 +3,9 @@ import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import toast from 'react-hot-toast'
 
-const ROLES = ['admin', 'teacher', 'staff']
+const ROLES = ['admin', 'staff']
 
-const ROLE_BADGE = {
-  admin:   'bg-purple-100 text-purple-700',
-  teacher: 'bg-blue-100 text-blue-700',
-  staff:   'bg-gray-100 text-gray-600',
-}
+const emptyForm = { email: '', firstName: '', lastName: '', middleName: '', suffix: '', role: 'staff' }
 
 export default function Users() {
   const { isAdmin, user } = useAuth()
@@ -18,6 +14,14 @@ export default function Users() {
   const [saving,     setSaving]     = useState(null)
   const [deleting,   setDeleting]   = useState(null)
   const [confirmId,  setConfirmId]  = useState(null)
+  const [togglingId, setTogglingId] = useState(null)
+  const [resettingId, setResettingId] = useState(null)
+
+  const [showCreate, setShowCreate] = useState(false)
+  const [creating,   setCreating]   = useState(false)
+  const [form,       setForm]       = useState(emptyForm)
+
+  const [tempPassword, setTempPassword] = useState(null) // { name, password }
 
   useEffect(() => {
     if (!isAdmin) { setLoading(false); return }
@@ -34,6 +38,30 @@ export default function Users() {
     setSaving(null)
   }
 
+  async function toggleActive(target) {
+    setTogglingId(target.id)
+    try {
+      if (target.isActive) {
+        await api.users.deactivate(target.id)
+        toast.success('Account deactivated')
+      } else {
+        await api.users.reactivate(target.id)
+        toast.success('Account reactivated')
+      }
+      setUsers(u => u.map(p => p.id === target.id ? { ...p, isActive: !target.isActive } : p))
+    } catch (e) { toast.error(e.message) }
+    setTogglingId(null)
+  }
+
+  async function handleResetPassword(target) {
+    setResettingId(target.id)
+    try {
+      const res = await api.users.resetPassword(target.id)
+      setTempPassword({ name: target.fullName || target.email, password: res.tempPassword })
+    } catch (e) { toast.error(e.message) }
+    setResettingId(null)
+  }
+
   async function handleDelete(id) {
     setConfirmId(null)
     setDeleting(id)
@@ -45,13 +73,49 @@ export default function Users() {
     setDeleting(null)
   }
 
+  async function handleCreate(e) {
+    e.preventDefault()
+    if (!form.email.trim() || !form.firstName.trim() || !form.lastName.trim()) {
+      toast.error('Email, first name, and last name are required'); return
+    }
+    setCreating(true)
+    try {
+      const res = await api.users.create({
+        email: form.email.trim(),
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        middleName: form.middleName.trim(),
+        suffix: form.suffix.trim(),
+        role: form.role,
+      })
+      setUsers(u => [...u, res.user])
+      setShowCreate(false)
+      setForm(emptyForm)
+      setTempPassword({ name: res.user.fullName || res.user.email, password: res.tempPassword })
+    } catch (e) { toast.error(e.message) }
+    setCreating(false)
+  }
+
+  function copyPassword() {
+    navigator.clipboard?.writeText(tempPassword.password)
+    toast.success('Copied to clipboard')
+  }
+
   if (!isAdmin) return <div className="text-center py-20 text-gray-400">Admin access required.</div>
 
   const confirmTarget = users.find(u => u.id === confirmId)
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-extrabold text-gray-900">Users</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-extrabold text-gray-900">Users</h1>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+        >
+          + Add Staff
+        </button>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
@@ -65,6 +129,7 @@ export default function Users() {
                 <th className="text-left px-4 py-3">Name</th>
                 <th className="text-left px-4 py-3 hidden sm:table-cell">Email</th>
                 <th className="text-left px-4 py-3">Role</th>
+                <th className="text-left px-4 py-3">Status</th>
                 <th className="text-left px-4 py-3 hidden md:table-cell">Joined</th>
                 <th className="text-left px-4 py-3">Actions</th>
               </tr>
@@ -89,26 +154,121 @@ export default function Users() {
                         {ROLES.map(r => <option key={r}>{r}</option>)}
                       </select>
                     </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                        {u.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{new Date(u.createdAt).toLocaleDateString('en-PH')}</td>
                     <td className="px-4 py-3">
-                      {!isSelf && (
+                      <div className="flex flex-wrap gap-1.5">
                         <button
-                          onClick={() => setConfirmId(u.id)}
-                          disabled={deleting === u.id}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
+                          onClick={() => handleResetPassword(u)}
+                          disabled={resettingId === u.id}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-semibold hover:bg-blue-100 transition-colors disabled:opacity-50"
                         >
-                          {deleting === u.id
-                            ? <span className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                            : '🗑'}
-                          Delete
+                          {resettingId === u.id
+                            ? <span className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                            : '🔑'}
+                          Reset
                         </button>
-                      )}
+                        {!isSelf && (
+                          <button
+                            onClick={() => toggleActive(u)}
+                            disabled={togglingId === u.id}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 ${
+                              u.isActive ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' : 'bg-green-50 text-green-600 hover:bg-green-100'
+                            }`}
+                          >
+                            {togglingId === u.id
+                              ? <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                              : (u.isActive ? '⏸' : '▶')}
+                            {u.isActive ? 'Deactivate' : 'Reactivate'}
+                          </button>
+                        )}
+                        {!isSelf && (
+                          <button
+                            onClick={() => setConfirmId(u.id)}
+                            disabled={deleting === u.id}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
+                          >
+                            {deleting === u.id
+                              ? <span className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                              : '🗑'}
+                            Delete
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Add staff modal */}
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <form onSubmit={handleCreate} className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-scale-in space-y-3">
+            <h2 className="text-lg font-extrabold text-gray-900">Add staff account</h2>
+            <p className="text-xs text-gray-500 -mt-2">A temporary password will be generated and shown once.</p>
+            <div className="grid grid-cols-2 gap-2">
+              <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
+                placeholder="First name" className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
+                placeholder="Last name" className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <input value={form.middleName} onChange={e => setForm(f => ({ ...f, middleName: e.target.value }))}
+                placeholder="Middle name" className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <input value={form.suffix} onChange={e => setForm(f => ({ ...f, suffix: e.target.value }))}
+                placeholder="Suffix" className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            </div>
+            <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+              placeholder="Email address" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+              {ROLES.map(r => <option key={r}>{r}</option>)}
+            </select>
+            <div className="flex gap-3 pt-1">
+              <button type="button" onClick={() => { setShowCreate(false); setForm(emptyForm) }}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              <button type="submit" disabled={creating}
+                className="flex-1 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white text-sm font-semibold transition-colors">
+                {creating ? 'Creating…' : 'Create account'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* One-time temp password modal */}
+      {tempPassword && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-scale-in">
+            <div className="text-4xl text-center mb-3">🔑</div>
+            <h2 className="text-lg font-extrabold text-gray-900 text-center mb-1">Temporary password</h2>
+            <p className="text-sm text-gray-500 text-center mb-4">
+              For <span className="font-semibold text-gray-700">{tempPassword.name}</span>. This is shown only once — copy it now and share it securely.
+            </p>
+            <div className="flex items-center gap-2 mb-5">
+              <code className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-mono text-gray-800 text-center select-all">
+                {tempPassword.password}
+              </code>
+              <button onClick={copyPassword}
+                className="px-3 py-2.5 rounded-xl border border-gray-200 text-sm hover:bg-gray-50 transition-colors" title="Copy">
+                📋
+              </button>
+            </div>
+            <button onClick={() => setTempPassword(null)}
+              className="w-full py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold transition-colors">
+              Done
+            </button>
+          </div>
         </div>
       )}
 

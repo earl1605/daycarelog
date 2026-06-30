@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider }   from './contexts/AuthContext'
 import ProtectedRoute     from './components/ProtectedRoute'
+import AdminRoute         from './components/AdminRoute'
 import Layout             from './components/Layout'
 import Landing            from './pages/Landing'
 import Login              from './pages/Login'
@@ -35,7 +36,9 @@ export default function App() {
             <Route path="/health"            element={<HealthRecords />} />
             <Route path="/health/new"        element={<HealthForm />} />
             <Route path="/reports"           element={<Reports />} />
-            <Route path="/users"             element={<Users />} />
+            <Route element={<AdminRoute />}>
+              <Route path="/users"           element={<Users />} />
+            </Route>
             <Route path="/settings"          element={<Settings />} />
           </Route>
         </Route>
