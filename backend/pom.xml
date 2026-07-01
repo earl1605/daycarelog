@@ -11,7 +11,7 @@
     <relativePath/>
   </parent>
 
-  <groupId>com.daycarelog</groupId>
+  <groupId>edu.cit.mahumot.daycarelog</groupId>
   <artifactId>daycarelog-backend</artifactId>
   <version>1.0.0</version>
   <name>DaycareLog Backend</name>
