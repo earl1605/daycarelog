@@ -132,14 +132,6 @@ export default function Children() {
         <div className="flex items-center justify-center h-48"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200/70 overflow-x-auto">
-          {filtered.length === 0 ? (
-            <div className="text-center py-16">
-              <span className="inline-flex w-12 h-12 rounded-full bg-gray-100 text-gray-400 items-center justify-center mb-3">
-                <UsersIcon width={22} height={22} />
-              </span>
-              <p className="font-medium text-gray-500">No children enrolled yet.</p>
-            </div>
-          ) : (
             <table className="w-full text-sm min-w-[720px]">
               <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                 <tr>
@@ -152,7 +144,16 @@ export default function Children() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filtered.map(c => (
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-16">
+                      <span className="inline-flex w-12 h-12 rounded-full bg-gray-100 text-gray-400 items-center justify-center mb-3">
+                        <UsersIcon width={22} height={22} />
+                      </span>
+                      <p className="font-medium text-gray-500">No children enrolled yet.</p>
+                    </td>
+                  </tr>
+                ) : filtered.map(c => (
                   <tr key={c.id} className="hover:bg-gray-50/60 transition-colors duration-150">
                     <td className="px-4 py-3 font-medium text-gray-900">{c.firstName} {c.lastName}</td>
                     <td className="px-4 py-3 text-gray-600">{new Date(c.dateOfBirth + 'T00:00:00').toLocaleDateString('en-PH')}</td>
@@ -179,7 +180,6 @@ export default function Children() {
                 ))}
               </tbody>
             </table>
-          )}
         </div>
       )}
     </div>
