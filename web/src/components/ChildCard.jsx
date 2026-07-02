@@ -7,7 +7,7 @@ export default function ChildCard({ child, status }) {
   return (
     <Link
       to={`/children/${child.id}`}
-      className="feature-card bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4 hover:border-primary-200"
+      className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 p-5 flex items-center gap-4 transition-colors duration-150 hover:bg-gray-100/70 hover:border-gray-300"
     >
       <div className="w-12 h-12 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-lg shrink-0">
         {initials}

@@ -27,11 +27,11 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold text-gray-900">Reports</h1>
+        <h1 className="text-[22px] font-bold text-gray-900">Reports</h1>
         <div className="flex gap-2 flex-wrap">
           <input type="month" value={month} onChange={e => setMonth(e.target.value)}
-            className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
-          <button onClick={downloadCSV} className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">↓ Export CSV</button>
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
+          <button onClick={downloadCSV} className="bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-150">↓ Export CSV</button>
         </div>
       </div>
 
@@ -39,8 +39,8 @@ export default function Reports() {
         <div className="flex items-center justify-center h-48"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
       ) : data && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h2 className="font-bold text-gray-900 mb-4">Attendance Summary</h2>
+          <div className="bg-white rounded-xl border border-gray-200/70 p-6">
+            <h2 className="text-[17px] font-bold text-gray-900 mb-4">Attendance Summary</h2>
             <div className="space-y-3 text-sm">
               {[['Active Children', data.total], ['School Days', data.schoolDays], ['Total Present', data.presentCount], ['Total Absent', data.absentCount], ['Attendance Rate', `${data.attendanceRate}%`]].map(([l, v]) => (
                 <div key={l} className="flex justify-between items-center">
@@ -51,8 +51,8 @@ export default function Reports() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h2 className="font-bold text-gray-900 mb-4">Nutritional Status</h2>
+          <div className="bg-white rounded-xl border border-gray-200/70 p-6">
+            <h2 className="text-[17px] font-bold text-gray-900 mb-4">Nutritional Status</h2>
             <div className="space-y-3">
               {Object.entries(data.nutritionalStatus ?? {}).map(([label, count]) => {
                 const pct = data.total > 0 ? Math.round((count / data.total) * 100) : 0
