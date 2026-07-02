@@ -5,6 +5,7 @@ backend/target/
 web/node_modules/
 web/dist/
 web/.vite/
+scripts/normalize-names/node_modules/
 
 # IDE
 .vscode/

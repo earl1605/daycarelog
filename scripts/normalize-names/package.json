@@ -1,0 +1,13 @@
+{
+  "name": "normalize-names",
+  "private": true,
+  "version": "1.0.0",
+  "description": "One-time migration to Title Case name columns in the DaycareLog Supabase database",
+  "main": "normalize-names.js",
+  "scripts": {
+    "start": "node normalize-names.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.5"
+  }
+}
