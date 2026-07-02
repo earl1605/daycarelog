@@ -61,7 +61,7 @@ export default function Sidebar({ open, onClose }) {
   const linkClass = ({ isActive }) =>
     `group flex items-center gap-2.5 px-3 py-2 rounded-lg text-[14px] font-medium transition-colors duration-150 ${
       isActive
-        ? 'bg-primary-100/70 text-gray-900'
+        ? 'bg-primary-200 text-gray-900'
         : 'text-gray-500 hover:bg-gray-900/[0.04] hover:text-gray-800'
     }`
 
