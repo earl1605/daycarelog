@@ -16,11 +16,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -48,7 +52,7 @@ private val Green500 = Color(0xFF16a34a)
 private val Green900 = Color(0xFF052e16)
 
 @Composable
-fun HealthScreen(onAdd: () -> Unit) {
+fun HealthScreen(onOpenDrawer: () -> Unit, onAdd: () -> Unit) {
     val scope   = rememberCoroutineScope()
     var records      by remember { mutableStateOf<List<HealthRecord>>(emptyList()) }
     var children     by remember { mutableStateOf<Map<Long, Child>>(emptyMap()) }
@@ -111,9 +115,14 @@ fun HealthScreen(onAdd: () -> Unit) {
                 Modifier
                     .fillMaxWidth()
                     .background(Green900)
-                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                    .padding(horizontal = 8.dp, vertical = 10.dp),
             ) {
-                Text("Health Records", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(Icons.Outlined.Menu, contentDescription = "Open navigation", tint = Color.White)
+                    }
+                    Text("Health Records", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 4.dp))
+                }
             }
 
             OutlinedTextField(

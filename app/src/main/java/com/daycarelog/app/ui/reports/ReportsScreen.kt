@@ -13,11 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -45,7 +49,7 @@ private val Green900 = Color(0xFF052e16)
 private val Green700 = Color(0xFF15803d)
 
 @Composable
-fun ReportsScreen() {
+fun ReportsScreen(onOpenDrawer: () -> Unit) {
     val scope = rememberCoroutineScope()
     val currentMonth = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM"))
     var month   by remember { mutableStateOf(currentMonth) }
@@ -78,9 +82,14 @@ fun ReportsScreen() {
             Modifier
                 .fillMaxWidth()
                 .background(Green900)
-                .padding(horizontal = 20.dp, vertical = 18.dp),
+                .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
-            Text("Monthly Reports", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onOpenDrawer) {
+                    Icon(Icons.Outlined.Menu, contentDescription = "Open navigation", tint = Color.White)
+                }
+                Text("Monthly Reports", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 4.dp))
+            }
         }
 
         Column(

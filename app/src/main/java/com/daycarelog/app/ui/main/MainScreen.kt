@@ -270,6 +270,8 @@ fun MainScreen(onSignOut: () -> Unit) {
             }
         },
     ) {
+        val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
+
         Scaffold { padding ->
             NavHost(
                 navController = innerNav,
@@ -278,7 +280,7 @@ fun MainScreen(onSignOut: () -> Unit) {
             ) {
                 composable(InnerRoutes.DASHBOARD) {
                     DashboardScreen(
-                        onOpenDrawer        = { scope.launch { drawerState.open() } },
+                        onOpenDrawer        = openDrawer,
                         onNavigateToSettings = { navigateTo(InnerRoutes.SETTINGS) },
                         onAddChild          = { innerNav.navigate(InnerRoutes.CHILD_FORM) },
                         onTakeAttendance    = { navigateTo(InnerRoutes.ATTENDANCE) },
@@ -288,6 +290,7 @@ fun MainScreen(onSignOut: () -> Unit) {
                 }
                 composable(InnerRoutes.CHILDREN) {
                     ChildrenScreen(
+                        onOpenDrawer = openDrawer,
                         onAddChild  = { innerNav.navigate(InnerRoutes.CHILD_FORM) },
                         onEditChild = { id -> innerNav.navigate("${InnerRoutes.CHILD_FORM}/$id") },
                     )
@@ -300,16 +303,16 @@ fun MainScreen(onSignOut: () -> Unit) {
                     ChildFormScreen(childId = null, onBack = { innerNav.popBackStack() })
                 }
                 composable(InnerRoutes.ATTENDANCE) {
-                    AttendanceScreen()
+                    AttendanceScreen(onOpenDrawer = openDrawer)
                 }
                 composable(InnerRoutes.HEALTH) {
-                    HealthScreen(onAdd = { innerNav.navigate(InnerRoutes.HEALTH_FORM) })
+                    HealthScreen(onOpenDrawer = openDrawer, onAdd = { innerNav.navigate(InnerRoutes.HEALTH_FORM) })
                 }
                 composable(InnerRoutes.HEALTH_FORM) {
                     HealthFormScreen(onBack = { innerNav.popBackStack() })
                 }
                 composable(InnerRoutes.REPORTS) {
-                    ReportsScreen()
+                    ReportsScreen(onOpenDrawer = openDrawer)
                 }
                 composable(InnerRoutes.SETTINGS) {
                     SettingsScreen(
