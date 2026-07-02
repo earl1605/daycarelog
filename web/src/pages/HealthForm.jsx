@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import { classifyNutritionalStatus } from '../utils/nutritionalStatus'
+import { toLocalDateString } from '../utils/date'
 import toast from 'react-hot-toast'
 
 export default function HealthForm() {
@@ -9,7 +10,7 @@ export default function HealthForm() {
   const [params]    = useSearchParams()
   const preChildId  = params.get('child') ?? ''
   const [children, setChildren] = useState([])
-  const [form, setForm] = useState({ childId: preChildId, measurementDate: new Date().toISOString().split('T')[0], weightKg: '', heightCm: '', remarks: '' })
+  const [form, setForm] = useState({ childId: preChildId, measurementDate: toLocalDateString(), weightKg: '', heightCm: '', remarks: '' })
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState(null)
 

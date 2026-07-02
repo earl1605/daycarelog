@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
+import { toLocalDateString } from '../utils/date'
 import toast from 'react-hot-toast'
 
 const STATUS_OPTS   = ['present', 'absent', 'late', 'excused']
@@ -23,7 +24,7 @@ function isWeekend(dateStr) {
 export default function Attendance() {
   const [children, setChildren] = useState([])
   const [records,  setRecords]  = useState({})
-  const [date,     setDate]     = useState(() => nearestWeekday(new Date()).toISOString().split('T')[0])
+  const [date,     setDate]     = useState(() => toLocalDateString(nearestWeekday(new Date())))
   const [saving,   setSaving]   = useState(false)
   const [loading,  setLoading]  = useState(true)
 

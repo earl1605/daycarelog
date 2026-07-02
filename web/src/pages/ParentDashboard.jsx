@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import StatCard from '../components/StatCard'
 import { UsersIcon, CheckIcon, ClipboardIcon, HeartIcon } from '../components/icons'
 import { formatAge } from '../utils/nutritionalStatus'
+import { toLocalDateString } from '../utils/date'
 import toast from 'react-hot-toast'
 
 export default function ParentDashboard() {
@@ -27,7 +28,7 @@ export default function ParentDashboard() {
     load()
   }, [])
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = toLocalDateString()
   const presentToday = attendance.filter(a => a.date === today && a.status === 'present').length
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>

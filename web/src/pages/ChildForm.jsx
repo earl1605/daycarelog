@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import GuardiansSection from '../components/GuardiansSection'
+import { toLocalDateString } from '../utils/date'
 import toast from 'react-hot-toast'
 
-const empty = { firstName: '', lastName: '', dateOfBirth: '', sex: '', address: '', enrollmentDate: new Date().toISOString().split('T')[0], enrollmentStatus: 'active' }
+const empty = { firstName: '', lastName: '', dateOfBirth: '', sex: '', address: '', enrollmentDate: toLocalDateString(), enrollmentStatus: 'active' }
 
 export default function ChildForm() {
   const { id }   = useParams()

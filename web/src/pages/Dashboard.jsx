@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { toLocalDateString } from '../utils/date'
 import StatCard from '../components/StatCard'
 import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, HeartIcon, BarChartIcon, PlusIcon } from '../components/icons'
 import toast from 'react-hot-toast'
@@ -17,7 +18,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const today = new Date().toISOString().split('T')[0]
+        const today = toLocalDateString()
         const [kids, att] = await Promise.all([
           api.children.list(),
           api.attendance.getByDate(today),
@@ -34,7 +35,7 @@ export default function Dashboard() {
         monday.setDate(now.getDate() - mondayOffset)
         const days = Array.from({ length: 5 }, (_, i) => {
           const d = new Date(monday); d.setDate(monday.getDate() + i)
-          return d.toISOString().split('T')[0]
+          return toLocalDateString(d)
         })
         const start = days[0], end = days[4]
         const weekAtt = await api.attendance.getRange(start, end)

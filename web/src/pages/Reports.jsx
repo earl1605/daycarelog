@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
+import { toLocalDateString } from '../utils/date'
 import toast from 'react-hot-toast'
 
 export default function Reports() {
   const [data,    setData]    = useState(null)
-  const [month,   setMonth]   = useState(new Date().toISOString().slice(0, 7))
+  const [month,   setMonth]   = useState(toLocalDateString().slice(0, 7))
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

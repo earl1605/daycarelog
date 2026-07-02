@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
+import { toLocalDateString } from '../utils/date'
 import { PlusIcon, UsersIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
@@ -41,7 +42,7 @@ export default function Children() {
         dateOfBirth: form.dateOfBirth,
         sex: form.sex,
         enrollmentStatus: form.enrollmentStatus,
-        enrollmentDate: new Date().toISOString().split('T')[0],
+        enrollmentDate: toLocalDateString(),
       })
       if (form.guardianUserId) {
         const acct = guardians.find(g => String(g.userId) === form.guardianUserId)
