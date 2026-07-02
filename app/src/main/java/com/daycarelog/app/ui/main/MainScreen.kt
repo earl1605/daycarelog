@@ -177,11 +177,19 @@ fun MainScreen(onSignOut: () -> Unit) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                 ) {
-                    androidx.compose.foundation.Image(
-                        painter = painterResource(R.mipmap.ic_launcher_round),
-                        contentDescription = "DaycareLog",
-                        modifier = Modifier.size(28.dp),
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Green40),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        androidx.compose.foundation.Image(
+                            painter = painterResource(R.drawable.ic_child),
+                            contentDescription = "DaycareLog",
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
                     Column {
                         Text("DaycareLog", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Charcoal)
                         Text("BARANGAY SYSTEM", fontSize = 10.sp, color = MutedGray, letterSpacing = 0.8.sp)
