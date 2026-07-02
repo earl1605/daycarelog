@@ -4,7 +4,8 @@ SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
 
 Project Title: DaycareLog: A Digital Management System for Barangay Daycare Centers
 Prepared By: Christian Earl V. Mahumot
-Version: 2.1 (Implementation-Aligned Revision — supersedes Version 2.0, June 29, 2026)
+Date of Submission: June 30, 2026
+Version: 2.0 (Implementation-Aligned Revision — supersedes Version 1.0, June 29, 2026)
 
 > "I certify that this finalized SRS and UML models are my own individual work. I understand that copied, duplicated, or AI-generated submissions without proper understanding and revision may be subject to verification and possible deductions."
 > — Christian Earl V. Mahumot
@@ -26,8 +27,6 @@ The purpose of DaycareLog is to replace manual, paper-based enrollment and healt
 The system currently supports three account roles — **Admin**, **Teacher**, and **Staff** — as implemented in the `users` table and enforced at the API layer. Full role descriptions and the actual scope of access enforced per role are provided in Section 2.
 
 ### 1.5 Problem Statement
-*(Unchanged from v2.0 — narrative problem statement, not implementation-dependent.)*
-
 Barangay daycare centers currently rely on manual, paper-based processes to manage child enrollment and health records. This results in records that are vulnerable to loss or physical damage, frequent data-entry errors, and slow record retrieval. The absence of a centralized digital system limits the ability of daycare staff to monitor children's health status in a timely and consistent manner.
 
 ### 1.6 Scope of the System
@@ -72,10 +71,9 @@ The system serves one barangay daycare center per deployment instance and is acc
 | **Teacher** | Selectable role at registration; intended for classroom/instructional staff. | Functionally identical to Staff today — no endpoint currently differentiates Teacher from Staff permissions. |
 | **Admin** | Combines the oversight and technical-administration duties described separately in v2.0 (Barangay Administrator + System Administrator are **not** separate roles in the implementation). | Everything Staff/Teacher can do, **plus** the only role-gated capabilities in the system: view the full user list, change another user's role, and delete a user account. |
 
-> **Note:** Unlike v2.0's three-tier role model (Daycare Worker / Barangay Administrator / System Administrator), the implementation has a flat three-role scheme (Staff / Teacher / Admin) where Admin is the only role with any enforced elevated permission, and that permission is scoped solely to user management.
+> **Note:** Unlike v2.0's three-tier role model, the implementation has a flat three-role scheme where Admin is the only role with any enforced elevated permission, scoped solely to user management.
 
 ### 2.2 Indirect Stakeholders
-*(Unchanged from v2.0.)*
 
 | Stakeholder | Interest in the System |
 |---|---|
@@ -87,62 +85,62 @@ The system serves one barangay daycare center per deployment instance and is acc
 
 ## 3. Functional Requirements
 
-Requirements are renumbered FR-0XX. Each entry below is annotated **[Implemented]**, **[Partially Implemented]**, or **[Not Implemented]** against the current codebase.
+Each entry is annotated **Implemented**, **Partially Implemented**, or **Not Implemented** against the current codebase.
 
 ### 3.1 User Authentication and Account Management
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-001 | The system shall allow a registered user to log in using an **email** and password, returning a signed JWT access token upon successful authentication. | Implemented |
-| FR-002 | The system shall reject login attempts with invalid credentials and return an error message. | Implemented |
-| FR-003 | ~~Account lockout after failed login attempts~~ | **Not Implemented** — no lockout logic exists. Removed from current scope. |
-| FR-004 | The system shall enforce role-based access control on `/api/users/**` endpoints only (list users, change role, delete user — Admin-only). All other endpoints require authentication but not a specific role. | Partially Implemented |
-| FR-005 | The system shall allow an Admin to view all user accounts, change any user's role, and permanently delete a user account. | Implemented |
-| FR-006 | The system shall store all user passwords using one-way bcrypt hashing (Spring Security `BCryptPasswordEncoder`); plaintext passwords are never persisted or logged. | Implemented |
-| FR-006a | *(New)* Any self-registering user may select their own role, including Admin, with no approval step. | Implemented (flagged as a limitation, see 1.7) |
+| FR-001 | Log in using email and password, returning a signed JWT. | **Implemented** |
+| FR-002 | Reject invalid credentials with an error message. | **Implemented** |
+| FR-003 | Account lockout after failed logins. | **Not Implemented** |
+| FR-004 | RBAC enforced only on `/api/users/**` (Admin-only); all other endpoints require auth but not a specific role. | **Partially Implemented** |
+| FR-005 | Admin can view all users, change any user's role, and permanently delete a user. | **Implemented** |
+| FR-006 | Passwords stored via bcrypt; never logged in plaintext. | **Implemented** |
+| FR-006a | *(New)* Any self-registering user may pick their own role, including Admin, with no approval step. | **Implemented (flagged limitation)** |
 
 ### 3.2 Child Enrollment Management
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-007 | The system shall allow a user to create a new child profile with first name, last name, date of birth, sex, address, and enrollment date. | Implemented |
-| FR-008 | The system shall compute and display the child's current age (in the frontend) based on date of birth. | Implemented (client-side) |
-| FR-009 | The system shall allow a user to edit any field of an existing child profile. | Implemented — note: **no `updated_at` timestamp is tracked**, so the "automatically record the date/time of last update" behavior from v2.0 does not exist. |
-| FR-010 | The system shall allow client-side searching by name and filtering by enrollment status. | Implemented (client-side only — no backend search/filter query params; no filtering by age range or sex). |
-| FR-011 | ~~Archive child profile on graduation/withdrawal~~ | **Not Implemented as a distinct workflow.** A child has an `enrollmentStatus` field that can be set via the generic edit endpoint, but there is no dedicated archive/reactivate action, and the only delete operation is a permanent hard delete. |
-| FR-012 | ~~Prevent duplicate enrollment by name + date of birth~~ | **Not Implemented** — no uniqueness check exists in `ChildService.create()` or at the database level. |
-| FR-013 | The system shall display a dashboard summarizing active children, present-today count, total enrolled, and attendance rate. | Implemented |
+| FR-007 | Create a child profile: first/last name, DOB, sex, address, enrollment date. | **Implemented** |
+| FR-008 | Compute/display current age (frontend only). | **Implemented (client-side)** |
+| FR-009 | Edit any field of a child profile. No `updated_at` timestamp is tracked. | **Implemented (partial claim removed)** |
+| FR-010 | Client-side search by name and filter by status (no backend search, no age/sex filter). | **Implemented (client-side only)** |
+| FR-011 | Archive child profile workflow with reactivation. | **Not Implemented as distinct workflow** |
+| FR-012 | Prevent duplicate enrollment (name + DOB). | **Not Implemented** |
+| FR-013 | Dashboard: active children, present today, total enrolled, attendance rate. | **Implemented** |
 
 ### 3.3 Health Record Monitoring
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-014 | The system shall allow a user to create a health record entry per child consisting of measurement date, weight (kg), height (cm), and free-text remarks. | Implemented |
-| FR-015 | The system shall classify a child's nutritional status (Normal, Underweight, Severely Underweight, or Overweight) using a simplified WHO weight-for-age median table, computed **client-side**, based on weight, age, and sex. | Implemented, with two corrections vs. v2.0: (a) computed in the React frontend, not the Spring Boot service layer; (b) height is captured but not used in the classification; (c) there is no "Obese" category. |
-| FR-016 | The system shall display a color-coded health status indicator on a child's profile/card reflecting the most recent classification. | Implemented |
-| FR-017 | ~~Log a structured developmental milestone observation (description + date) per child~~ | **Not Implemented as a separate record type.** A free-text `remarks` field on each health record can be used for notes, but there is no dedicated milestone entity or list. |
-| FR-018 | The system shall display a chronological health history per child, ordered by most recent measurement date. | Implemented |
-| FR-019 | ~~Reject health record submissions with missing/out-of-range weight or height and return field-specific validation errors~~ | **Not Implemented** — no server-side validation beyond basic JSON deserialization exists in `HealthRecordService`/`HealthRecordController`. |
+| FR-014 | Create health record: date, weight (kg), height (cm), free-text remarks. | **Implemented** |
+| FR-015 | Classify nutritional status (Normal/Underweight/Severely Underweight/Overweight) client-side, weight+age+sex only — no height factor, no "Obese" category. | **Implemented (corrected description)** |
+| FR-016 | Color-coded health status indicator reflecting latest classification. | **Implemented** |
+| FR-017 | Structured developmental milestone log (description + date) as its own record type. | **Not Implemented (only a generic remarks field exists)** |
+| FR-018 | Chronological health history per child. | **Implemented** |
+| FR-019 | Reject missing/out-of-range weight/height with field-specific errors. | **Not Implemented** |
 
 ### 3.4 Immunization Tracking
 
-**Removed from current scope.** No `ImmunizationRecord` entity, repository, controller, or UI exists anywhere in the codebase. This entire feature area from v2.0 (FR-020, FR-021) is future work, not an implemented requirement.
+**Removed from current scope.** No `ImmunizationRecord` entity, repository, controller, or UI exists anywhere in the codebase.
 
 ### 3.5 Attendance Tracking
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-020 | The system shall allow a user to mark daily attendance for each enrolled child as Present or Absent. | Implemented |
-| FR-021 | The system shall record time-in and time-out for each attendance entry. | Implemented |
-| FR-022 | The system shall enforce one attendance entry per child per calendar date at the database level (unique constraint on `child_id, date`); resubmission for the same date updates the existing entry (upsert) rather than creating a duplicate. | Implemented — this is the one area that matches the original BR-09 description exactly. |
+| FR-020 | Mark daily attendance as Present or Absent. | **Implemented** |
+| FR-021 | Record time-in/time-out per attendance entry. | **Implemented** |
+| FR-022 | One attendance entry per child per day, enforced via DB unique constraint + upsert. | **Implemented (matches v2.0 exactly)** |
 
 ### 3.6 Report Generation
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-023 | The system shall allow any authenticated user (not Admin-restricted) to generate a monthly summary for all active children, including total enrollment, present/absent counts, school days, attendance rate, and nutritional-status breakdown. | Implemented |
-| FR-024 | The system shall allow the generated report to be exported as **CSV**. | Implemented — v2.0's PDF/XLSX export claim is incorrect; the implementation builds a CSV blob client-side and triggers a browser download. |
-| FR-025 | ~~Include immunization completion rate in the summary report~~ | **Not Implemented** — no immunization data exists to aggregate. |
+| FR-023 | Any authenticated user (not Admin-restricted) generates a monthly summary: enrollment, present/absent counts, school days, attendance rate, nutritional-status breakdown. | **Implemented** |
+| FR-024 | Export report as CSV (corrected from "PDF or Excel"). | **Implemented** |
+| FR-025 | Include immunization completion rate in the report. | **Not Implemented (no immunization data exists)** |
 
 ---
 
@@ -152,36 +150,36 @@ Requirements are renumbered FR-0XX. Each entry below is annotated **[Implemented
 
 | ID | Requirement | Status |
 |---|---|---|
-| NFR-001 | The system enforces role-based access control on user-management endpoints only; unauthorized requests to those endpoints return HTTP 403. All other endpoints require a valid JWT but not a specific role. | Partially Implemented (narrower than v2.0's blanket claim) |
-| NFR-002 | The system stores all passwords using bcrypt hashing (default `BCryptPasswordEncoder` cost factor of 10) and never transmits or logs plaintext passwords. | Implemented |
-| NFR-003 | The system transmits client–server traffic over HTTPS/TLS in production (Vercel and Railway both terminate TLS). | Implemented |
-| NFR-004 | The system issues JWT access tokens with a validity of **7 days**, after which the user must re-authenticate. | Implemented (corrected from v2.0's "24 hours") |
-| NFR-005 | ~~Log all failed authentication attempts for audit purposes~~ | **Not Implemented** — no audit logging of failed logins exists. |
-| NFR-006 | *(New)* CORS is permissive (`Access-Control-Allow-Origin: *`) at both the Spring Security CORS configuration and a servlet-level filter, since the API uses stateless bearer-token auth with no cookies. | Implemented |
+| NFR-001 | RBAC enforced on user-management endpoints only (403 on violation); all other endpoints require valid JWT only. | **Partially Implemented** |
+| NFR-002 | bcrypt password hashing (cost factor 10), no plaintext transmission/logging. | **Implemented** |
+| NFR-003 | HTTPS/TLS in production (Vercel/Railway). | **Implemented** |
+| NFR-004 | JWT validity of 7 days (corrected from 24 hours). | **Implemented** |
+| NFR-005 | Log all failed authentication attempts. | **Not Implemented** |
+| NFR-006 | *(New)* Permissive CORS (`Access-Control-Allow-Origin: *`) via Spring Security CORS config and a servlet-level filter, appropriate for stateless bearer-token auth with no cookies. | **Implemented** |
 
 ### 4.2 Performance
-*(Unchanged from v2.0 — not independently verifiable without load testing; retained as target, not measured.)*
+Unchanged from v2.0 — targets retained, not independently load-tested.
 
 ### 4.3 Usability
-*(Unchanged from v2.0, except:)* NFR-009's Filipino/English bilingual interface is **not implemented** — the UI is English-only. NFR-011's 1024px minimum is also not strictly accurate: the Users page table was recently made responsive down to mobile widths (sm/md breakpoints), so usability now extends below 1024px for at least that screen.
+Filipino/English bilingual UI is not implemented (English only). The 1024px minimum width claim is outdated for at least the Users page, which was recently made responsive down to mobile widths.
 
 ### 4.4 Reliability
-*(Unchanged narrative from v2.0 — uptime/backup targets are infrastructure-level commitments from Supabase/Railway, not something the application code enforces directly.)*
+Unchanged narrative from v2.0 — uptime/backup targets are infrastructure-level commitments from Supabase/Railway, not application-level guarantees.
 
 ### 4.5 Compatibility
 
 | ID | Requirement | Status |
 |---|---|---|
-| NFR-007 | The web client shall function correctly on current versions of Chrome, Firefox, and Edge (desktop and mobile). | Implemented/targeted |
-| NFR-008 | ~~Android companion app, Android 10.0+~~ | **Not built.** Planned future work. |
-| NFR-009 | The backend REST API exposes endpoints under `/api/**`. *(v2.0's claim of versioned `/api/v1/...` endpoints is incorrect — there is no version segment in any route.)* | Implemented, unversioned |
+| NFR-007 | Web client targets current Chrome/Firefox/Edge, desktop and mobile. | **Implemented/targeted** |
+| NFR-008 | Android companion app, Android 10.0+. | **Not built — planned future work** |
+| NFR-009 | API exposes endpoints under `/api/**` (no version segment — corrected from "`/api/v1/...`"). | **Implemented, unversioned** |
 
 ### 4.6 Maintainability
 
 | ID | Requirement | Status |
 |---|---|---|
-| NFR-010 | The backend follows a layered architecture: `controller` → `service` → `repository`, with `model` (entities), `dto`, `security`, and `config` packages. | Implemented |
-| NFR-011 | Environment-specific configuration (database credentials, JWT secret) is externalized via environment variables rather than hardcoded. | Implemented |
+| NFR-010 | Layered backend: controller → service → repository, plus model/dto/security/config. | **Implemented** |
+| NFR-011 | Config externalized via environment variables. | **Implemented** |
 
 ---
 
@@ -189,48 +187,173 @@ Requirements are renumbered FR-0XX. Each entry below is annotated **[Implemented
 
 | Rule ID | Business Rule | Status |
 |---|---|---|
-| BR-01 | ~~A child profile is uniquely identified by full name + date of birth; no duplicates allowed~~ | **Not enforced.** |
-| BR-02 | ~~Only children aged 3–5 are eligible for enrollment~~ | **Not enforced** — no age validation exists at creation time. |
-| BR-03 | A child's nutritional status reflects the most recently recorded measurement; the frontend always classifies against the latest health record per child. | Implemented |
-| BR-04 | A color-coded health indicator reflects the current classification (Normal/Underweight/Severely Underweight/Overweight); it updates automatically as new measurements are recorded. | Implemented |
-| BR-05 | ~~Archived child profiles cannot receive new records until reactivated~~ | **Not enforced** — `enrollmentStatus` does not gate record creation in any controller. |
-| BR-06 | Each user account has exactly one role (Staff, Teacher, or Admin); multi-role accounts are not supported. | Implemented |
-| BR-07 | ~~Accounts lock for 15 minutes after 3 failed logins~~ | **Not implemented.** |
-| BR-08 | Only an Admin may view the full user list, change another user's role, or delete a user account. *(Caveat: any user can self-assign the Admin role at registration — see 1.7.)* | Implemented (with the caveat above) |
-| BR-09 | Only one attendance entry is permitted per child per calendar date; a second submission updates the existing entry. Enforced via a database unique constraint plus upsert logic. | Implemented |
-| BR-10 | ~~Reports exclude archived children unless explicitly included~~ | Not applicable — archiving isn't a real workflow today (see BR-05); the monthly report currently includes all children with `enrollmentStatus = "active"`. |
+| BR-01 | Unique child profile by name + DOB. | **Not Enforced** |
+| BR-02 | Only children aged 3–5 eligible for enrollment. | **Not Enforced** |
+| BR-03 | Nutritional status reflects most recent measurement. | **Implemented** |
+| BR-04 | Health indicator auto-updates with new measurements. | **Implemented** |
+| BR-05 | Archived profiles blocked from new records until reactivated. | **Not Enforced** |
+| BR-06 | Each user has exactly one role (Staff/Teacher/Admin). | **Implemented** |
+| BR-07 | 15-minute lockout after 3 failed logins. | **Not Implemented** |
+| BR-08 | Only Admin can view/modify/delete user accounts. (Caveat: any user can self-assign Admin at registration.) | **Implemented (with caveat)** |
+| BR-09 | One attendance entry per child per day; resubmission updates the existing entry. | **Implemented** |
+| BR-10 | Reports exclude archived children unless explicitly included. | **N/A — archiving isn't a real workflow; report includes all "active" children** |
 
 ---
 
 ## 6. System Models (UML Diagrams)
 
-The diagrams below describe what should be **redrawn** to match the implementation. (This document does not include rendered images — recreate these in your diagramming tool of choice using the descriptions below.)
+The four diagrams below are redrawn to reflect the actual implementation, replacing the v2.0 diagrams that described the originally planned (but not fully built) system.
 
-### 6.1 Use Case Diagram — required changes from v2.0
-- Replace the three actors **Daycare Worker / Barangay Administrator / System Administrator** with two actors: **Authenticated User** (covers Staff and Teacher, who have identical permissions) and **Admin** (extends Authenticated User, adds *Manage User Accounts*).
-- Remove the *Log Immunization* use case entirely.
-- Remove *Configure System* and *Perform Backup* — no in-app functionality exists for either; these are operator/infrastructure tasks (Supabase/Railway dashboards), not application use cases.
-- Keep: *Register/Login, Enroll Child, Update Child Profile, Record Health Data, View Health Alerts, Track Attendance, Generate Reports, View Dashboard, Manage User Accounts.*
-- Remove the *«extend»* relationship between *Update Child Profile* and *Archive Child Record* (archiving isn't a real, separate use case — status is just a field on the edit form).
+### 6.1 Use Case Diagram
 
-### 6.2 Entity Relationship Diagram — required changes from v2.0
-- Remove `IMMUNIZATION_RECORD` and `REPORT` entities entirely — neither exists in the database/JPA model.
-- **Add** a `GUARDIAN` entity (table `guardians`): `id` (PK), `child_id` (FK → CHILD), `name`, `relationship`, `contact_number`, `is_primary`. Note in the diagram that this table exists but has **no REST endpoint** yet — mark it visually as "schema-only / not exposed."
-- `USER` table fields: `id, email (unique), password (hashed), first_name, last_name, middle_name, suffix, profile_photo, role, created_at`. There is no `username` field — login is by email.
-- `CHILD` table fields: `id, first_name, last_name, date_of_birth, sex, address, enrollment_date, enrollment_status, created_by (FK→USER), created_at`. No `updated_at`.
-- `HEALTH_RECORD` table fields: `id, child_id (FK), measurement_date, weight_kg, height_cm, nutritional_status, remarks, recorded_by (FK→USER), created_at`.
-- `ATTENDANCE` table fields: `id, child_id (FK), date, status, time_in, time_out, recorded_by (FK→USER), created_at`, with a **unique constraint on (child_id, date)**.
-- Cardinalities: USER 1—M CHILD (via created_by), CHILD 1—M HEALTH_RECORD, CHILD 1—M ATTENDANCE, CHILD 1—M GUARDIAN.
+```mermaid
+flowchart LR
+    ActorUser(["Authenticated User<br/>(Staff / Teacher)"])
+    ActorAdmin(["Admin"])
 
-### 6.3 Activity Diagram – Recording Health Data — required changes from v2.0
-- Remove the "validate input fields → display validation error" branch — there is no server-side field validation today; bad input either gets silently stored or causes an unhandled error.
-- Move the "compute nutritional status" step from the System/Database swimlane to the **Daycare Worker (client) swimlane**, since classification happens in the React app before the record is even submitted to the API.
-- The "raise health alert indicator" step is a frontend rendering decision (color the badge), not a persisted flag — there is no `health_alert` boolean column in `health_record`.
+    subgraph SYS["DaycareLog System"]
+        UC1(("Register / Login"))
+        UC2(("View Dashboard"))
+        UC3(("Enroll Child"))
+        UC4(("Update Child Profile"))
+        UC5(("Record Health Data"))
+        UC6(("View Health Alerts"))
+        UC7(("Track Attendance"))
+        UC8(("Generate Reports"))
+        UC9(("Manage User Accounts"))
+    end
 
-### 6.4 Sequence Diagram – Recording Health Data — required changes from v2.0
-- Remove step 3 ("validate JWT, check role = DAYCARE_WORKER") — `HealthRecordController` has no role check; only the JWT validity is checked by the shared `JwtAuthFilter`, not a specific role.
-- Remove step 6 ("computeNutritionalStatus(age, weight)") from `HealthRecordService` — this computation happens in the browser before step 2 (the POST already includes the computed `nutritionalStatus` string).
-- Remove the `alt [invalid input]` 400 Bad Request branch — there is no field-level validation in the service/controller to trigger it.
+    ActorUser --> UC1
+    ActorUser --> UC2
+    ActorUser --> UC3
+    ActorUser --> UC4
+    ActorUser --> UC5
+    ActorUser --> UC7
+    ActorUser --> UC8
+    UC5 -. "«include»" .-> UC6
+    ActorAdmin -. generalizes .-> ActorUser
+    ActorAdmin --> UC9
+```
+
+*Figure 6.1 – Use Case Diagram (implementation-aligned). Two actors only: Authenticated User (Staff/Teacher, identical permissions) and Admin (extends Authenticated User, adds Manage User Accounts). Immunization, Configure System, and Perform Backup use cases removed — none exist in the application.*
+
+### 6.2 Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    USER {
+        bigint id PK
+        varchar email UK
+        varchar password
+        varchar first_name
+        varchar last_name
+        varchar middle_name
+        varchar suffix
+        text profile_photo
+        varchar role
+        timestamp created_at
+    }
+    CHILD {
+        bigint id PK
+        varchar first_name
+        varchar last_name
+        date date_of_birth
+        varchar sex
+        varchar address
+        date enrollment_date
+        varchar enrollment_status
+        bigint created_by FK
+        timestamp created_at
+    }
+    GUARDIAN {
+        bigint id PK
+        bigint child_id FK
+        varchar name
+        varchar relationship
+        varchar contact_number
+        boolean is_primary
+    }
+    HEALTH_RECORD {
+        bigint id PK
+        bigint child_id FK
+        date measurement_date
+        decimal weight_kg
+        decimal height_cm
+        varchar nutritional_status
+        varchar remarks
+        bigint recorded_by FK
+        timestamp created_at
+    }
+    ATTENDANCE {
+        bigint id PK
+        bigint child_id FK
+        date date
+        varchar status
+        time time_in
+        time time_out
+        bigint recorded_by FK
+        timestamp created_at
+    }
+
+    USER       ||--o{ CHILD         : "created_by"
+    USER       ||--o{ HEALTH_RECORD : "recorded_by"
+    USER       ||--o{ ATTENDANCE    : "recorded_by"
+    CHILD      ||--o{ GUARDIAN      : "has"
+    CHILD      ||--o{ HEALTH_RECORD : "has"
+    CHILD      ||--o{ ATTENDANCE    : "has"
+```
+
+*Figure 6.2 – Entity Relationship Diagram (implementation-aligned). `IMMUNIZATION_RECORD` and `REPORT` entities removed (neither exists). `GUARDIAN` added as a real table with no REST endpoint yet. No `USER.username`, no `CHILD.updated_at`. `ATTENDANCE` carries a `unique(child_id, date)` constraint not expressible in the ER notation above.*
+
+### 6.3 Activity Diagram – Recording Health Data
+
+```mermaid
+flowchart TD
+    subgraph Client["Daycare Worker (Client / React)"]
+        A1([Log in to system]) --> A2[Select child & open health form]
+        A2 --> A3[Enter weight, height, remarks]
+        A3 --> A4["Compute nutritional status client-side<br/>(WHO weight-for-age table)"]
+        A4 --> A5[Render color-coded health alert badge]
+        A5 --> A6[Submit POST /api/health-records]
+        A9[Display confirmation] --> A10([End])
+    end
+    subgraph Backend["Backend (Spring Boot)"]
+        B1["Validate JWT (JwtAuthFilter) — no role check"]
+        B2["HealthRecordService.create(req)"]
+        B3["Return 200 OK + recordId"]
+    end
+    subgraph Database["Database (PostgreSQL)"]
+        D1[INSERT INTO health_record]
+    end
+
+    A6 --> B1 --> B2 --> D1 --> B3 --> A9
+```
+
+*Figure 6.3 – Activity Diagram: Recording Health Data (implementation-aligned). The validation branch from v2.0 is removed (no server-side field validation exists); nutritional status computation and the health alert badge are both client-side steps (highlighted), not backend logic.*
+
+### 6.4 Sequence Diagram – Recording Health Data
+
+```mermaid
+sequenceDiagram
+    actor DW as Daycare Worker
+    participant UI as Health Form (React UI)
+    participant Ctrl as HealthRecord Controller
+    participant Svc as HealthRecord Service
+    participant DB as DB
+
+    DW->>UI: 1. enter weight, height, remarks
+    UI->>UI: 2. compute nutritional status<br/>(client-side, WHO weight-for-age table)
+    UI->>Ctrl: 3. POST /api/health-records<br/>{childId, weight, height, nutritionalStatus, remarks}
+    Ctrl->>Ctrl: 4. validate JWT (JwtAuthFilter)<br/>— no role / no field validation
+    Ctrl->>Svc: 5. create(req, userId)
+    Svc->>DB: 6. INSERT INTO health_record (...)
+    DB-->>Svc: recordId
+    Svc-->>Ctrl: HealthRecord entity
+    Ctrl-->>UI: 7. 200 OK { recordId, nutritionalStatus }
+    UI-->>DW: 8. display confirmation / health alert badge
+```
+
+*Figure 6.4 – Sequence Diagram: Recording Health Data (implementation-aligned). No role check at the controller (JWT validity only), no backend nutritional-status computation, and no invalid-input alt branch — all removed from the v2.0 version since none exist in code.*
 
 ---
 
@@ -238,18 +361,18 @@ The diagrams below describe what should be **redrawn** to match the implementati
 
 | Req. ID | Requirement | System Function | Status |
 |---|---|---|---|
-| FR-001–FR-002 | Email/password login, JWT issuance | Authenticate User | Implemented |
-| FR-004–FR-006 | Admin-only user management; bcrypt storage | Manage User Accounts | Implemented (narrow RBAC scope) |
-| FR-007–FR-009 | Create/edit child profile | Enroll / Update Child | Implemented |
-| FR-010 | Client-side search/filter | Search Records | Implemented (frontend only) |
-| FR-013 | Enrollment dashboard | View Dashboard | Implemented |
-| FR-014–FR-016, FR-018 | Health record CRUD, client-side classification, history view | Record Health Data | Implemented |
-| FR-020–FR-022 | Mark and validate daily attendance | Track Attendance | Implemented |
-| FR-023–FR-024 | Generate and export monthly report (CSV) | Generate Reports | Implemented |
-| FR-011, FR-012, FR-017, FR-019 | Archiving, duplicate prevention, milestones, server-side validation | — | **Not Implemented** |
-| FR-020–FR-021 (v2.0 numbering) | Immunization tracking | — | **Removed from scope** |
-| BR-09 | One attendance entry per child per day | Track Attendance | Implemented (DB constraint + upsert) |
-| BR-01, BR-02, BR-05, BR-07 | Duplicate prevention, age eligibility, archiving, login lockout | — | **Not Implemented** |
+| FR-001–FR-002 | Email/password login, JWT issuance | Authenticate User | **Implemented** |
+| FR-004–FR-006 | Admin-only user management; bcrypt storage | Manage User Accounts | **Implemented (narrow RBAC)** |
+| FR-007–FR-009 | Create/edit child profile | Enroll/Update Child | **Implemented** |
+| FR-010 | Client-side search/filter | Search Records | **Implemented (frontend only)** |
+| FR-013 | Enrollment dashboard | View Dashboard | **Implemented** |
+| FR-014–FR-016, FR-018 | Health record CRUD, classification, history | Record Health Data | **Implemented** |
+| FR-020–FR-022 | Mark/validate daily attendance | Track Attendance | **Implemented** |
+| FR-023–FR-024 | Generate/export monthly report (CSV) | Generate Reports | **Implemented** |
+| FR-011, FR-012, FR-017, FR-019 | Archiving, duplicate prevention, milestones, validation | — | **Not Implemented** |
+| Immunization (v2.0 FR-020–021) | Immunization tracking | — | **Removed from scope** |
+| BR-09 | One attendance entry per child per day | Track Attendance | **Implemented** |
+| BR-01, BR-02, BR-05, BR-07 | Duplicate prevention, age eligibility, archiving, lockout | — | **Not Implemented** |
 
 ---
 
@@ -259,7 +382,7 @@ The diagrams below describe what should be **redrawn** to match the implementati
 |---|---|---|
 | 1.0 | June 22, 2026 | Initial SRS with narrative requirements and placeholder UML sections. |
 | 2.0 | June 29, 2026 | Added Immunization Tracking, Report Generation, Business Rules, Compatibility NFRs, traceability table. Renumbered FR/NFR schemes. |
-| **2.1** | **June 30, 2026** | **Implementation-aligned revision.** Audited every functional and non-functional requirement against the actual Spring Boot/React codebase. Corrected: role model (Staff/Teacher/Admin replaces the three-tier Daycare Worker/Barangay Admin/System Admin scheme, with RBAC enforced only on user-management endpoints); login field (email, not username); JWT expiry (7 days, not 24 hours); report export format (CSV, not PDF/XLSX); nutritional classification location (client-side, weight+age+sex only, no height, no "Obese" category); CORS policy (`*`, not credentialed). Removed as not implemented: account lockout, immunization tracking, duplicate-enrollment prevention, age-eligibility validation, child archiving/reactivation workflow, structured developmental milestones, server-side health-record validation, failed-login audit logging, Filipino/English bilingual UI, versioned API routes. Added: Guardian entity (schema-only, no endpoint yet), self-service Admin role assignment at registration (flagged as a limitation). Updated all four UML diagrams' required changes in Section 6 (redraw guidance, since this revision does not include new diagram images).
+| 2.0 | June 30, 2026 | **Implementation-aligned revision.** Audited every requirement against the actual Spring Boot/React codebase. Corrected role model, login field, JWT expiry, report export format, nutritional classification location/inputs, CORS policy. Removed as not implemented: account lockout, immunization tracking, duplicate-enrollment prevention, age-eligibility validation, child archiving, structured milestones, server-side health-record validation, failed-login audit logging, bilingual UI, versioned API routes. Added: Guardian entity (schema-only), self-service Admin role assignment caveat. Redrew all four UML diagrams in Section 6 to match the implementation. |
 
 ---
 
@@ -270,3 +393,4 @@ The diagrams below describe what should be **redrawn** to match the implementati
 Name: Christian Earl V. Mahumot
 Course & Section: IT342-G01 – Systems Integration and Architecture 1
 Date: June 30, 2026
+Signature: ____________________________
