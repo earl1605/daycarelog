@@ -8,7 +8,7 @@ A daycare management system for tracking children, attendance, health records, a
 daycarelog/
 ├── backend/   Spring Boot 3 REST API (Java 17, Maven)
 ├── web/       React + Vite web client
-├── mobile/    Mobile client (planned)
+├── mobile/    Android client (Kotlin + Jetpack Compose)
 └── docs/      Project documentation (SRS, etc.)
 ```
 
@@ -80,7 +80,21 @@ Outputs a production build to `web/dist`.
 
 ## Mobile (`/mobile`)
 
-Not yet implemented.
+Android client (Kotlin + Jetpack Compose, Material 3), consuming the same backend API as the web client.
+
+### Requirements
+- Android Studio (or the Gradle wrapper + Android SDK)
+
+### Run
+
+Open `mobile/` in Android Studio and run the `app` configuration, or from the command line:
+
+```bash
+cd mobile
+./gradlew assembleDebug
+```
+
+The app points at the production backend URL by default (see `mobile/app/src/main/java/com/daycarelog/app/data/api/RetrofitClient.kt`).
 
 ## Docs (`/docs`)
 
