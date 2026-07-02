@@ -5,10 +5,25 @@ import toast from 'react-hot-toast'
 const STATUS_OPTS   = ['present', 'absent', 'late', 'excused']
 const STATUS_COLORS = { present: 'bg-green-100 text-green-700', absent: 'bg-red-100 text-red-700', late: 'bg-yellow-100 text-yellow-700', excused: 'bg-blue-100 text-blue-700' }
 
+// The daycare only operates Monday-Friday. If "today" is a weekend, default to the
+// most recent Friday rather than opening on a date that can never have attendance.
+function nearestWeekday(d) {
+  const day = d.getDay()
+  const result = new Date(d)
+  if (day === 0) result.setDate(result.getDate() - 2) // Sunday -> Friday
+  else if (day === 6) result.setDate(result.getDate() - 1) // Saturday -> Friday
+  return result
+}
+
+function isWeekend(dateStr) {
+  const day = new Date(dateStr + 'T00:00:00').getDay()
+  return day === 0 || day === 6
+}
+
 export default function Attendance() {
   const [children, setChildren] = useState([])
   const [records,  setRecords]  = useState({})
-  const [date,     setDate]     = useState(new Date().toISOString().split('T')[0])
+  const [date,     setDate]     = useState(() => nearestWeekday(new Date()).toISOString().split('T')[0])
   const [saving,   setSaving]   = useState(false)
   const [loading,  setLoading]  = useState(true)
 
@@ -29,6 +44,15 @@ export default function Attendance() {
     setRecords(prev => ({ ...prev, [childId]: { ...(prev[childId] ?? {}), status } }))
   }
 
+  function handleDateChange(e) {
+    const value = e.target.value
+    if (isWeekend(value)) {
+      toast.error('Attendance can only be recorded for Monday–Friday')
+      return
+    }
+    setDate(value)
+  }
+
   async function saveAll() {
     setSaving(true)
     try {
@@ -46,7 +70,7 @@ export default function Attendance() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-[22px] font-bold text-gray-900">Attendance</h1>
-        <input type="date" value={date} onChange={e => setDate(e.target.value)}
+        <input type="date" value={date} onChange={handleDateChange}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
       </div>
 

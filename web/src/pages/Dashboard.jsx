@@ -25,11 +25,18 @@ export default function Dashboard() {
         setChildren(kids)
         setTodayAtt(att)
 
-        const days = Array.from({ length: 7 }, (_, i) => {
-          const d = new Date(); d.setDate(d.getDate() - (6 - i))
+        // This week's Monday through Friday only — the daycare doesn't operate on
+        // weekends, so the chart never shows Sat/Sun columns regardless of what day
+        // today happens to be.
+        const now = new Date()
+        const mondayOffset = now.getDay() === 0 ? 6 : now.getDay() - 1
+        const monday = new Date(now)
+        monday.setDate(now.getDate() - mondayOffset)
+        const days = Array.from({ length: 5 }, (_, i) => {
+          const d = new Date(monday); d.setDate(monday.getDate() + i)
           return d.toISOString().split('T')[0]
         })
-        const start = days[0], end = days[6]
+        const start = days[0], end = days[4]
         const weekAtt = await api.attendance.getRange(start, end)
         setChartData(days.map(date => ({
           date: new Date(date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'short' }),

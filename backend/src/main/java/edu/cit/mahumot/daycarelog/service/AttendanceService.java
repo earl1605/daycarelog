@@ -5,6 +5,7 @@ import edu.cit.mahumot.daycarelog.model.Attendance;
 import edu.cit.mahumot.daycarelog.repository.AttendanceRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class AttendanceService {
     }
 
     public Attendance upsert(AttendanceRequest req, Long userId) {
+        validateWeekday(req.getDate());
         Attendance att = attendanceRepository.findByChildIdAndDate(req.getChildId(), req.getDate())
                 .orElse(Attendance.builder()
                         .childId(req.getChildId())
@@ -45,5 +47,16 @@ public class AttendanceService {
 
     public List<Attendance> bulkUpsert(List<AttendanceRequest> requests, Long userId) {
         return requests.stream().map(r -> upsert(r, userId)).toList();
+    }
+
+    // Daycare only operates Monday-Friday; reject weekend dates at the write path.
+    // Read endpoints (findByDate/findByChild/findByDateRange) are intentionally left
+    // unrestricted so any pre-existing data remains viewable.
+    private void validateWeekday(LocalDate date) {
+        if (date == null) throw new RuntimeException("Date is required");
+        DayOfWeek dow = date.getDayOfWeek();
+        if (dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY) {
+            throw new RuntimeException("Attendance cannot be recorded for a Saturday or Sunday (" + date + ")");
+        }
     }
 }
