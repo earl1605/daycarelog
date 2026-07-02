@@ -1,28 +1,36 @@
 package edu.cit.mahumot.daycarelog.service;
 
+import edu.cit.mahumot.daycarelog.dto.GuardianAccountResponse;
+import edu.cit.mahumot.daycarelog.dto.GuardianAccountResponse.ChildSummary;
 import edu.cit.mahumot.daycarelog.dto.GuardianRequest;
 import edu.cit.mahumot.daycarelog.model.Guardian;
 import edu.cit.mahumot.daycarelog.model.User;
+import edu.cit.mahumot.daycarelog.repository.ChildRepository;
 import edu.cit.mahumot.daycarelog.repository.GuardianRepository;
 import edu.cit.mahumot.daycarelog.repository.UserRepository;
 import edu.cit.mahumot.daycarelog.util.TempPasswordGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GuardianService {
 
     private final GuardianRepository guardianRepository;
     private final UserRepository userRepository;
+    private final ChildRepository childRepository;
     private final PasswordEncoder passwordEncoder;
 
     public GuardianService(GuardianRepository guardianRepository, UserRepository userRepository,
-                            PasswordEncoder passwordEncoder) {
+                            ChildRepository childRepository, PasswordEncoder passwordEncoder) {
         this.guardianRepository = guardianRepository;
         this.userRepository = userRepository;
+        this.childRepository = childRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -48,6 +56,8 @@ public class GuardianService {
         guardian.setName(req.getName());
         guardian.setRelationship(req.getRelationship());
         guardian.setContactNumber(req.getContactNumber());
+        guardian.setAddress(req.getAddress());
+        guardian.setEmail(req.getEmail());
         guardian.setIsPrimary(req.getIsPrimary() != null && req.getIsPrimary());
 
         String tempPassword = null;
@@ -87,6 +97,42 @@ public class GuardianService {
             throw new RuntimeException("Guardian does not belong to this child");
         }
         guardianRepository.deleteById(guardianId);
+    }
+
+    // One row per parent-portal-account, aggregating every child that account is
+    // linked to. Contact-only guardians (no userId) don't have a login and are
+    // managed from the child's own edit page instead, so they're excluded here.
+    public List<GuardianAccountResponse> findAllAccounts() {
+        List<Guardian> rows = guardianRepository.findByUserIdIsNotNull();
+        return rows.stream()
+                .collect(Collectors.groupingBy(Guardian::getUserId))
+                .entrySet().stream()
+                .map(entry -> {
+                    Long userId = entry.getKey();
+                    List<Guardian> forUser = entry.getValue();
+                    Guardian first = forUser.get(0);
+                    User user = userRepository.findById(userId).orElse(null);
+                    List<ChildSummary> children = forUser.stream()
+                            .map(Guardian::getChildId)
+                            .map(childRepository::findById)
+                            .flatMap(Optional::stream)
+                            .map(c -> new ChildSummary(c.getId(), c.getFirstName(), c.getLastName()))
+                            .toList();
+                    return new GuardianAccountResponse(
+                            userId, first.getName(),
+                            user != null ? user.getEmail() : first.getEmail(),
+                            first.getContactNumber(), first.getAddress(), first.getRelationship(),
+                            children);
+                })
+                .sorted(Comparator.comparing(GuardianAccountResponse::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .toList();
+    }
+
+    // Unlinks every child from this parent account (does not delete the User login
+    // itself - that's a separate, more destructive action available on the Users page).
+    @Transactional
+    public void removeAllForUser(Long userId) {
+        guardianRepository.deleteByUserId(userId);
     }
 
     public record CreatedGuardian(Guardian guardian, String tempPassword) {}

@@ -236,4 +236,45 @@ class ParentRoleAccessControlTest {
                 url("/api/children/mine"), HttpMethod.GET, new HttpEntity<>(authHeaders(parentToken)), List.class);
         assertThat(mine.getBody()).hasSize(2);
     }
+
+    @Test
+    void guardianAccountDirectoryGroupsByPersonAndRemoveUnlinksWithoutDeletingTheLogin() {
+        String adminToken = loginAndGetToken(ADMIN_EMAIL, PASSWORD);
+        HttpHeaders headers = authHeaders(adminToken);
+        Long parentUserId = userRepository.findByEmail(PARENT_EMAIL).orElseThrow().getId();
+
+        // link the same parent (from setUp, already linked to childA) to childB too
+        Map<String, Object> body = Map.of(
+                "name", "Test Parent", "relationship", "Mother", "createPortalAccount", true,
+                "email", PARENT_EMAIL);
+        restTemplate.exchange(url("/api/children/" + childBId + "/guardians"), HttpMethod.POST,
+                new HttpEntity<>(body, headers), String.class);
+
+        ResponseEntity<List> list = restTemplate.exchange(
+                url("/api/guardians"), HttpMethod.GET, new HttpEntity<>(headers), List.class);
+        assertThat(list.getStatusCode().is2xxSuccessful()).isTrue();
+        // one row per PERSON, not one row per child link
+        assertThat(list.getBody()).hasSize(1);
+        Map<String, Object> account = (Map<String, Object>) list.getBody().get(0);
+        assertThat(account.get("email")).isEqualTo(PARENT_EMAIL);
+        assertThat((List) account.get("children")).hasSize(2);
+
+        ResponseEntity<String> remove = restTemplate.exchange(
+                url("/api/guardians/user/" + parentUserId), HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+        assertThat(remove.getStatusCode().is2xxSuccessful()).isTrue();
+
+        ResponseEntity<List> afterRemove = restTemplate.exchange(
+                url("/api/guardians"), HttpMethod.GET, new HttpEntity<>(headers), List.class);
+        assertThat(afterRemove.getBody()).isEmpty();
+        // the login itself must survive removal - only the child links are gone
+        assertThat(userRepository.findById(parentUserId)).isPresent();
+        assertThat(guardianRepository.findByUserId(parentUserId)).isEmpty();
+    }
+
+    @Test
+    void parentIsBlockedFromTheGuardianAccountDirectory() {
+        String token = loginAndGetToken(PARENT_EMAIL, PASSWORD);
+        assertThat(restTemplate.exchange(url("/api/guardians"), HttpMethod.GET, new HttpEntity<>(authHeaders(token)), String.class)
+                .getStatusCode().value()).isEqualTo(403);
+    }
 }

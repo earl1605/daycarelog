@@ -57,6 +57,7 @@ public class SecurityConfig {
 
                 // Guardian contact/portal-account management is Admin/Staff only.
                 .requestMatchers("/api/children/*/guardians", "/api/children/*/guardians/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/api/guardians", "/api/guardians/**").hasAnyRole("ADMIN", "STAFF")
 
                 // Everything else under children/attendance/health-records - writes and
                 // the "all records"/"any child by ID" views - is Admin/Staff only. Parent

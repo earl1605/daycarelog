@@ -17,6 +17,7 @@ import HealthRecords      from './pages/HealthRecords'
 import HealthForm         from './pages/HealthForm'
 import Reports            from './pages/Reports'
 import Users              from './pages/Users'
+import Guardians          from './pages/Guardians'
 import Settings           from './pages/Settings'
 import ParentDashboard     from './pages/ParentDashboard'
 import ParentAttendance    from './pages/ParentAttendance'
@@ -41,6 +42,7 @@ export default function App() {
               <Route path="/attendance"        element={<Attendance />} />
               <Route path="/health"            element={<HealthRecords />} />
               <Route path="/health/new"        element={<HealthForm />} />
+              <Route path="/guardians"         element={<Guardians />} />
               <Route path="/reports"           element={<Reports />} />
               <Route element={<AdminRoute />}>
                 <Route path="/users"           element={<Users />} />

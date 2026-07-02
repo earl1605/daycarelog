@@ -21,6 +21,10 @@ public class Guardian {
     @Column(name = "contact_number")
     private String contactNumber;
 
+    private String email;
+
+    private String address;
+
     @Column(name = "is_primary")
     private Boolean isPrimary = false;
 
@@ -48,6 +52,12 @@ public class Guardian {
 
     public String getContactNumber() { return contactNumber; }
     public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
     public Boolean getIsPrimary() { return isPrimary; }
     public void setIsPrimary(Boolean isPrimary) { this.isPrimary = isPrimary; }

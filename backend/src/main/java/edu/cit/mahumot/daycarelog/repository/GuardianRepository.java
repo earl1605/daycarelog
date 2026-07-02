@@ -7,5 +7,7 @@ import java.util.List;
 public interface GuardianRepository extends JpaRepository<Guardian, Long> {
     List<Guardian> findByChildId(Long childId);
     List<Guardian> findByUserId(Long userId);
+    List<Guardian> findByUserIdIsNotNull();
     boolean existsByChildIdAndUserId(Long childId, Long userId);
+    void deleteByUserId(Long userId);
 }

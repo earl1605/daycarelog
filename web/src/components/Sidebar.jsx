@@ -14,6 +14,7 @@ const groups = [
       { to: '/children',   icon: UsersIcon,     label: 'Children' },
       { to: '/attendance', icon: ClipboardIcon, label: 'Attendance' },
       { to: '/health',     icon: HeartIcon,     label: 'Health Records' },
+      { to: '/guardians',  icon: UsersIcon,     label: 'Guardians' },
     ],
   },
   {

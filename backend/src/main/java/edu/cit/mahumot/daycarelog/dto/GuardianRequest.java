@@ -4,6 +4,7 @@ public class GuardianRequest {
     private String name;
     private String relationship;
     private String contactNumber;
+    private String address;
     private Boolean isPrimary;
 
     // Optional: when true, also creates a "parent" portal User account (using
@@ -19,6 +20,9 @@ public class GuardianRequest {
 
     public String getContactNumber() { return contactNumber; }
     public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
     public Boolean getIsPrimary() { return isPrimary; }
     public void setIsPrimary(Boolean isPrimary) { this.isPrimary = isPrimary; }

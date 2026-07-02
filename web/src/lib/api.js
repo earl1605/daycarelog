@@ -54,9 +54,11 @@ export const api = {
     create:     data       => request('/health-records', { method: 'POST', body: JSON.stringify(data) }),
   },
   guardians: {
-    list:   childId          => request(`/children/${childId}/guardians`),
-    add:    (childId, data)  => request(`/children/${childId}/guardians`, { method: 'POST', body: JSON.stringify(data) }),
-    delete: (childId, id)    => request(`/children/${childId}/guardians/${id}`, { method: 'DELETE' }),
+    list:          childId          => request(`/children/${childId}/guardians`),
+    add:           (childId, data)  => request(`/children/${childId}/guardians`, { method: 'POST', body: JSON.stringify(data) }),
+    delete:        (childId, id)    => request(`/children/${childId}/guardians/${id}`, { method: 'DELETE' }),
+    listAccounts:  ()               => request('/guardians'),
+    removeAccount: userId           => request(`/guardians/user/${userId}`, { method: 'DELETE' }),
   },
   reports: {
     monthly: month => request(`/reports/monthly?month=${month}`),
