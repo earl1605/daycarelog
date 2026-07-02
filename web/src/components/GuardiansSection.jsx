@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { PlusIcon, TrashIcon, KeyIcon, CopyIcon } from './icons'
+import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
 const emptyForm = { name: '', relationship: '', contactNumber: '', isPrimary: false, createPortalAccount: false, email: '' }
@@ -19,6 +20,7 @@ export default function GuardiansSection({ childId }) {
   }, [childId])
 
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })) }
+  function setCapitalized(field) { return handleCapitalizedNameInput(v => setForm(f => ({ ...f, [field]: v }))) }
 
   async function handleAdd(e) {
     e.preventDefault()
@@ -105,12 +107,12 @@ export default function GuardiansSection({ childId }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Name *</label>
-              <input type="text" value={form.name} onChange={set('name')} placeholder="Maria Dela Cruz"
+              <input type="text" value={form.name} onChange={setCapitalized('name')} placeholder="Maria Dela Cruz" autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Relationship</label>
-              <input type="text" value={form.relationship} onChange={set('relationship')} placeholder="Mother"
+              <input type="text" value={form.relationship} onChange={setCapitalized('relationship')} placeholder="Mother" autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { PlusIcon, KeyIcon, PauseIcon, PlayIcon, TrashIcon, AlertTriangleIcon, CopyIcon } from '../components/icons'
+import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
 const ROLES = ['admin', 'staff']
@@ -216,16 +217,16 @@ export default function Users() {
             <h2 className="text-[17px] font-bold text-gray-900">Add staff account</h2>
             <p className="text-xs text-gray-500 -mt-2">A temporary password will be generated and shown once.</p>
             <div className="grid grid-cols-2 gap-2">
-              <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
-                placeholder="First name" className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
-              <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
-                placeholder="Last name" className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
+              <input value={form.firstName} onChange={handleCapitalizedNameInput(v => setForm(f => ({ ...f, firstName: v })))}
+                placeholder="First name" className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" autoCapitalize="words" />
+              <input value={form.lastName} onChange={handleCapitalizedNameInput(v => setForm(f => ({ ...f, lastName: v })))}
+                placeholder="Last name" className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" autoCapitalize="words" />
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <input value={form.middleName} onChange={e => setForm(f => ({ ...f, middleName: e.target.value }))}
-                placeholder="Middle name" className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
-              <input value={form.suffix} onChange={e => setForm(f => ({ ...f, suffix: e.target.value }))}
-                placeholder="Suffix" className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
+              <input value={form.middleName} onChange={handleCapitalizedNameInput(v => setForm(f => ({ ...f, middleName: v })))}
+                placeholder="Middle name" className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" autoCapitalize="words" />
+              <input value={form.suffix} onChange={handleCapitalizedNameInput(v => setForm(f => ({ ...f, suffix: v })))}
+                placeholder="Suffix" className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" autoCapitalize="words" />
             </div>
             <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
               placeholder="Email address" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />

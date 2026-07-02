@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import GuardiansSection from '../components/GuardiansSection'
 import { toLocalDateString } from '../utils/date'
+import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
 const empty = { firstName: '', lastName: '', dateOfBirth: '', sex: '', address: '', enrollmentDate: toLocalDateString(), enrollmentStatus: 'active' }
@@ -21,6 +22,7 @@ export default function ChildForm() {
   }, [id, isEdit])
 
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.value })) }
+  function setCapitalized(field) { return handleCapitalizedNameInput(v => setForm(f => ({ ...f, [field]: v }))) }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -43,6 +45,14 @@ export default function ChildForm() {
     </div>
   )
 
+  const nameField = (label, key, opts = {}) => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <input type="text" value={form[key]} onChange={setCapitalized(key)} autoCapitalize="words"
+        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" {...opts} />
+    </div>
+  )
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
@@ -52,8 +62,8 @@ export default function ChildForm() {
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {field('First Name *', 'firstName', 'text', { placeholder: 'Juan' })}
-          {field('Last Name *',  'lastName',  'text', { placeholder: 'Dela Cruz' })}
+          {nameField('First Name *', 'firstName', { placeholder: 'Juan' })}
+          {nameField('Last Name *',  'lastName',  { placeholder: 'Dela Cruz' })}
           {field('Date of Birth *', 'dateOfBirth', 'date')}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Sex *</label>
@@ -63,7 +73,7 @@ export default function ChildForm() {
               <option>Female</option>
             </select>
           </div>
-          {field('Address', 'address', 'text', { placeholder: 'Barangay, City' })}
+          {nameField('Address', 'address', { placeholder: 'Barangay, City' })}
           {field('Enrollment Date', 'enrollmentDate', 'date')}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>

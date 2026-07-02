@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { toLocalDateString } from '../utils/date'
+import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import { PlusIcon, UsersIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
@@ -28,6 +29,7 @@ export default function Children() {
   }
 
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.value })) }
+  function setCapitalized(field) { return handleCapitalizedNameInput(v => setForm(f => ({ ...f, [field]: v }))) }
 
   async function handleCreate(e) {
     e.preventDefault()
@@ -87,12 +89,12 @@ export default function Children() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">First name:</label>
-              <input type="text" value={form.firstName} onChange={set('firstName')} placeholder="Juan"
+              <input type="text" value={form.firstName} onChange={setCapitalized('firstName')} placeholder="Juan" autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Last name:</label>
-              <input type="text" value={form.lastName} onChange={set('lastName')} placeholder="Dela Cruz"
+              <input type="text" value={form.lastName} onChange={setCapitalized('lastName')} placeholder="Dela Cruz" autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>

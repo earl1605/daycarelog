@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { PlusIcon, KeyIcon, CopyIcon, TrashIcon, AlertTriangleIcon, UsersIcon } from '../components/icons'
+import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
 const emptyForm = {
@@ -33,6 +34,7 @@ export default function Guardians() {
   }
 
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.value })) }
+  function setCapitalized(field) { return handleCapitalizedNameInput(v => setForm(f => ({ ...f, [field]: v }))) }
 
   async function handleCreate(e) {
     e.preventDefault()
@@ -105,22 +107,22 @@ export default function Guardians() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">First name:</label>
-              <input type="text" value={form.firstName} onChange={set('firstName')}
+              <input type="text" value={form.firstName} onChange={setCapitalized('firstName')} autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Last name:</label>
-              <input type="text" value={form.lastName} onChange={set('lastName')}
+              <input type="text" value={form.lastName} onChange={setCapitalized('lastName')} autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle name:</label>
-              <input type="text" value={form.middleName} onChange={set('middleName')}
+              <input type="text" value={form.middleName} onChange={setCapitalized('middleName')} autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Suffix:</label>
-              <input type="text" value={form.suffix} onChange={set('suffix')}
+              <input type="text" value={form.suffix} onChange={setCapitalized('suffix')} autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
@@ -135,12 +137,12 @@ export default function Guardians() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Address:</label>
-              <input type="text" value={form.address} onChange={set('address')}
+              <input type="text" value={form.address} onChange={setCapitalized('address')} autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Relationship to child:</label>
-              <input type="text" value={form.relationship} onChange={set('relationship')} placeholder="Mother, Father, Guardian…"
+              <input type="text" value={form.relationship} onChange={setCapitalized('relationship')} placeholder="Mother, Father, Guardian…" autoCapitalize="words"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
