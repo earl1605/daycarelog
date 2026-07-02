@@ -100,7 +100,7 @@ export default function Dashboard() {
         <h2 className="text-[17px] font-bold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { to: '/children/new', icon: PlusIcon,      label: 'Add Child' },
+            { to: '/children',     icon: PlusIcon,      label: 'Add Child' },
             { to: '/attendance',   icon: ClipboardIcon, label: 'Take Attendance' },
             { to: '/health/new',   icon: HeartIcon,     label: 'Health Record' },
             { to: '/reports',      icon: BarChartIcon,  label: 'View Reports' },

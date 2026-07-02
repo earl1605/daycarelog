@@ -36,7 +36,6 @@ export default function App() {
             <Route element={<StaffRoute />}>
               <Route path="/dashboard"         element={<Dashboard />} />
               <Route path="/children"          element={<Children />} />
-              <Route path="/children/new"      element={<ChildForm />} />
               <Route path="/children/:id"      element={<ChildDetail />} />
               <Route path="/children/:id/edit" element={<ChildForm />} />
               <Route path="/attendance"        element={<Attendance />} />
