@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -22,9 +23,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -45,12 +51,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.Child
+import com.daycarelog.app.util.formatAge
 import kotlinx.coroutines.launch
 
 private val Green500 = Color(0xFF16a34a)
 private val Green100 = Color(0xFFdcfce7)
 private val Green900 = Color(0xFF052e16)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChildrenScreen(
     onOpenDrawer: () -> Unit,
@@ -62,6 +70,8 @@ fun ChildrenScreen(
     var loading      by remember { mutableStateOf(true) }
     var error        by remember { mutableStateOf<String?>(null) }
     var search       by remember { mutableStateOf("") }
+    var statusFilter by remember { mutableStateOf("all") }
+    var filterExpanded by remember { mutableStateOf(false) }
     var deleteTarget by remember { mutableStateOf<Child?>(null) }
 
     fun refresh() {
@@ -134,16 +144,40 @@ fun ChildrenScreen(
                 }
             }
 
-            OutlinedTextField(
-                value = search,
-                onValueChange = { search = it },
-                placeholder = { Text("Search by name…") },
-                singleLine = true,
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp),
-                shape = RoundedCornerShape(12.dp),
-            )
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = { search = it },
+                    placeholder = { Text("Search by name…") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                )
+                ExposedDropdownMenuBox(
+                    expanded = filterExpanded,
+                    onExpandedChange = { filterExpanded = it },
+                    modifier = Modifier.width(130.dp),
+                ) {
+                    OutlinedTextField(
+                        value = when (statusFilter) { "active" -> "Active"; "inactive" -> "Inactive"; else -> "All status" },
+                        onValueChange = {}, readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(filterExpanded) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                    )
+                    ExposedDropdownMenu(expanded = filterExpanded, onDismissRequest = { filterExpanded = false }) {
+                        listOf("all" to "All status", "active" to "Active", "inactive" to "Inactive").forEach { (value, label) ->
+                            DropdownMenuItem(text = { Text(label) }, onClick = { statusFilter = value; filterExpanded = false })
+                        }
+                    }
+                }
+            }
 
             when {
                 loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -155,12 +189,15 @@ fun ChildrenScreen(
                 else -> {
                     val filtered = children.filter {
                         val q = search.trim().lowercase()
-                        q.isBlank() || "${it.firstName} ${it.lastName}".lowercase().contains(q)
+                        val matchesSearch = q.isBlank() || "${it.firstName} ${it.lastName}".lowercase().contains(q)
+                        val matchesStatus = statusFilter == "all" || it.enrollmentStatus == statusFilter
+                        matchesSearch && matchesStatus
                     }
                     if (filtered.isEmpty()) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
-                                if (search.isBlank()) "No children found.\nTap + to add one."
+                                if (search.isBlank() && statusFilter == "all") "No children found.\nTap + to add one."
+                                else if (search.isBlank()) "No results for this filter"
                                 else "No results for \"$search\"",
                                 color = Color.Gray,
                             )
@@ -223,7 +260,7 @@ private fun ChildCard(child: Child, onEdit: () -> Unit, onDelete: () -> Unit) {
                     color = Color(0xFF111827),
                 )
                 Text(
-                    "DOB: ${child.dateOfBirth}  •  ${child.sex.replaceFirstChar { it.uppercase() }}",
+                    "${child.sex.replaceFirstChar { it.uppercase() }} · ${formatAge(child.dateOfBirth)}  •  DOB: ${child.dateOfBirth}",
                     fontSize = 12.sp,
                     color = Color.Gray,
                 )

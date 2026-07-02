@@ -48,6 +48,8 @@ import com.daycarelog.app.data.model.HealthRecord
 import com.daycarelog.app.ui.common.DateField
 import com.daycarelog.app.ui.common.digitsToIso
 import com.daycarelog.app.ui.common.isoToDigits
+import com.daycarelog.app.util.classifyNutritionalStatus
+import com.daycarelog.app.util.nutritionalStatusColors
 import kotlinx.coroutines.launch
 
 private val Green500 = Color(0xFF16a34a)
@@ -67,6 +69,13 @@ fun HealthFormScreen(onBack: () -> Unit) {
     var loading        by remember { mutableStateOf(true) }
     var saving         by remember { mutableStateOf(false) }
     var error          by remember { mutableStateOf<String?>(null) }
+
+    val preview = remember(selectedChild, weight) {
+        val child = selectedChild
+        val w = weight.toDoubleOrNull()
+        if (child == null || w == null) null
+        else classifyNutritionalStatus(w, child.dateOfBirth, child.sex)
+    }
 
     LaunchedEffect(Unit) {
         try {
@@ -168,6 +177,19 @@ fun HealthFormScreen(onBack: () -> Unit) {
                     )
                 }
 
+                preview?.let {
+                    val (bg, fg) = nutritionalStatusColors(it.color)
+                    Surface(color = bg, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            "Nutritional Status: ${it.label}",
+                            color = fg,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        )
+                    }
+                }
+
                 OutlinedTextField(
                     value = remarks, onValueChange = { remarks = it },
                     label = { Text("Remarks / Notes") },
@@ -191,11 +213,12 @@ fun HealthFormScreen(onBack: () -> Unit) {
                                     try {
                                         RetrofitClient.api.createHealthRecord(
                                             HealthRecord(
-                                                childId  = selectedChild!!.id!!,
-                                                date     = digitsToIso(dateDigits),
-                                                weightKg = weight.toDoubleOrNull(),
-                                                heightCm = height.toDoubleOrNull(),
-                                                remarks  = remarks.trim().ifBlank { null },
+                                                childId          = selectedChild!!.id!!,
+                                                measurementDate  = digitsToIso(dateDigits),
+                                                weightKg         = weight.toDoubleOrNull(),
+                                                heightCm         = height.toDoubleOrNull(),
+                                                remarks          = remarks.trim().ifBlank { null },
+                                                nutritionalStatus = preview?.label,
                                             )
                                         )
                                         onBack()

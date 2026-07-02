@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.Child
 import com.daycarelog.app.data.model.HealthRecord
+import com.daycarelog.app.util.classifyNutritionalStatus
+import com.daycarelog.app.util.nutritionalStatusColors
 import kotlinx.coroutines.launch
 
 private val Green500 = Color(0xFF16a34a)
@@ -205,10 +207,23 @@ private fun HealthRecordCard(record: HealthRecord, child: Child?, onDelete: () -
                     fontSize = 14.sp,
                     color = Color(0xFF111827),
                 )
-                Text("Date: ${record.date}", fontSize = 12.sp, color = Color.Gray)
+                Text("Date: ${record.measurementDate}", fontSize = 12.sp, color = Color.Gray)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     record.weightKg?.let { Text("⚖️ ${it}kg", fontSize = 12.sp, color = Color(0xFF374151)) }
                     record.heightCm?.let { Text("📏 ${it}cm", fontSize = 12.sp, color = Color(0xFF374151)) }
+                }
+                if (child != null) {
+                    val status = classifyNutritionalStatus(record.weightKg, child.dateOfBirth, child.sex)
+                    val (bg, fg) = nutritionalStatusColors(status.color)
+                    Surface(color = bg, shape = RoundedCornerShape(20.dp)) {
+                        Text(
+                            status.label,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = fg,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        )
+                    }
                 }
                 if (!record.remarks.isNullOrBlank()) {
                     Surface(color = Color(0xFFf9fafb), shape = RoundedCornerShape(8.dp)) {

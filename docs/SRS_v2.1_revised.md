@@ -4,8 +4,8 @@ SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
 
 Project Title: DaycareLog: A Digital Management System for Barangay Daycare Centers
 Prepared By: Christian Earl V. Mahumot
-Date of Submission: June 30, 2026
-Version: 2.0 (Implementation-Aligned Revision — supersedes Version 1.0, June 29, 2026)
+Date of Submission: June 30, 2026 (mobile-parity revision: July 2, 2026)
+Version: 2.1 (Mobile-Parity Revision — supersedes Version 2.0, June 30, 2026)
 
 > "I certify that this finalized SRS and UML models are my own individual work. I understand that copied, duplicated, or AI-generated submissions without proper understanding and revision may be subject to verification and possible deductions."
 > — Christian Earl V. Mahumot
@@ -18,7 +18,7 @@ Version: 2.0 (Implementation-Aligned Revision — supersedes Version 1.0, June 2
 DaycareLog: A Digital Management System for Barangay Daycare Centers
 
 ### 1.2 System Overview
-DaycareLog is a web-based information system that digitizes the core recordkeeping operations of a single barangay daycare center: child enrollment, guardian information, health monitoring, and daily attendance. The system follows a client–server architecture composed of a Spring Boot 3 REST API backend secured with custom JSON Web Token (JWT) authentication, a PostgreSQL relational database (hosted on Supabase), and a React (Vite + Tailwind CSS) single-page web client deployed on Vercel, with the backend deployed on Railway. A companion Android application (Kotlin) is planned as a future phase of the project and is not part of the current implementation.
+DaycareLog is an information system that digitizes the core recordkeeping operations of a single barangay daycare center: child enrollment, guardian information, health monitoring, and daily attendance. The system follows a client–server architecture composed of a Spring Boot 3 REST API backend secured with custom JSON Web Token (JWT) authentication, a PostgreSQL relational database (hosted on Supabase), and two clients that share the same backend: a React (Vite + Tailwind CSS) single-page web client deployed on Vercel, and a native Android application (Kotlin + Jetpack Compose, Material 3). The backend is deployed on Railway. The Android client was originally scoped as a future phase; it is now implemented, though with a narrower feature set than the web client in a few areas — see 1.6 for the specific gaps.
 
 ### 1.3 Purpose of the System
 The purpose of DaycareLog is to replace manual, paper-based enrollment and health recordkeeping at the barangay daycare level with a centralized digital system. The system is intended to reduce data-entry errors and record loss and give Daycare Staff real-time visibility into each child's enrollment and health status.
@@ -32,16 +32,17 @@ Barangay daycare centers currently rely on manual, paper-based processes to mana
 ### 1.6 Scope of the System
 The current, implemented scope of DaycareLog covers:
 
-1. **Child Enrollment Management** – registration, profile editing, and hard deletion of child records; client-side search by name and filter by enrollment status.
+1. **Child Enrollment Management** – registration, profile editing, and hard deletion of child records; client-side search by name and filter by enrollment status (web and mobile), with computed/displayed current age (web and mobile).
 2. **Guardian Records** – a `guardians` database table exists (name, relationship, contact number, primary flag, linked to a child), but is **not yet exposed through any REST endpoint or UI screen**. It is schema-only at this stage.
-3. **Health Record Monitoring** – weight/height capture per child, with nutritional status classification computed **client-side in the React app** from a simplified WHO weight-for-age median table (weight and age/sex only — height is not currently factored into the classification despite being captured).
-4. **Attendance Tracking** – daily attendance recording (Present/Absent) with time-in/time-out per child, with one entry enforced per child per day at the database level.
-5. **Report Generation** – a monthly enrollment/attendance/nutritional-status summary, exportable as **CSV** (not PDF/Excel).
-6. **User Account & Role Management** – custom JWT-based authentication with three roles (Admin, Teacher, Staff). Role-based access control is currently enforced **only** on the user-management endpoints (`/api/users/**`); all other endpoints (children, health records, attendance, reports) are open to any authenticated user regardless of role.
+3. **Health Record Monitoring** – weight/height capture per child, with nutritional status classification computed **client-side, independently in both the React web app and the Android app**, from the same simplified WHO weight-for-age median table (weight and age/sex only — height is not currently factored into the classification despite being captured). Both clients compute a live preview while filling out the form and send the resulting label to the backend to persist alongside the record.
+4. **Attendance Tracking** – daily attendance recording per child (web and mobile both expose Present/Absent/Late/Excused, broader than the original Present/Absent scope), with one entry enforced per child per day at the database level. Neither client's UI currently captures time-in/time-out, despite the `attendance` table having columns for both — see FR-021.
+5. **Report Generation** – a monthly enrollment/attendance/nutritional-status summary (web and mobile). CSV export of the report is **web-only**; the Android client has no export/share action on this screen.
+6. **User Account & Role Management** – custom JWT-based authentication with three roles (Admin, Teacher, Staff). Role-based access control is currently enforced **only** on the user-management endpoints (`/api/users/**`); all other endpoints (children, health records, attendance, reports) are open to any authenticated user regardless of role. Admin user management (view, change role, deactivate/reactivate, reset password, delete) has full parity between web and mobile. Self-registration differs by client: web lets the registrant pick any role including Admin (see 1.7's known-limitation note); the Android app has no role picker and always registers as Staff.
+7. **Android Client** – Kotlin + Jetpack Compose (Material 3), consuming the same REST API as the web client, so data is shared in real time across both. Fixed brand color scheme (no dynamic/wallpaper theming). Covers dashboard, children, attendance, health records, reports, and admin user management; does not cover CSV export or admin self-registration (see above).
 
-**Not implemented in the current version** (removed from scope vs. v2.0, candidates for future work): Immunization tracking, PDF/Excel report export, account lockout after failed logins, child-profile archiving with reactivation workflow, duplicate-enrollment prevention, age-eligibility validation at enrollment, developmental milestone logging as a distinct record type, and the Android companion app.
+**Not implemented in the current version** (removed from scope vs. v2.0, candidates for future work): Immunization tracking, PDF/Excel report export, account lockout after failed logins, child-profile archiving with reactivation workflow, duplicate-enrollment prevention, age-eligibility validation at enrollment, developmental milestone logging as a distinct record type, and time-in/time-out capture in either client's UI.
 
-The system serves one barangay daycare center per deployment instance and is accessible via web browser.
+The system serves one barangay daycare center per deployment instance and is accessible via web browser or the Android app.
 
 ### 1.7 Assumptions and Constraints
 
@@ -55,9 +56,9 @@ The system serves one barangay daycare center per deployment instance and is acc
 - The system requires an active internet connection for the web client; offline operation is not supported.
 - The backend connects to Supabase PostgreSQL.
 - Authentication is implemented as a custom JWT scheme (HS256), with a token validity of **7 days** (`app.jwt.expiration=604800000` ms), not 24 hours.
-- Any authenticated user who self-registers can select **any** role at sign-up, including Admin — there is currently no approval workflow gating Admin self-assignment. This is a known limitation, not an intentional design.
+- Any authenticated user who self-registers **on the web client** can select **any** role at sign-up, including Admin — there is currently no approval workflow gating Admin self-assignment. This is a known limitation, not an intentional design. The Android client does not have this exposure since its registration screen has no role picker at all (always Staff).
 - The system does not integrate with external government databases (PSA, DSWD).
-- A mobile companion application is planned but not yet built.
+- The Android client requires an active internet connection to the same backend as the web client; it has no offline mode either.
 
 ---
 
@@ -97,16 +98,16 @@ Each entry is annotated **Implemented**, **Partially Implemented**, or **Not Imp
 | FR-004 | RBAC enforced only on `/api/users/**` (Admin-only); all other endpoints require auth but not a specific role. | **Partially Implemented** |
 | FR-005 | Admin can view all users, change any user's role, and permanently delete a user. | **Implemented** |
 | FR-006 | Passwords stored via bcrypt; never logged in plaintext. | **Implemented** |
-| FR-006a | *(New)* Any self-registering user may pick their own role, including Admin, with no approval step. | **Implemented (flagged limitation)** |
+| FR-006a | *(New)* Any self-registering user may pick their own role, including Admin, with no approval step. | **Implemented on web (flagged limitation); not present on Android** — mobile's register screen has no role field and always creates a Staff account |
 
 ### 3.2 Child Enrollment Management
 
 | ID | Requirement | Status |
 |---|---|---|
 | FR-007 | Create a child profile: first/last name, DOB, sex, address, enrollment date. | **Implemented** |
-| FR-008 | Compute/display current age (frontend only). | **Implemented (client-side)** |
+| FR-008 | Compute/display current age (frontend only). | **Implemented (client-side, web and mobile)** |
 | FR-009 | Edit any field of a child profile. No `updated_at` timestamp is tracked. | **Implemented (partial claim removed)** |
-| FR-010 | Client-side search by name and filter by status (no backend search, no age/sex filter). | **Implemented (client-side only)** |
+| FR-010 | Client-side search by name and filter by status (no backend search, no age/sex filter). | **Implemented (client-side only, web and mobile)** |
 | FR-011 | Archive child profile workflow with reactivation. | **Not Implemented as distinct workflow** |
 | FR-012 | Prevent duplicate enrollment (name + DOB). | **Not Implemented** |
 | FR-013 | Dashboard: active children, present today, total enrolled, attendance rate. | **Implemented** |
@@ -116,8 +117,8 @@ Each entry is annotated **Implemented**, **Partially Implemented**, or **Not Imp
 | ID | Requirement | Status |
 |---|---|---|
 | FR-014 | Create health record: date, weight (kg), height (cm), free-text remarks. | **Implemented** |
-| FR-015 | Classify nutritional status (Normal/Underweight/Severely Underweight/Overweight) client-side, weight+age+sex only — no height factor, no "Obese" category. | **Implemented (corrected description)** |
-| FR-016 | Color-coded health status indicator reflecting latest classification. | **Implemented** |
+| FR-015 | Classify nutritional status (Normal/Underweight/Severely Underweight/Overweight) client-side, weight+age+sex only — no height factor, no "Obese" category. | **Implemented independently on web and mobile**, from the same WHO median table (ported value-for-value between the two clients) |
+| FR-016 | Color-coded health status indicator reflecting latest classification. | **Implemented (web and mobile)** |
 | FR-017 | Structured developmental milestone log (description + date) as its own record type. | **Not Implemented (only a generic remarks field exists)** |
 | FR-018 | Chronological health history per child. | **Implemented** |
 | FR-019 | Reject missing/out-of-range weight/height with field-specific errors. | **Not Implemented** |
@@ -130,8 +131,8 @@ Each entry is annotated **Implemented**, **Partially Implemented**, or **Not Imp
 
 | ID | Requirement | Status |
 |---|---|---|
-| FR-020 | Mark daily attendance as Present or Absent. | **Implemented** |
-| FR-021 | Record time-in/time-out per attendance entry. | **Implemented** |
+| FR-020 | Mark daily attendance as Present or Absent. | **Implemented (web and mobile both expose a broader Present/Absent/Late/Excused set)** |
+| FR-021 | Record time-in/time-out per attendance entry. | **Partially Implemented** — the `attendance` table has `time_in`/`time_out` columns and the backend model supports them, but neither the web nor the Android attendance screen has an input for either field, so they are never populated today |
 | FR-022 | One attendance entry per child per day, enforced via DB unique constraint + upsert. | **Implemented (matches v2.0 exactly)** |
 
 ### 3.6 Report Generation
@@ -139,7 +140,7 @@ Each entry is annotated **Implemented**, **Partially Implemented**, or **Not Imp
 | ID | Requirement | Status |
 |---|---|---|
 | FR-023 | Any authenticated user (not Admin-restricted) generates a monthly summary: enrollment, present/absent counts, school days, attendance rate, nutritional-status breakdown. | **Implemented** |
-| FR-024 | Export report as CSV (corrected from "PDF or Excel"). | **Implemented** |
+| FR-024 | Export report as CSV (corrected from "PDF or Excel"). | **Implemented on web; not implemented on Android** — the mobile Reports screen displays the same monthly summary data but has no export/share action |
 | FR-025 | Include immunization completion rate in the report. | **Not Implemented (no immunization data exists)** |
 
 ---
@@ -171,7 +172,7 @@ Unchanged narrative from v2.0 — uptime/backup targets are infrastructure-level
 | ID | Requirement | Status |
 |---|---|---|
 | NFR-007 | Web client targets current Chrome/Firefox/Edge, desktop and mobile. | **Implemented/targeted** |
-| NFR-008 | Android companion app, Android 10.0+. | **Not built — planned future work** |
+| NFR-008 | Android companion app, Android 10.0+ (`minSdk 24` in the actual Gradle config, i.e. Android 7.0+ — corrected from the original "10.0+" target). | **Implemented** — Kotlin + Jetpack Compose (Material 3) native client, consuming the same backend API as the web client; see 1.6 for the specific feature gaps versus web (no CSV export, no admin self-registration) |
 | NFR-009 | API exposes endpoints under `/api/**` (no version segment — corrected from "`/api/v1/...`"). | **Implemented, unversioned** |
 
 ### 4.6 Maintainability
@@ -194,7 +195,7 @@ Unchanged narrative from v2.0 — uptime/backup targets are infrastructure-level
 | BR-05 | Archived profiles blocked from new records until reactivated. | **Not Enforced** |
 | BR-06 | Each user has exactly one role (Staff/Teacher/Admin). | **Implemented** |
 | BR-07 | 15-minute lockout after 3 failed logins. | **Not Implemented** |
-| BR-08 | Only Admin can view/modify/delete user accounts. (Caveat: any user can self-assign Admin at registration.) | **Implemented (with caveat)** |
+| BR-08 | Only Admin can view/modify/delete user accounts. (Caveat: any user can self-assign Admin at registration on web; the Android client has no self-registration role picker.) | **Implemented (with web-only caveat)** |
 | BR-09 | One attendance entry per child per day; resubmission updates the existing entry. | **Implemented** |
 | BR-10 | Reports exclude archived children unless explicitly included. | **N/A — archiving isn't a real workflow; report includes all "active" children** |
 
@@ -366,9 +367,12 @@ sequenceDiagram
 | FR-007–FR-009 | Create/edit child profile | Enroll/Update Child | **Implemented** |
 | FR-010 | Client-side search/filter | Search Records | **Implemented (frontend only)** |
 | FR-013 | Enrollment dashboard | View Dashboard | **Implemented** |
-| FR-014–FR-016, FR-018 | Health record CRUD, classification, history | Record Health Data | **Implemented** |
-| FR-020–FR-022 | Mark/validate daily attendance | Track Attendance | **Implemented** |
-| FR-023–FR-024 | Generate/export monthly report (CSV) | Generate Reports | **Implemented** |
+| FR-014–FR-016, FR-018 | Health record CRUD, classification, history | Record Health Data | **Implemented (web and mobile)** |
+| FR-020, FR-022 | Mark/validate daily attendance | Track Attendance | **Implemented** |
+| FR-021 | Time-in/time-out capture | Track Attendance | **Partially Implemented — DB/backend only, no UI on either client** |
+| FR-023 | Generate monthly report | Generate Reports | **Implemented (web and mobile)** |
+| FR-024 | Export report as CSV | Generate Reports | **Implemented (web only)** |
+| FR-006a | Self-registration role picker | Authenticate User | **Implemented (web only)** |
 | FR-011, FR-012, FR-017, FR-019 | Archiving, duplicate prevention, milestones, validation | — | **Not Implemented** |
 | Immunization (v2.0 FR-020–021) | Immunization tracking | — | **Removed from scope** |
 | BR-09 | One attendance entry per child per day | Track Attendance | **Implemented** |
@@ -383,6 +387,7 @@ sequenceDiagram
 | 1.0 | June 22, 2026 | Initial SRS with narrative requirements and placeholder UML sections. |
 | 2.0 | June 29, 2026 | Added Immunization Tracking, Report Generation, Business Rules, Compatibility NFRs, traceability table. Renumbered FR/NFR schemes. |
 | 2.0 | June 30, 2026 | **Implementation-aligned revision.** Audited every requirement against the actual Spring Boot/React codebase. Corrected role model, login field, JWT expiry, report export format, nutritional classification location/inputs, CORS policy. Removed as not implemented: account lockout, immunization tracking, duplicate-enrollment prevention, age-eligibility validation, child archiving, structured milestones, server-side health-record validation, failed-login audit logging, bilingual UI, versioned API routes. Added: Guardian entity (schema-only), self-service Admin role assignment caveat. Redrew all four UML diagrams in Section 6 to match the implementation. |
+| 2.1 | July 2, 2026 | **Mobile-parity revision.** The Android (Kotlin + Jetpack Compose) client, previously scoped as future work, is now implemented and audited alongside web. Updated NFR-008 from "not built" to Implemented. Brought mobile to feature parity with web on age display (FR-008), status filtering (FR-010), and client-side nutritional status classification (FR-015/FR-016) — the WHO median table was ported value-for-value from the web app and verified to match exactly; a pre-existing mobile bug where health records were serialized with the wrong JSON field name for the measurement date (silently dropping it) was fixed in the same pass. Documented two intentional client differences that were *not* changed: CSV export (FR-024) remains web-only, and self-registration's role picker (FR-006a) remains web-only — the Android client always registers as Staff, which is arguably the safer default given FR-006a is itself flagged as an unintentional limitation. Corrected FR-021 from "Implemented" to "Partially Implemented": the `attendance` table has time-in/time-out columns, but neither client's UI actually captures them, on any version of the app to date — this was already inaccurate in v2.0 and predates the mobile client. Advanced the version number to 2.1 to resolve the prior revision-history rows both being labeled "2.0" for two distinct dates. |
 
 ---
 
