@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
+import { UsersIcon, KeyIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
 function resizeImage(file, maxSize = 256) {
@@ -76,88 +77,106 @@ export default function Settings() {
   }
 
   const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  const disabledClass = "w-full border border-gray-100 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-gray-400"
   const btnClass = "bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
+  const roleColors = { admin: 'bg-violet-50 text-violet-700', staff: 'bg-blue-50 text-blue-700', parent: 'bg-amber-50 text-amber-700' }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-extrabold text-gray-900 mb-6">Settings</h1>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-[22px] font-bold text-gray-900">Settings</h1>
+        <p className="text-gray-500 text-sm mt-1">Manage your profile, photo, and account security.</p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
         {/* Profile */}
-        <form onSubmit={saveName} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4 transition-all duration-200 hover:shadow-md hover:border-primary-200">
-          <h2 className="font-bold text-gray-900">Profile</h2>
-
-          {/* Avatar inside profile card */}
-          <div className="flex flex-col items-center py-2">
+        <div className="bg-white rounded-xl border border-gray-200/70 overflow-hidden">
+          {/* Identity header */}
+          <div className="p-6 flex items-center gap-4 bg-[#FAFAFA] border-b border-gray-200/70">
             <button type="button" onClick={() => fileRef.current.click()}
-              className="relative group w-20 h-20 rounded-full overflow-hidden ring-4 ring-primary-100 hover:ring-primary-300 transition-all">
+              className="relative group w-16 h-16 rounded-full overflow-hidden ring-4 ring-white shadow-sm shrink-0">
               {preview
                 ? <img src={preview} alt="Profile" className="w-full h-full object-cover" />
-                : <div className="w-full h-full bg-primary-100 text-primary-700 flex items-center justify-center text-2xl font-bold">{initial}</div>
+                : <div className="w-full h-full bg-primary-100 text-primary-700 flex items-center justify-center text-xl font-bold">{initial}</div>
               }
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="text-white text-xs font-medium">Change</span>
+                <span className="text-white text-[10px] font-medium">Change</span>
               </div>
             </button>
-            <p className="text-xs text-gray-400 mt-1.5">Click to change photo</p>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-gray-900 truncate">{[firstName, middleName, lastName, suffix].filter(Boolean).join(' ') || 'User'}</p>
+              <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+              <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${roleColors[user?.role] ?? 'bg-gray-100 text-gray-600'}`}>
+                {user?.role ?? '—'}
+              </span>
+            </div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <form onSubmit={saveName} className="p-6 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name <span className="text-red-400">*</span></label>
-              <input type="text" value={firstName} onChange={handleCapitalizedNameInput(setFirstName)} className={inputClass} placeholder="Juan" autoCapitalize="words" />
+              <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
+                <UsersIcon width={16} height={16} className="text-primary-600" /> Personal Information
+              </h2>
+              <p className="text-xs text-gray-400 mt-1">Click your photo above to change it.</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name <span className="text-red-400">*</span></label>
-              <input type="text" value={lastName} onChange={handleCapitalizedNameInput(setLastName)} className={inputClass} placeholder="dela Cruz" autoCapitalize="words" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle Name</label>
-              <input type="text" value={middleName} onChange={handleCapitalizedNameInput(setMiddleName)} className={inputClass} placeholder="Santos" autoCapitalize="words" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Suffix</label>
-              <select value={suffix} onChange={e => setSuffix(e.target.value)} className={inputClass}>
-                <option value="">— None —</option>
-                <option value="Jr.">Jr.</option>
-                <option value="Sr.">Sr.</option>
-                <option value="II">II</option>
-                <option value="III">III</option>
-                <option value="IV">IV</option>
-                <option value="V">V</option>
-              </select>
-            </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-            <input type="email" value={user?.email ?? ''} disabled className={disabledClass} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Role</label>
-            <input type="text" value={user?.role ?? ''} disabled className={`${disabledClass} capitalize`} />
-          </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name <span className="text-red-400">*</span></label>
+                <input type="text" value={firstName} onChange={handleCapitalizedNameInput(setFirstName)} className={inputClass} placeholder="Juan" autoCapitalize="words" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name <span className="text-red-400">*</span></label>
+                <input type="text" value={lastName} onChange={handleCapitalizedNameInput(setLastName)} className={inputClass} placeholder="dela Cruz" autoCapitalize="words" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle Name</label>
+                <input type="text" value={middleName} onChange={handleCapitalizedNameInput(setMiddleName)} className={inputClass} placeholder="Santos" autoCapitalize="words" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Suffix</label>
+                <select value={suffix} onChange={e => setSuffix(e.target.value)} className={`${inputClass} bg-white`}>
+                  <option value="">— None —</option>
+                  <option value="Jr.">Jr.</option>
+                  <option value="Sr.">Sr.</option>
+                  <option value="II">II</option>
+                  <option value="III">III</option>
+                  <option value="IV">IV</option>
+                  <option value="V">V</option>
+                </select>
+              </div>
+            </div>
 
-          <button type="submit" disabled={saving} className={btnClass}>
-            {saving ? 'Saving…' : 'Save Changes'}
-          </button>
-        </form>
+            <div className="flex justify-end pt-1">
+              <button type="submit" disabled={saving} className={btnClass}>
+                {saving ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
 
         {/* Change Password */}
-        <form onSubmit={savePassword} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4 transition-all duration-200 hover:shadow-md hover:border-primary-200">
-          <h2 className="font-bold text-gray-900">Change Password</h2>
+        <form onSubmit={savePassword} className="bg-white rounded-xl border border-gray-200/70 p-6 space-y-5">
+          <div>
+            <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
+              <KeyIcon width={16} height={16} className="text-primary-600" /> Change Password
+            </h2>
+            <p className="text-xs text-gray-400 mt-1">Use at least 6 characters. You'll need your current password to confirm.</p>
+          </div>
+
           {[['Current Password', curPass, setCurPass], ['New Password', newPass, setNewPass], ['Confirm New Password', confirm, setConfirm]].map(([label, val, setter]) => (
             <div key={label}>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
               <input type="password" value={val} onChange={e => setter(e.target.value)} className={inputClass} />
             </div>
           ))}
-          <button type="submit" disabled={saving} className={btnClass}>
-            {saving ? 'Saving…' : 'Update Password'}
-          </button>
+
+          <div className="flex justify-end pt-1">
+            <button type="submit" disabled={saving} className={btnClass}>
+              {saving ? 'Saving…' : 'Update Password'}
+            </button>
+          </div>
         </form>
 
       </div>
