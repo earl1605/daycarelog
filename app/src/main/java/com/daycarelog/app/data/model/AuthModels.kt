@@ -29,7 +29,13 @@ data class AuthResponse(
     val user: UserDto,
 )
 
-data class UpdateProfileRequest(val profilePhoto: String)
+data class UpdateProfileRequest(
+    val profilePhoto: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val middleName: String? = null,
+    val suffix: String? = null,
+)
 
 // Admin-only user management
 data class CreateUserRequest(

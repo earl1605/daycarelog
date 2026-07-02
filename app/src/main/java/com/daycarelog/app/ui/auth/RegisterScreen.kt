@@ -14,12 +14,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.daycarelog.app.util.capitalizeWords
+import com.daycarelog.app.util.capitalizedNameFieldValue
 
 private val suffixes = listOf("", "Jr.", "Sr.", "II", "III", "IV", "V")
 
@@ -33,9 +37,9 @@ fun RegisterScreen(
     val context = LocalContext.current
     val state by authViewModel.state.collectAsState()
 
-    var firstName  by remember { mutableStateOf("") }
-    var lastName   by remember { mutableStateOf("") }
-    var middleName by remember { mutableStateOf("") }
+    var firstName  by remember { mutableStateOf(TextFieldValue("")) }
+    var lastName   by remember { mutableStateOf(TextFieldValue("")) }
+    var middleName by remember { mutableStateOf(TextFieldValue("")) }
     var suffix     by remember { mutableStateOf("") }
     var email      by remember { mutableStateOf("") }
     var password   by remember { mutableStateOf("") }
@@ -86,23 +90,26 @@ fun RegisterScreen(
                     // Name row 1
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
-                            value = firstName, onValueChange = { firstName = it },
+                            value = firstName, onValueChange = { firstName = capitalizedNameFieldValue(it) },
                             label = { Text("First Name *", fontSize = 12.sp) },
                             singleLine = true, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                         )
                         OutlinedTextField(
-                            value = lastName, onValueChange = { lastName = it },
+                            value = lastName, onValueChange = { lastName = capitalizedNameFieldValue(it) },
                             label = { Text("Last Name *", fontSize = 12.sp) },
                             singleLine = true, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                         )
                     }
 
                     // Name row 2
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
-                            value = middleName, onValueChange = { middleName = it },
+                            value = middleName, onValueChange = { middleName = capitalizedNameFieldValue(it) },
                             label = { Text("Middle Name", fontSize = 12.sp) },
                             singleLine = true, modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                         )
                         ExposedDropdownMenuBox(
                             expanded = suffixExpanded,
@@ -160,11 +167,17 @@ fun RegisterScreen(
                     Button(
                         onClick = {
                             when {
-                                firstName.isBlank() || lastName.isBlank() -> errorMsg = "First and last name are required"
+                                firstName.text.isBlank() || lastName.text.isBlank() -> errorMsg = "First and last name are required"
                                 email.isBlank()     -> errorMsg = "Email is required"
                                 password.length < 6 -> errorMsg = "Password must be at least 6 characters"
                                 password != confirm -> errorMsg = "Passwords do not match"
-                                else -> authViewModel.register(context, email.trim(), password, firstName.trim(), lastName.trim(), middleName.trim(), suffix)
+                                else -> authViewModel.register(
+                                    context, email.trim(), password,
+                                    capitalizeWords(firstName.text.trim()),
+                                    capitalizeWords(lastName.text.trim()),
+                                    capitalizeWords(middleName.text.trim()),
+                                    suffix,
+                                )
                             }
                         },
                         enabled = state !is AuthState.Loading,

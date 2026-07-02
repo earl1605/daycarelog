@@ -26,6 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,6 +34,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,6 +53,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
@@ -58,6 +62,8 @@ import com.daycarelog.app.data.api.TokenProvider
 import com.daycarelog.app.data.model.UpdateProfileRequest
 import com.daycarelog.app.data.model.UserDto
 import com.daycarelog.app.data.preferences.TokenDataStore
+import com.daycarelog.app.util.capitalizeWords
+import com.daycarelog.app.util.capitalizedNameFieldValue
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -101,9 +107,50 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
     var photoUploading    by remember { mutableStateOf(false) }
     var photoError        by remember { mutableStateOf<String?>(null) }
 
+    var editFirstName  by remember { mutableStateOf<TextFieldValue?>(null) }
+    var editLastName   by remember { mutableStateOf<TextFieldValue?>(null) }
+    var editMiddleName by remember { mutableStateOf<TextFieldValue?>(null) }
+    var nameSaving      by remember { mutableStateOf(false) }
+    var nameSaveError   by remember { mutableStateOf<String?>(null) }
+    var nameSaved        by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         val json = TokenDataStore.getUser(ctx).first()
-        if (json != null) user = Gson().fromJson(json, UserDto::class.java)
+        if (json != null) {
+            val loaded = Gson().fromJson(json, UserDto::class.java)
+            user = loaded
+            editFirstName  = TextFieldValue(loaded.firstName ?: "")
+            editLastName   = TextFieldValue(loaded.lastName ?: "")
+            editMiddleName = TextFieldValue(loaded.middleName ?: "")
+        }
+    }
+
+    fun saveName() {
+        val u = user ?: return
+        scope.launch {
+            nameSaving = true
+            nameSaveError = null
+            nameSaved = false
+            try {
+                val updated = RetrofitClient.api.updateProfile(
+                    u.id,
+                    UpdateProfileRequest(
+                        firstName  = capitalizeWords((editFirstName?.text ?: "").trim()),
+                        lastName   = capitalizeWords((editLastName?.text ?: "").trim()),
+                        middleName = capitalizeWords((editMiddleName?.text ?: "").trim()),
+                    ),
+                )
+                TokenDataStore.saveUser(ctx, Gson().toJson(updated))
+                user = updated
+                editFirstName  = TextFieldValue(updated.firstName ?: "")
+                editLastName   = TextFieldValue(updated.lastName ?: "")
+                editMiddleName = TextFieldValue(updated.middleName ?: "")
+                nameSaved = true
+            } catch (e: Exception) {
+                nameSaveError = "Save failed: ${e.message}"
+            }
+            nameSaving = false
+        }
     }
 
     val photoBitmap = remember(user?.profilePhoto) {
@@ -296,12 +343,60 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Account Details", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Green900)
-                    SettingRow("Email",      user?.email     ?: "—")
-                    SettingRow("First Name", user?.firstName ?: "—")
-                    SettingRow("Last Name",  user?.lastName  ?: "—")
-                    if (!user?.middleName.isNullOrBlank())
-                        SettingRow("Middle Name", user!!.middleName!!)
-                    SettingRow("Role", user?.role?.replaceFirstChar { it.uppercase() } ?: "—")
+                    SettingRow("Email", user?.email ?: "—")
+                    SettingRow("Role",  user?.role?.replaceFirstChar { it.uppercase() } ?: "—")
+
+                    Spacer(Modifier.height(2.dp))
+
+                    if (nameSaveError != null) {
+                        Surface(color = Color(0xFFfee2e2), shape = RoundedCornerShape(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            Text(nameSaveError!!, color = Color(0xFF991b1b), fontSize = 12.sp, modifier = Modifier.padding(10.dp))
+                        }
+                    }
+                    if (nameSaved) {
+                        Surface(color = Green100, shape = RoundedCornerShape(10.dp), modifier = Modifier.fillMaxWidth()) {
+                            Text("✓  Profile updated", color = Green700, fontSize = 12.sp, modifier = Modifier.padding(10.dp))
+                        }
+                    }
+
+                    OutlinedTextField(
+                        value = editFirstName ?: TextFieldValue(""),
+                        onValueChange = { editFirstName = capitalizedNameFieldValue(it); nameSaved = false },
+                        label = { Text("First Name", fontSize = 12.sp) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    )
+                    OutlinedTextField(
+                        value = editLastName ?: TextFieldValue(""),
+                        onValueChange = { editLastName = capitalizedNameFieldValue(it); nameSaved = false },
+                        label = { Text("Last Name", fontSize = 12.sp) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    )
+                    OutlinedTextField(
+                        value = editMiddleName ?: TextFieldValue(""),
+                        onValueChange = { editMiddleName = capitalizedNameFieldValue(it); nameSaved = false },
+                        label = { Text("Middle Name", fontSize = 12.sp) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    )
+
+                    Button(
+                        onClick = { saveName() },
+                        enabled = !nameSaving && !(editFirstName?.text ?: "").isBlank() && !(editLastName?.text ?: "").isBlank(),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Green500),
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        if (nameSaving) CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                        else Text("Save Changes", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                    }
                 }
             }
 

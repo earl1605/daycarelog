@@ -49,6 +49,9 @@ interface ApiService {
     @GET("attendance")
     suspend fun getAttendance(@Query("date") date: String): List<AttendanceRecord>
 
+    @GET("attendance/range")
+    suspend fun getAttendanceRange(@Query("start") start: String, @Query("end") end: String): List<AttendanceRecord>
+
     @POST("attendance/bulk")
     suspend fun saveAttendanceBulk(@Body records: List<AttendanceRecord>): List<AttendanceRecord>
 
