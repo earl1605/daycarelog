@@ -92,3 +92,29 @@ export function MenuIcon(props) {
     </svg>
   )
 }
+
+export function CheckIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m5 13 4.5 4.5L19 8" />
+    </svg>
+  )
+}
+
+export function CalendarIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+      <path d="M3.5 9.5h17" />
+      <path d="M8 3v4M16 3v4" />
+    </svg>
+  )
+}
+
+export function PlusIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
