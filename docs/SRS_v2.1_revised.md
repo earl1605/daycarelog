@@ -209,7 +209,7 @@ The four diagrams below are redrawn to reflect the actual implementation, replac
 
 ```mermaid
 flowchart LR
-    ActorUser(["Authenticated User<br/>(Staff / Teacher)"])
+    ActorUser(["Authenticated User - Staff or Teacher"])
     ActorAdmin(["Admin"])
 
     subgraph SYS["DaycareLog System"]
@@ -231,8 +231,8 @@ flowchart LR
     ActorUser --> UC5
     ActorUser --> UC7
     ActorUser --> UC8
-    UC5 -. "«include»" .-> UC6
-    ActorAdmin -. generalizes .-> ActorUser
+    UC5 -. "include" .-> UC6
+    ActorAdmin -. "generalizes" .-> ActorUser
     ActorAdmin --> UC9
 ```
 
@@ -310,20 +310,20 @@ erDiagram
 
 ```mermaid
 flowchart TD
-    subgraph Client["Daycare Worker (Client / React)"]
-        A1([Log in to system]) --> A2[Select child & open health form]
+    subgraph Client["Daycare Worker - Client, Web or Android"]
+        A1([Log in to system]) --> A2[Select child and open health form]
         A2 --> A3[Enter weight, height, remarks]
-        A3 --> A4["Compute nutritional status client-side<br/>(WHO weight-for-age table)"]
+        A3 --> A4[Compute nutritional status client-side from the WHO weight-for-age table]
         A4 --> A5[Render color-coded health alert badge]
-        A5 --> A6[Submit POST /api/health-records]
+        A5 --> A6[Submit POST to /api/health-records]
         A9[Display confirmation] --> A10([End])
     end
-    subgraph Backend["Backend (Spring Boot)"]
-        B1["Validate JWT (JwtAuthFilter) — no role check"]
-        B2["HealthRecordService.create(req)"]
-        B3["Return 200 OK + recordId"]
+    subgraph Backend["Backend - Spring Boot"]
+        B1[Validate JWT via JwtAuthFilter, no role check]
+        B2[HealthRecordService creates the record]
+        B3[Return 200 OK with recordId]
     end
-    subgraph Database["Database (PostgreSQL)"]
+    subgraph Database["Database - PostgreSQL"]
         D1[INSERT INTO health_record]
     end
 
@@ -337,21 +337,21 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     actor DW as Daycare Worker
-    participant UI as Health Form (React UI)
+    participant UI as Health Form UI, Web or Android
     participant Ctrl as HealthRecord Controller
     participant Svc as HealthRecord Service
     participant DB as DB
 
     DW->>UI: 1. enter weight, height, remarks
-    UI->>UI: 2. compute nutritional status<br/>(client-side, WHO weight-for-age table)
-    UI->>Ctrl: 3. POST /api/health-records<br/>{childId, weight, height, nutritionalStatus, remarks}
-    Ctrl->>Ctrl: 4. validate JWT (JwtAuthFilter)<br/>— no role / no field validation
-    Ctrl->>Svc: 5. create(req, userId)
-    Svc->>DB: 6. INSERT INTO health_record (...)
+    UI->>UI: 2. compute nutritional status client-side from WHO weight-for-age table
+    UI->>Ctrl: 3. POST /api/health-records with childId, weight, height, nutritionalStatus, remarks
+    Ctrl->>Ctrl: 4. validate JWT via JwtAuthFilter, no role or field validation
+    Ctrl->>Svc: 5. create request for userId
+    Svc->>DB: 6. INSERT INTO health_record
     DB-->>Svc: recordId
     Svc-->>Ctrl: HealthRecord entity
-    Ctrl-->>UI: 7. 200 OK { recordId, nutritionalStatus }
-    UI-->>DW: 8. display confirmation / health alert badge
+    Ctrl-->>UI: 7. 200 OK with recordId and nutritionalStatus
+    UI-->>DW: 8. display confirmation and health alert badge
 ```
 
 *Figure 6.4 – Sequence Diagram: Recording Health Data (implementation-aligned). No role check at the controller (JWT validity only), no backend nutritional-status computation, and no invalid-input alt branch — all removed from the v2.0 version since none exist in code.*
