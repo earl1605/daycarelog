@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { capitalizeFirstLetters } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
 function EyeIcon({ open }) {
@@ -32,6 +34,22 @@ export default function Register() {
   const [showPass,    setShowPass]    = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [formError,   setFormError]   = useState('')
+
+  // Capitalizes the first letter of each word segment as the user types,
+  // without disturbing the rest of what they typed, and keeps the cursor
+  // where it was (the transform is same-length, so the caret index is
+  // still valid after the re-render — flushSync just makes that render
+  // happen before we restore it, instead of racing it).
+  function handleNameInput(setter) {
+    return e => {
+      const el = e.target
+      const start = el.selectionStart
+      const end = el.selectionEnd
+      const transformed = capitalizeFirstLetters(el.value)
+      flushSync(() => setter(transformed))
+      el.setSelectionRange(start, end)
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -109,13 +127,13 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">First Name <span className="text-red-400">*</span></label>
-                <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
-                  placeholder="Juan" className={inputClass} autoComplete="given-name" />
+                <input type="text" value={firstName} onChange={handleNameInput(setFirstName)}
+                  placeholder="Juan" className={inputClass} autoComplete="given-name" autoCapitalize="words" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Last Name <span className="text-red-400">*</span></label>
-                <input type="text" value={lastName} onChange={e => setLastName(e.target.value)}
-                  placeholder="dela Cruz" className={inputClass} autoComplete="family-name" />
+                <input type="text" value={lastName} onChange={handleNameInput(setLastName)}
+                  placeholder="dela Cruz" className={inputClass} autoComplete="family-name" autoCapitalize="words" />
               </div>
             </div>
 
@@ -123,8 +141,8 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Middle Name</label>
-                <input type="text" value={middleName} onChange={e => setMiddleName(e.target.value)}
-                  placeholder="Santos" className={inputClass} autoComplete="additional-name" />
+                <input type="text" value={middleName} onChange={handleNameInput(setMiddleName)}
+                  placeholder="Santos" className={inputClass} autoComplete="additional-name" autoCapitalize="words" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Suffix</label>
