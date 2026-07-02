@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface GuardianRepository extends JpaRepository<Guardian, Long> {
     List<Guardian> findByChildId(Long childId);
+    List<Guardian> findByUserId(Long userId);
+    boolean existsByChildIdAndUserId(Long childId, Long userId);
 }

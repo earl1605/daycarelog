@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
+import GuardiansSection from '../components/GuardiansSection'
 import toast from 'react-hot-toast'
 
 const empty = { firstName: '', lastName: '', dateOfBirth: '', sex: '', address: '', enrollmentDate: new Date().toISOString().split('T')[0], enrollmentStatus: 'active' }
@@ -78,6 +79,8 @@ export default function ChildForm() {
           </button>
         </div>
       </form>
+
+      {isEdit && <GuardiansSection childId={id} />}
     </div>
   )
 }

@@ -4,19 +4,20 @@ import edu.cit.mahumot.daycarelog.dto.CreateUserRequest;
 import edu.cit.mahumot.daycarelog.dto.UpdateProfileRequest;
 import edu.cit.mahumot.daycarelog.model.User;
 import edu.cit.mahumot.daycarelog.repository.UserRepository;
+import edu.cit.mahumot.daycarelog.util.TempPasswordGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Set;
 
 @Service
 public class UserService {
 
+    // "parent" deliberately excluded: parent accounts are created only via
+    // GuardianService (tied to a specific child), never through this generic
+    // admin/staff creation or role-change path.
     private static final Set<String> ALLOWED_ROLES = Set.of("admin", "staff");
-    private static final String TEMP_PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -50,7 +51,7 @@ public class UserService {
         if (!ALLOWED_ROLES.contains(role)) {
             throw new RuntimeException("Role must be 'admin' or 'staff'");
         }
-        String tempPassword = generateTempPassword();
+        String tempPassword = TempPasswordGenerator.generate();
         User user = User.builder()
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(tempPassword))
@@ -82,18 +83,10 @@ public class UserService {
 
     public String resetPassword(Long targetId) {
         User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("User not found"));
-        String tempPassword = generateTempPassword();
+        String tempPassword = TempPasswordGenerator.generate();
         target.setPassword(passwordEncoder.encode(tempPassword));
         userRepository.save(target);
         return tempPassword;
-    }
-
-    private String generateTempPassword() {
-        StringBuilder sb = new StringBuilder(12);
-        for (int i = 0; i < 12; i++) {
-            sb.append(TEMP_PASSWORD_CHARS.charAt(RANDOM.nextInt(TEMP_PASSWORD_CHARS.length())));
-        }
-        return sb.toString();
     }
 
     public record CreatedUser(User user, String tempPassword) {}

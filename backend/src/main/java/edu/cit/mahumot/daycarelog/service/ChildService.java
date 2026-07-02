@@ -25,6 +25,10 @@ public class ChildService {
                 .orElseThrow(() -> new RuntimeException("Child not found"));
     }
 
+    public List<Child> findByIds(List<Long> ids) {
+        return childRepository.findAllById(ids);
+    }
+
     public Child create(ChildRequest req, Long userId) {
         Child child = Child.builder()
                 .firstName(req.getFirstName())

@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider }   from './contexts/AuthContext'
 import ProtectedRoute     from './components/ProtectedRoute'
 import AdminRoute         from './components/AdminRoute'
+import StaffRoute         from './components/StaffRoute'
+import ParentRoute        from './components/ParentRoute'
 import Layout             from './components/Layout'
 import Landing            from './pages/Landing'
 import Login              from './pages/Login'
@@ -16,6 +18,9 @@ import HealthForm         from './pages/HealthForm'
 import Reports            from './pages/Reports'
 import Users              from './pages/Users'
 import Settings           from './pages/Settings'
+import ParentDashboard     from './pages/ParentDashboard'
+import ParentAttendance    from './pages/ParentAttendance'
+import ParentHealthRecords from './pages/ParentHealthRecords'
 
 export default function App() {
   return (
@@ -27,18 +32,27 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
-            <Route path="/dashboard"         element={<Dashboard />} />
-            <Route path="/children"          element={<Children />} />
-            <Route path="/children/new"      element={<ChildForm />} />
-            <Route path="/children/:id"      element={<ChildDetail />} />
-            <Route path="/children/:id/edit" element={<ChildForm />} />
-            <Route path="/attendance"        element={<Attendance />} />
-            <Route path="/health"            element={<HealthRecords />} />
-            <Route path="/health/new"        element={<HealthForm />} />
-            <Route path="/reports"           element={<Reports />} />
-            <Route element={<AdminRoute />}>
-              <Route path="/users"           element={<Users />} />
+            <Route element={<StaffRoute />}>
+              <Route path="/dashboard"         element={<Dashboard />} />
+              <Route path="/children"          element={<Children />} />
+              <Route path="/children/new"      element={<ChildForm />} />
+              <Route path="/children/:id"      element={<ChildDetail />} />
+              <Route path="/children/:id/edit" element={<ChildForm />} />
+              <Route path="/attendance"        element={<Attendance />} />
+              <Route path="/health"            element={<HealthRecords />} />
+              <Route path="/health/new"        element={<HealthForm />} />
+              <Route path="/reports"           element={<Reports />} />
+              <Route element={<AdminRoute />}>
+                <Route path="/users"           element={<Users />} />
+              </Route>
             </Route>
+
+            <Route element={<ParentRoute />}>
+              <Route path="/parent/dashboard"  element={<ParentDashboard />} />
+              <Route path="/parent/attendance" element={<ParentAttendance />} />
+              <Route path="/parent/health"     element={<ParentHealthRecords />} />
+            </Route>
+
             <Route path="/settings"          element={<Settings />} />
           </Route>
         </Route>

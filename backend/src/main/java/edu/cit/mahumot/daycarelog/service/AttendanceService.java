@@ -30,6 +30,11 @@ public class AttendanceService {
         return attendanceRepository.findByDateBetween(start, end);
     }
 
+    public List<Attendance> findByChildIds(List<Long> childIds) {
+        if (childIds.isEmpty()) return List.of();
+        return attendanceRepository.findByChildIdInOrderByDateDesc(childIds);
+    }
+
     public Attendance upsert(AttendanceRequest req, Long userId) {
         validateWeekday(req.getDate());
         Attendance att = attendanceRepository.findByChildIdAndDate(req.getChildId(), req.getDate())

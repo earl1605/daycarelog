@@ -34,6 +34,7 @@ export const api = {
   },
   children: {
     list:   ()          => request('/children'),
+    mine:   ()          => request('/children/mine'),
     get:    id          => request(`/children/${id}`),
     create: data        => request('/children', { method: 'POST', body: JSON.stringify(data) }),
     update: (id, data)  => request(`/children/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
@@ -43,12 +44,19 @@ export const api = {
     getByDate:  date    => request(`/attendance?date=${date}`),
     getByChild: childId => request(`/attendance/child/${childId}`),
     getRange:   (s, e)  => request(`/attendance/range?start=${s}&end=${e}`),
+    mine:       ()      => request('/attendance/mine'),
     saveBulk:   records => request('/attendance/bulk', { method: 'POST', body: JSON.stringify(records) }),
   },
   health: {
     list:       ()         => request('/health-records'),
     getByChild: childId    => request(`/health-records/child/${childId}`),
+    mine:       ()         => request('/health-records/mine'),
     create:     data       => request('/health-records', { method: 'POST', body: JSON.stringify(data) }),
+  },
+  guardians: {
+    list:   childId          => request(`/children/${childId}/guardians`),
+    add:    (childId, data)  => request(`/children/${childId}/guardians`, { method: 'POST', body: JSON.stringify(data) }),
+    delete: (childId, id)    => request(`/children/${childId}/guardians/${id}`, { method: 'DELETE' }),
   },
   reports: {
     monthly: month => request(`/reports/monthly?month=${month}`),

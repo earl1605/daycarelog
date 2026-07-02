@@ -24,6 +24,11 @@ public class HealthRecordService {
         return healthRecordRepository.findByChildIdOrderByMeasurementDateDesc(childId);
     }
 
+    public List<HealthRecord> findByChildIds(List<Long> childIds) {
+        if (childIds.isEmpty()) return List.of();
+        return healthRecordRepository.findByChildIdInOrderByMeasurementDateDesc(childIds);
+    }
+
     public HealthRecord create(HealthRecordRequest req, Long userId) {
         HealthRecord record = HealthRecord.builder()
                 .childId(req.getChildId())

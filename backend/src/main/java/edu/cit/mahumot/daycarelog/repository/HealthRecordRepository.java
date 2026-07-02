@@ -9,4 +9,5 @@ public interface HealthRecordRepository extends JpaRepository<HealthRecord, Long
     List<HealthRecord> findAllByOrderByMeasurementDateDesc();
     List<HealthRecord> findByChildIdOrderByMeasurementDateDesc(Long childId);
     List<HealthRecord> findByMeasurementDateBetween(LocalDate start, LocalDate end);
+    List<HealthRecord> findByChildIdInOrderByMeasurementDateDesc(List<Long> childIds);
 }

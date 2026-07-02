@@ -4,6 +4,7 @@ import edu.cit.mahumot.daycarelog.dto.ChildRequest;
 import edu.cit.mahumot.daycarelog.model.Child;
 import edu.cit.mahumot.daycarelog.security.JwtUtil;
 import edu.cit.mahumot.daycarelog.service.ChildService;
+import edu.cit.mahumot.daycarelog.service.GuardianService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,16 +16,27 @@ import java.util.Map;
 public class ChildController {
 
     private final ChildService childService;
+    private final GuardianService guardianService;
     private final JwtUtil jwtUtil;
 
-    public ChildController(ChildService childService, JwtUtil jwtUtil) {
+    public ChildController(ChildService childService, GuardianService guardianService, JwtUtil jwtUtil) {
         this.childService = childService;
+        this.guardianService = guardianService;
         this.jwtUtil = jwtUtil;
     }
 
     @GetMapping
     public List<Child> getAll() {
         return childService.findAll();
+    }
+
+    // Parent-facing: resolves the caller's own linked children from the JWT rather
+    // than accepting a child ID, so there is no ID to tamper with.
+    @GetMapping("/mine")
+    public ResponseEntity<?> getMine(@RequestHeader("Authorization") String authHeader) {
+        Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+        List<Long> childIds = guardianService.findChildIdsForUser(userId);
+        return ResponseEntity.ok(childService.findByIds(childIds));
     }
 
     @GetMapping("/{id}")

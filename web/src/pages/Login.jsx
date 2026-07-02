@@ -17,14 +17,14 @@ export default function Login() {
     setFormError('')
     if (!email || !password) { setFormError('Please fill in all fields'); return }
     setLoading(true)
-    const { error } = await signIn(email, password)
+    const { data, error } = await signIn(email, password)
     setLoading(false)
     if (error) {
       setFormError(error.message)
       toast.error(error.message)
     } else {
       toast.success('Welcome back!')
-      navigate('/dashboard')
+      navigate(data.user?.role === 'parent' ? '/parent/dashboard' : '/dashboard')
     }
   }
 

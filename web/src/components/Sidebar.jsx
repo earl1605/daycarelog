@@ -25,11 +25,31 @@ const groups = [
   },
 ]
 
+// Parent role only sees their own child's data - no Children/Reports/Users, and
+// no access to the Admin/Staff attendance-taking or health-record-entry pages.
+const parentGroups = [
+  {
+    label: 'Main',
+    items: [
+      { to: '/parent/dashboard',  icon: HomeIcon,      label: 'Dashboard' },
+      { to: '/parent/attendance', icon: ClipboardIcon, label: 'Attendance' },
+      { to: '/parent/health',     icon: HeartIcon,     label: 'Health Records' },
+    ],
+  },
+  {
+    label: 'Management',
+    items: [
+      { to: '/settings', icon: SettingsIcon, label: 'Settings', chevron: true },
+    ],
+  },
+]
+
 const adminItem = { to: '/users', icon: UsersIcon, label: 'Users' }
 
 export default function Sidebar({ open, onClose }) {
-  const { user, signOut, isAdmin } = useAuth()
+  const { user, signOut, isAdmin, isParent } = useAuth()
   const navigate = useNavigate()
+  const navGroups = isParent ? parentGroups : groups
 
   function handleSignOut() {
     signOut()
@@ -78,7 +98,7 @@ export default function Sidebar({ open, onClose }) {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
-          {groups.map((group, gi) => (
+          {navGroups.map((group, gi) => (
             <div key={group.label}>
               {gi > 0 && <div className="h-px bg-gray-200/70 mb-5 -mt-2.5 mx-1" />}
               <p className="px-3 pb-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{group.label}</p>

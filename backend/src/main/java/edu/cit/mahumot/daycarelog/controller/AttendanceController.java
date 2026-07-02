@@ -4,6 +4,7 @@ import edu.cit.mahumot.daycarelog.dto.AttendanceRequest;
 import edu.cit.mahumot.daycarelog.model.Attendance;
 import edu.cit.mahumot.daycarelog.security.JwtUtil;
 import edu.cit.mahumot.daycarelog.service.AttendanceService;
+import edu.cit.mahumot.daycarelog.service.GuardianService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,12 @@ import java.util.Map;
 public class AttendanceController {
 
     private final AttendanceService attendanceService;
+    private final GuardianService guardianService;
     private final JwtUtil jwtUtil;
 
-    public AttendanceController(AttendanceService attendanceService, JwtUtil jwtUtil) {
+    public AttendanceController(AttendanceService attendanceService, GuardianService guardianService, JwtUtil jwtUtil) {
         this.attendanceService = attendanceService;
+        this.guardianService = guardianService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -28,6 +31,15 @@ public class AttendanceController {
     public List<Attendance> getByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return attendanceService.findByDate(date);
+    }
+
+    // Parent-facing: all attendance records for the caller's own linked children,
+    // resolved server-side from the JWT rather than an accepted child ID.
+    @GetMapping("/mine")
+    public ResponseEntity<?> getMine(@RequestHeader("Authorization") String authHeader) {
+        Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+        List<Long> childIds = guardianService.findChildIdsForUser(userId);
+        return ResponseEntity.ok(attendanceService.findByChildIds(childIds));
     }
 
     @GetMapping("/child/{childId}")

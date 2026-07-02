@@ -3,6 +3,7 @@ package edu.cit.mahumot.daycarelog.controller;
 import edu.cit.mahumot.daycarelog.dto.HealthRecordRequest;
 import edu.cit.mahumot.daycarelog.model.HealthRecord;
 import edu.cit.mahumot.daycarelog.security.JwtUtil;
+import edu.cit.mahumot.daycarelog.service.GuardianService;
 import edu.cit.mahumot.daycarelog.service.HealthRecordService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,16 +16,27 @@ import java.util.Map;
 public class HealthRecordController {
 
     private final HealthRecordService healthRecordService;
+    private final GuardianService guardianService;
     private final JwtUtil jwtUtil;
 
-    public HealthRecordController(HealthRecordService healthRecordService, JwtUtil jwtUtil) {
+    public HealthRecordController(HealthRecordService healthRecordService, GuardianService guardianService, JwtUtil jwtUtil) {
         this.healthRecordService = healthRecordService;
+        this.guardianService = guardianService;
         this.jwtUtil = jwtUtil;
     }
 
     @GetMapping
     public List<HealthRecord> getAll() {
         return healthRecordService.findAll();
+    }
+
+    // Parent-facing: all health records for the caller's own linked children,
+    // resolved server-side from the JWT rather than an accepted child ID.
+    @GetMapping("/mine")
+    public ResponseEntity<?> getMine(@RequestHeader("Authorization") String authHeader) {
+        Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+        List<Long> childIds = guardianService.findChildIdsForUser(userId);
+        return ResponseEntity.ok(healthRecordService.findByChildIds(childIds));
     }
 
     @GetMapping("/child/{childId}")
