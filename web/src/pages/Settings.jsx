@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
 function resizeImage(file, maxSize = 256) {
@@ -107,15 +108,15 @@ export default function Settings() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name <span className="text-red-400">*</span></label>
-              <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} className={inputClass} placeholder="Juan" />
+              <input type="text" value={firstName} onChange={handleCapitalizedNameInput(setFirstName)} className={inputClass} placeholder="Juan" autoCapitalize="words" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name <span className="text-red-400">*</span></label>
-              <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} className={inputClass} placeholder="dela Cruz" />
+              <input type="text" value={lastName} onChange={handleCapitalizedNameInput(setLastName)} className={inputClass} placeholder="dela Cruz" autoCapitalize="words" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle Name</label>
-              <input type="text" value={middleName} onChange={e => setMiddleName(e.target.value)} className={inputClass} placeholder="Santos" />
+              <input type="text" value={middleName} onChange={handleCapitalizedNameInput(setMiddleName)} className={inputClass} placeholder="Santos" autoCapitalize="words" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Suffix</label>
