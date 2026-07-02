@@ -118,3 +118,61 @@ export function PlusIcon(props) {
     </svg>
   )
 }
+
+export function KeyIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="7.5" cy="15.5" r="3.3" />
+      <path d="M9.8 13.2 18.5 4.5" />
+      <path d="M14.5 8.5 17 11" />
+      <path d="M17.3 5.7 19.8 8.2" />
+    </svg>
+  )
+}
+
+export function PauseIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="7" y="5" width="3.2" height="14" rx="1" />
+      <rect x="13.8" y="5" width="3.2" height="14" rx="1" />
+    </svg>
+  )
+}
+
+export function PlayIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M7 5.3v13.4a1 1 0 0 0 1.5.87l11-6.7a1 1 0 0 0 0-1.74l-11-6.7A1 1 0 0 0 7 5.3Z" />
+    </svg>
+  )
+}
+
+export function TrashIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M5 7h14" />
+      <path d="M9.5 7V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v2" />
+      <path d="M7 7l.8 12a2 2 0 0 0 2 1.9h4.4a2 2 0 0 0 2-1.9L17 7" />
+      <path d="M10.2 11v6M13.8 11v6" />
+    </svg>
+  )
+}
+
+export function AlertTriangleIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 4.5 21 19.5H3Z" />
+      <path d="M12 10v4" />
+      <circle cx="12" cy="16.8" r="0.75" />
+    </svg>
+  )
+}
+
+export function CopyIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="8.5" y="8.5" width="11" height="11" rx="2" />
+      <path d="M15.5 8.5V6.5A2 2 0 0 0 13.5 4.5h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+    </svg>
+  )
+}
