@@ -54,47 +54,11 @@ Tests run against an in-memory H2 database (see `backend/src/test/resources/appl
 
 ## Web (`/web`)
 
-React + Vite single-page app.
-
-### Requirements
-- Node.js and npm
-
-### Run
-
-```bash
-cd web
-npm install
-npm run dev
-```
-
-The dev server runs on Vite's default port and proxies `/api` requests to the backend at `http://localhost:8080` (see `web/vite.config.js`), so start the backend first.
-
-### Build
-
-```bash
-cd web
-npm run build
-```
-
-Outputs a production build to `web/dist`.
+React + Vite single-page app. See [`web/README.md`](web/README.md) for tech stack, run/build instructions, and project structure.
 
 ## Mobile (`/mobile`)
 
-Android client (Kotlin + Jetpack Compose, Material 3), consuming the same backend API as the web client.
-
-### Requirements
-- Android Studio (or the Gradle wrapper + Android SDK)
-
-### Run
-
-Open `mobile/` in Android Studio and run the `app` configuration, or from the command line:
-
-```bash
-cd mobile
-./gradlew assembleDebug
-```
-
-The app points at the production backend URL by default (see `mobile/app/src/main/java/com/daycarelog/app/data/api/RetrofitClient.kt`).
+Android client (Kotlin + Jetpack Compose, Material 3), consuming the same backend API as the web client. See [`mobile/README.md`](mobile/README.md) for tech stack, run instructions, and project structure.
 
 ## Docs (`/docs`)
 
