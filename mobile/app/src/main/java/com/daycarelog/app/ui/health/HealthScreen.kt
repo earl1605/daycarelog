@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.Child
 import com.daycarelog.app.data.model.HealthRecord
+import com.daycarelog.app.ui.theme.ScreenPalette
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import com.daycarelog.app.util.classifyNutritionalStatus
 import com.daycarelog.app.util.nutritionalStatusColors
 import kotlinx.coroutines.launch
@@ -56,6 +58,7 @@ private val Green900 = Color(0xFF052e16)
 @Composable
 fun HealthScreen(onOpenDrawer: () -> Unit, onAdd: () -> Unit) {
     val scope   = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     var records      by remember { mutableStateOf<List<HealthRecord>>(emptyList()) }
     var children     by remember { mutableStateOf<Map<Long, Child>>(emptyMap()) }
     var loading      by remember { mutableStateOf(true) }
@@ -110,7 +113,7 @@ fun HealthScreen(onOpenDrawer: () -> Unit, onAdd: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFf0fdf4))
+                .background(palette.pageBg)
                 .padding(padding),
         ) {
             Box(
@@ -156,7 +159,7 @@ fun HealthScreen(onOpenDrawer: () -> Unit, onAdd: () -> Unit) {
                             Text(
                                 if (search.isBlank()) "No health records.\nTap + to add one."
                                 else "No results for \"$search\"",
-                                color = Color.Gray,
+                                color = palette.mutedColor,
                             )
                         }
                     } else {
@@ -171,6 +174,7 @@ fun HealthScreen(onOpenDrawer: () -> Unit, onAdd: () -> Unit) {
                                 HealthRecordCard(
                                     record   = rec,
                                     child    = children[rec.childId],
+                                    palette  = palette,
                                     onDelete = { deleteTarget = rec },
                                 )
                             }
@@ -184,11 +188,11 @@ fun HealthScreen(onOpenDrawer: () -> Unit, onAdd: () -> Unit) {
 }
 
 @Composable
-private fun HealthRecordCard(record: HealthRecord, child: Child?, onDelete: () -> Unit) {
+private fun HealthRecordCard(record: HealthRecord, child: Child?, palette: ScreenPalette, onDelete: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = palette.cardBg),
         elevation = CardDefaults.cardElevation(2.dp),
     ) {
         Row(
@@ -205,12 +209,12 @@ private fun HealthRecordCard(record: HealthRecord, child: Child?, onDelete: () -
                     "${child?.firstName ?: "?"} ${child?.lastName ?: ""}",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp,
-                    color = Color(0xFF111827),
+                    color = palette.textColor,
                 )
-                Text("Date: ${record.measurementDate}", fontSize = 12.sp, color = Color.Gray)
+                Text("Date: ${record.measurementDate}", fontSize = 12.sp, color = palette.mutedColor)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    record.weightKg?.let { Text("⚖️ ${it}kg", fontSize = 12.sp, color = Color(0xFF374151)) }
-                    record.heightCm?.let { Text("📏 ${it}cm", fontSize = 12.sp, color = Color(0xFF374151)) }
+                    record.weightKg?.let { Text("⚖️ ${it}kg", fontSize = 12.sp, color = palette.textColor) }
+                    record.heightCm?.let { Text("📏 ${it}cm", fontSize = 12.sp, color = palette.textColor) }
                 }
                 if (child != null) {
                     val status = classifyNutritionalStatus(record.weightKg, child.dateOfBirth, child.sex)
@@ -226,8 +230,8 @@ private fun HealthRecordCard(record: HealthRecord, child: Child?, onDelete: () -
                     }
                 }
                 if (!record.remarks.isNullOrBlank()) {
-                    Surface(color = Color(0xFFf9fafb), shape = RoundedCornerShape(8.dp)) {
-                        Text(record.remarks, fontSize = 11.sp, color = Color.Gray, modifier = Modifier.padding(6.dp))
+                    Surface(color = palette.borderColor, shape = RoundedCornerShape(8.dp)) {
+                        Text(record.remarks, fontSize = 11.sp, color = palette.mutedColor, modifier = Modifier.padding(6.dp))
                     }
                 }
             }

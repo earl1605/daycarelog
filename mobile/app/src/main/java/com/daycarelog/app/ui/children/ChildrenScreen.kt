@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.Child
+import com.daycarelog.app.ui.theme.ScreenPalette
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import com.daycarelog.app.util.formatAge
 import kotlinx.coroutines.launch
 
@@ -65,6 +67,7 @@ fun ChildrenScreen(
     onEditChild: (Long) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     var children     by remember { mutableStateOf<List<Child>>(emptyList()) }
     var loading      by remember { mutableStateOf(true) }
     var error        by remember { mutableStateOf<String?>(null) }
@@ -126,7 +129,7 @@ fun ChildrenScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFf0fdf4))
+                .background(palette.pageBg)
                 .padding(padding),
         ) {
             Box(
@@ -198,7 +201,7 @@ fun ChildrenScreen(
                                 if (search.isBlank() && statusFilter == "all") "No children found.\nTap + to add one."
                                 else if (search.isBlank()) "No results for this filter"
                                 else "No results for \"$search\"",
-                                color = Color.Gray,
+                                color = palette.mutedColor,
                             )
                         }
                     } else {
@@ -212,6 +215,7 @@ fun ChildrenScreen(
                             items(filtered) { child ->
                                 ChildCard(
                                     child    = child,
+                                    palette  = palette,
                                     onEdit   = { child.id?.let { onEditChild(it) } },
                                     onDelete = { deleteTarget = child },
                                 )
@@ -226,11 +230,11 @@ fun ChildrenScreen(
 }
 
 @Composable
-private fun ChildCard(child: Child, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun ChildCard(child: Child, palette: ScreenPalette, onEdit: () -> Unit, onDelete: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = palette.cardBg),
         elevation = CardDefaults.cardElevation(2.dp),
     ) {
         Row(
@@ -256,23 +260,23 @@ private fun ChildCard(child: Child, onEdit: () -> Unit, onDelete: () -> Unit) {
                     "${child.firstName} ${child.lastName}",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
-                    color = Color(0xFF111827),
+                    color = palette.textColor,
                 )
                 Text(
                     "${child.sex.replaceFirstChar { it.uppercase() }} · ${formatAge(child.dateOfBirth)}  •  DOB: ${child.dateOfBirth}",
                     fontSize = 12.sp,
-                    color = Color.Gray,
+                    color = palette.mutedColor,
                 )
             }
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = if (child.enrollmentStatus == "active") Green100 else Color(0xFFf3f4f6),
+                color = if (child.enrollmentStatus == "active") Green100 else palette.borderColor,
             ) {
                 Text(
                     child.enrollmentStatus.replaceFirstChar { it.uppercase() },
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (child.enrollmentStatus == "active") Color(0xFF15803d) else Color.Gray,
+                    color = if (child.enrollmentStatus == "active") Color(0xFF15803d) else palette.mutedColor,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 )
             }

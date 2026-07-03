@@ -65,6 +65,7 @@ import com.daycarelog.app.data.model.UpdateProfileRequest
 import com.daycarelog.app.data.model.UserDto
 import com.daycarelog.app.data.preferences.ThemeState
 import com.daycarelog.app.data.preferences.TokenDataStore
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import com.daycarelog.app.util.capitalizeWords
 import com.daycarelog.app.util.capitalizedNameFieldValue
 import com.google.gson.Gson
@@ -105,6 +106,7 @@ private fun decodeBase64Bitmap(dataUrl: String): Bitmap? = try {
 fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () -> Unit) {
     val ctx   = LocalContext.current
     val scope = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     var user  by remember { mutableStateOf<UserDto?>(null) }
     var showSignOutDialog by remember { mutableStateOf(false) }
     var photoUploading    by remember { mutableStateOf(false) }
@@ -213,7 +215,7 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFf0fdf4)),
+            .background(palette.pageBg),
     ) {
         Box(
             Modifier
@@ -238,7 +240,7 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                 elevation = CardDefaults.cardElevation(3.dp),
             ) {
                 Column(
@@ -313,14 +315,14 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                         Text(
                             "Tap to change photo",
                             fontSize = 11.sp,
-                            color = Color.Gray,
+                            color = palette.mutedColor,
                             modifier = Modifier.padding(top = 6.dp),
                         )
                     }
 
                     Spacer(Modifier.height(10.dp))
-                    Text(displayName, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF111827))
-                    Text(user?.email ?: "", fontSize = 13.sp, color = Color.Gray, modifier = Modifier.padding(top = 2.dp))
+                    Text(displayName, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = palette.textColor)
+                    Text(user?.email ?: "", fontSize = 13.sp, color = palette.mutedColor, modifier = Modifier.padding(top = 2.dp))
                     Surface(
                         color = Green100,
                         shape = RoundedCornerShape(20.dp),
@@ -341,13 +343,13 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                 elevation = CardDefaults.cardElevation(2.dp),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Account Details", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Green900)
-                    SettingRow("Email", user?.email ?: "—")
-                    SettingRow("Role",  user?.role?.replaceFirstChar { it.uppercase() } ?: "—")
+                    Text("Account Details", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = palette.textColor)
+                    SettingRow("Email", user?.email ?: "—", palette)
+                    SettingRow("Role",  user?.role?.replaceFirstChar { it.uppercase() } ?: "—", palette)
 
                     Spacer(Modifier.height(2.dp))
 
@@ -407,7 +409,7 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                 Card(
                     modifier = Modifier.fillMaxWidth().clickable(onClick = onManageStaff),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                     elevation = CardDefaults.cardElevation(2.dp),
                 ) {
                     Row(
@@ -415,8 +417,8 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text("👥", fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
-                        Text("Manage Staff", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Green900, modifier = Modifier.weight(1f))
-                        Text("›", fontSize = 18.sp, color = Color.Gray)
+                        Text("Manage Staff", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = palette.textColor, modifier = Modifier.weight(1f))
+                        Text("›", fontSize = 18.sp, color = palette.mutedColor)
                     }
                 }
             }
@@ -425,7 +427,7 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                 elevation = CardDefaults.cardElevation(2.dp),
             ) {
                 Row(
@@ -434,10 +436,10 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                 ) {
                     Text(if (ThemeState.isDarkMode) "🌙" else "☀️", fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
                     Column(Modifier.weight(1f)) {
-                        Text("Dark Mode", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Green900)
+                        Text("Dark Mode", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = palette.textColor)
                         Text(
                             if (ThemeState.isDarkMode) "On" else "Off",
-                            fontSize = 12.sp, color = Color.Gray,
+                            fontSize = 12.sp, color = palette.mutedColor,
                         )
                     }
                     Switch(
@@ -452,14 +454,14 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                 elevation = CardDefaults.cardElevation(2.dp),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("About", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Green900)
-                    Text("DaycareLog Mobile",                fontSize = 13.sp, color = Color(0xFF374151))
-                    Text("Version 1.0.0",                    fontSize = 12.sp, color = Color.Gray)
-                    Text("Barangay Childcare Management System", fontSize = 12.sp, color = Color.Gray)
+                    Text("About", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = palette.textColor)
+                    Text("DaycareLog Mobile",                fontSize = 13.sp, color = palette.textColor)
+                    Text("Version 1.0.0",                    fontSize = 12.sp, color = palette.mutedColor)
+                    Text("Barangay Childcare Management System", fontSize = 12.sp, color = palette.mutedColor)
                 }
             }
 
@@ -480,13 +482,13 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
 }
 
 @Composable
-private fun SettingRow(label: String, value: String) {
+private fun SettingRow(label: String, value: String, palette: com.daycarelog.app.ui.theme.ScreenPalette) {
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, fontSize = 13.sp, color = Color.Gray)
-        Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color(0xFF111827))
+        Text(label, fontSize = 13.sp, color = palette.mutedColor)
+        Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = palette.textColor)
     }
 }

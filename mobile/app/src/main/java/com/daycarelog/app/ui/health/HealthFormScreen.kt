@@ -47,6 +47,7 @@ import com.daycarelog.app.data.model.HealthRecord
 import com.daycarelog.app.ui.common.DateField
 import com.daycarelog.app.ui.common.digitsToIso
 import com.daycarelog.app.ui.common.isoToDigits
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import com.daycarelog.app.util.classifyNutritionalStatus
 import com.daycarelog.app.util.nutritionalStatusColors
 import kotlinx.coroutines.launch
@@ -58,6 +59,7 @@ private val Green900 = Color(0xFF052e16)
 @Composable
 fun HealthFormScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     var children       by remember { mutableStateOf<List<Child>>(emptyList()) }
     var selectedChild  by remember { mutableStateOf<Child?>(null) }
     var childExpanded  by remember { mutableStateOf(false) }
@@ -93,7 +95,7 @@ fun HealthFormScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFf0fdf4)),
+            .background(palette.pageBg),
     ) {
         Box(
             Modifier

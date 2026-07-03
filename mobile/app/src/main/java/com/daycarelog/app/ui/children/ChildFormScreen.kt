@@ -45,6 +45,7 @@ import com.daycarelog.app.ui.common.DateField
 import com.daycarelog.app.ui.common.digitsToIso
 import com.daycarelog.app.ui.common.isoToDigits
 import com.daycarelog.app.ui.guardians.GuardiansSection
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import com.daycarelog.app.util.capitalizeWords
 import kotlinx.coroutines.launch
 
@@ -55,6 +56,7 @@ private val Green900 = Color(0xFF052e16)
 @Composable
 fun ChildFormScreen(childId: Long?, onBack: () -> Unit) {
     val scope  = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     val isEdit = childId != null
     var firstName        by remember { mutableStateOf("") }
     var lastName         by remember { mutableStateOf("") }
@@ -95,7 +97,7 @@ fun ChildFormScreen(childId: Long?, onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFf0fdf4)),
+            .background(palette.pageBg),
     ) {
         // Top bar
         Box(

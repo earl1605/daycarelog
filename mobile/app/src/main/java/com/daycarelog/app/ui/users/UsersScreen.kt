@@ -50,6 +50,8 @@ import com.daycarelog.app.data.model.CreateUserRequest
 import com.daycarelog.app.data.model.UpdateRoleRequest
 import com.daycarelog.app.data.model.UserDto
 import com.daycarelog.app.data.preferences.TokenDataStore
+import com.daycarelog.app.ui.theme.ScreenPalette
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import com.daycarelog.app.util.capitalizeWords
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
@@ -69,6 +71,7 @@ private val roles = listOf("admin", "staff")
 fun UsersScreen(onBack: () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
 
     var currentUser by remember { mutableStateOf<UserDto?>(null) }
     var users        by remember { mutableStateOf<List<UserDto>>(emptyList()) }
@@ -102,7 +105,7 @@ fun UsersScreen(onBack: () -> Unit) {
 
     val isAdmin = currentUser?.role == "admin"
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFf0fdf4))) {
+    Column(modifier = Modifier.fillMaxSize().background(palette.pageBg)) {
         Box(
             modifier = Modifier.fillMaxWidth().background(Green900).padding(horizontal = 8.dp, vertical = 12.dp),
         ) {
@@ -114,7 +117,7 @@ fun UsersScreen(onBack: () -> Unit) {
 
         if (!isAdmin) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Admin access required.", color = Color.Gray)
+                Text("Admin access required.", color = palette.mutedColor)
             }
             return
         }
@@ -151,6 +154,7 @@ fun UsersScreen(onBack: () -> Unit) {
                                 user = u,
                                 isSelf = u.id == currentUser?.id,
                                 busy = busyId == u.id,
+                                palette = palette,
                                 onChangeRole = { newRole ->
                                     scope.launch {
                                         busyId = u.id
@@ -247,6 +251,7 @@ private fun UserRow(
     user: UserDto,
     isSelf: Boolean,
     busy: Boolean,
+    palette: ScreenPalette,
     onChangeRole: (String) -> Unit,
     onToggleActive: () -> Unit,
     onResetPassword: () -> Unit,
@@ -255,17 +260,17 @@ private fun UserRow(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = palette.cardBg),
         elevation = CardDefaults.cardElevation(2.dp),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(user.fullName?.ifBlank { null } ?: user.email.substringBefore("@"), fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = Color(0xFF111827))
+                        Text(user.fullName?.ifBlank { null } ?: user.email.substringBefore("@"), fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = palette.textColor)
                         if (isSelf) Text("  (you)", fontSize = 11.sp, color = Green700)
                     }
-                    Text(user.email, fontSize = 12.sp, color = Color.Gray)
+                    Text(user.email, fontSize = 12.sp, color = palette.mutedColor)
                 }
                 Surface(
                     shape = RoundedCornerShape(20.dp),
@@ -286,7 +291,7 @@ private fun UserRow(
                     val selected = user.role == r
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = if (selected) Green100 else Color(0xFFf3f4f6),
+                        color = if (selected) Green100 else palette.borderColor,
                         modifier = Modifier.weight(1f),
                     ) {
                         TextButton(
@@ -298,7 +303,7 @@ private fun UserRow(
                             Text(
                                 r.replaceFirstChar { it.uppercase() },
                                 fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
-                                color = if (selected) Green700 else Color(0xFF6b7280),
+                                color = if (selected) Green700 else palette.mutedColor,
                             )
                         }
                     }
@@ -338,6 +343,7 @@ private fun CreateStaffDialog(
     onError: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     var firstName  by remember { mutableStateOf("") }
     var lastName   by remember { mutableStateOf("") }
     var middleName by remember { mutableStateOf("") }
@@ -355,7 +361,7 @@ private fun CreateStaffDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text("A temporary password will be generated and shown once.", fontSize = 12.sp, color = Color.Gray)
+                Text("A temporary password will be generated and shown once.", fontSize = 12.sp, color = palette.mutedColor)
                 formError?.let { Text(it, color = Red500, fontSize = 12.sp) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(value = firstName, onValueChange = { firstName = capitalizeWords(it) }, label = { Text("First name") }, singleLine = true, modifier = Modifier.weight(1f))
@@ -365,17 +371,17 @@ private fun CreateStaffDialog(
                 OutlinedTextField(value = suffix, onValueChange = { suffix = capitalizeWords(it) }, label = { Text("Suffix") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email address") }, singleLine = true, modifier = Modifier.fillMaxWidth())
 
-                Text("Role", fontSize = 12.sp, color = Color(0xFF374151), fontWeight = FontWeight.Medium)
+                Text("Role", fontSize = 12.sp, color = palette.textColor, fontWeight = FontWeight.Medium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     roles.forEach { r ->
                         val selected = role == r
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = if (selected) Green100 else Color(0xFFf3f4f6),
+                            color = if (selected) Green100 else palette.borderColor,
                             modifier = Modifier.weight(1f),
                         ) {
                             TextButton(onClick = { role = r }, contentPadding = PaddingValues(vertical = 6.dp), modifier = Modifier.fillMaxWidth()) {
-                                Text(r.replaceFirstChar { it.uppercase() }, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (selected) Green700 else Color(0xFF6b7280))
+                                Text(r.replaceFirstChar { it.uppercase() }, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (selected) Green700 else palette.mutedColor)
                             }
                         }
                     }
@@ -416,15 +422,16 @@ private fun CreateStaffDialog(
 @Composable
 private fun TempPasswordDialog(name: String, password: String, onDismiss: () -> Unit) {
     val clipboard = LocalClipboardManager.current
+    val palette = rememberScreenPalette()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Temporary password") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("For $name. This is shown only once — copy it now and share it securely.", fontSize = 13.sp, color = Color.Gray)
+                Text("For $name. This is shown only once — copy it now and share it securely.", fontSize = 13.sp, color = palette.mutedColor)
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFf9fafb),
+                    color = palette.borderColor,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(

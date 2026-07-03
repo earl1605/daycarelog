@@ -52,6 +52,7 @@ import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.Child
 import com.daycarelog.app.data.model.GuardianAccountResponse
 import com.daycarelog.app.data.model.GuardianRequest
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import com.daycarelog.app.util.capitalizeWords
 import kotlinx.coroutines.launch
 
@@ -63,6 +64,7 @@ private val Green100 = Color(0xFFdcfce7)
 @Composable
 fun GuardiansScreen(onOpenDrawer: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     val clipboard = LocalClipboardManager.current
 
     var accounts by remember { mutableStateOf<List<GuardianAccountResponse>>(emptyList()) }
@@ -101,9 +103,9 @@ fun GuardiansScreen(onOpenDrawer: () -> Unit) {
             title = { Text("Temporary password") },
             text = {
                 Column {
-                    Text("For $who. Shown only once - copy it now and share it securely.", fontSize = 12.sp, color = Color.Gray)
+                    Text("For $who. Shown only once - copy it now and share it securely.", fontSize = 12.sp, color = palette.mutedColor)
                     Spacer(Modifier.height(8.dp))
-                    Surface(color = Color(0xFFf9fafb), shape = RoundedCornerShape(8.dp)) {
+                    Surface(color = palette.borderColor, shape = RoundedCornerShape(8.dp)) {
                         Text(pass, modifier = Modifier.padding(10.dp), fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -132,7 +134,7 @@ fun GuardiansScreen(onOpenDrawer: () -> Unit) {
         )
     }
 
-    Column(Modifier.fillMaxSize().background(Color(0xFFf0fdf4))) {
+    Column(Modifier.fillMaxSize().background(palette.pageBg)) {
         Box(Modifier.fillMaxWidth().background(Green900).padding(horizontal = 8.dp, vertical = 10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onOpenDrawer) {
@@ -149,14 +151,14 @@ fun GuardiansScreen(onOpenDrawer: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                 elevation = CardDefaults.cardElevation(2.dp),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("+ Create a Guardian Account", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Green900)
+                    Text("+ Create a Guardian Account", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = palette.textColor)
                     Text(
                         "Creates a new Parent/Guardian login and generates a temporary password. Public self-registration can never create one.",
-                        fontSize = 11.sp, color = Color.Gray,
+                        fontSize = 11.sp, color = palette.mutedColor,
                     )
                     formError?.let { Text(it, color = Color(0xFFdc2626), fontSize = 12.sp) }
 
@@ -254,22 +256,22 @@ fun GuardiansScreen(onOpenDrawer: () -> Unit) {
             } else {
                 val filtered = accounts.filter { it.name?.contains(search, ignoreCase = true) != false || search.isBlank() }
                 if (filtered.isEmpty()) {
-                    Text("No guardian accounts found", color = Color.Gray, modifier = Modifier.padding(vertical = 16.dp))
+                    Text("No guardian accounts found", color = palette.mutedColor, modifier = Modifier.padding(vertical = 16.dp))
                 } else {
                     filtered.forEach { acct ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                             elevation = CardDefaults.cardElevation(1.dp),
                         ) {
                             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(acct.name ?: "—", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color(0xFF111827))
-                                Text(acct.email ?: "—", fontSize = 12.sp, color = Color.Gray)
-                                if (!acct.contactNumber.isNullOrBlank()) Text(acct.contactNumber, fontSize = 12.sp, color = Color.Gray)
+                                Text(acct.name ?: "—", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = palette.textColor)
+                                Text(acct.email ?: "—", fontSize = 12.sp, color = palette.mutedColor)
+                                if (!acct.contactNumber.isNullOrBlank()) Text(acct.contactNumber, fontSize = 12.sp, color = palette.mutedColor)
                                 Text(
                                     "Children: " + (acct.children.joinToString(", ") { "${it.firstName} ${it.lastName}" }.ifBlank { "—" }),
-                                    fontSize = 12.sp, color = Color(0xFF374151),
+                                    fontSize = 12.sp, color = palette.textColor,
                                 )
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
                                     TextButton(

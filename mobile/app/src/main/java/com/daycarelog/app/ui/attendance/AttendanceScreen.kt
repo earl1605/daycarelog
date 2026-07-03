@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.AttendanceRecord
 import com.daycarelog.app.data.model.Child
+import com.daycarelog.app.ui.theme.ScreenPalette
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import kotlinx.coroutines.launch
 
 private val Green500 = Color(0xFF16a34a)
@@ -76,6 +78,7 @@ private fun isWeekend(dateStr: String): Boolean = try {
 @Composable
 fun AttendanceScreen(onOpenDrawer: () -> Unit) {
     val scope   = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     var date    by remember { mutableStateOf(nearestWeekday(java.time.LocalDate.now()).toString()) }
     var children by remember { mutableStateOf<List<Child>>(emptyList()) }
     var loading  by remember { mutableStateOf(true) }
@@ -112,7 +115,7 @@ fun AttendanceScreen(onOpenDrawer: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFf0fdf4)),
+            .background(palette.pageBg),
     ) {
         Box(
             Modifier
@@ -199,7 +202,7 @@ fun AttendanceScreen(onOpenDrawer: () -> Unit) {
                 CircularProgressIndicator(color = Green500)
             }
             children.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No children found. Add children first.", color = Color.Gray)
+                Text("No children found. Add children first.", color = palette.mutedColor)
             }
             else -> {
                 LazyColumn(
@@ -211,7 +214,7 @@ fun AttendanceScreen(onOpenDrawer: () -> Unit) {
                     items(children) { child ->
                         val id     = child.id ?: return@items
                         val status = statusMap[id] ?: "absent"
-                        AttendanceRow(child = child, status = status, onStatusChange = { statusMap[id] = it })
+                        AttendanceRow(child = child, status = status, palette = palette, onStatusChange = { statusMap[id] = it })
                     }
                     item { Spacer(Modifier.height(8.dp)) }
                 }
@@ -252,11 +255,11 @@ fun AttendanceScreen(onOpenDrawer: () -> Unit) {
 }
 
 @Composable
-private fun AttendanceRow(child: Child, status: String, onStatusChange: (String) -> Unit) {
+private fun AttendanceRow(child: Child, status: String, palette: ScreenPalette, onStatusChange: (String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = palette.cardBg),
         elevation = CardDefaults.cardElevation(1.dp),
     ) {
         Column(Modifier.padding(12.dp)) {
@@ -264,12 +267,12 @@ private fun AttendanceRow(child: Child, status: String, onStatusChange: (String)
                 "${child.firstName} ${child.lastName}",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp,
-                color = Color(0xFF111827),
+                color = palette.textColor,
             )
             Spacer(Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 statusOptions.forEach { s ->
-                    val (fg, bg) = statusColors[s] ?: (Color.Gray to Color(0xFFf3f4f6))
+                    val (fg, bg) = statusColors[s] ?: (palette.mutedColor to palette.borderColor)
                     FilterChip(
                         selected = status == s,
                         onClick = { onStatusChange(s) },

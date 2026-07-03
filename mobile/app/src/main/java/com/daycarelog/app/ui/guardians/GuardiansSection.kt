@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.Guardian
 import com.daycarelog.app.data.model.GuardianRequest
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import com.daycarelog.app.util.capitalizeWords
 import kotlinx.coroutines.launch
 
@@ -55,6 +56,7 @@ private val Green900 = Color(0xFF052e16)
 @Composable
 fun GuardiansSection(childId: Long) {
     val scope = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     val clipboard = LocalClipboardManager.current
 
     var guardians by remember { mutableStateOf<List<Guardian>>(emptyList()) }
@@ -85,9 +87,9 @@ fun GuardiansSection(childId: Long) {
             title = { Text("Temporary password") },
             text = {
                 Column {
-                    Text("Parent portal account for $who. Shown only once.", fontSize = 12.sp, color = Color.Gray)
+                    Text("Parent portal account for $who. Shown only once.", fontSize = 12.sp, color = palette.mutedColor)
                     Spacer(Modifier.height(8.dp))
-                    Surface(color = Color(0xFFf9fafb), shape = RoundedCornerShape(8.dp)) {
+                    Surface(color = palette.borderColor, shape = RoundedCornerShape(8.dp)) {
                         Text(pass, modifier = Modifier.padding(10.dp), fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -100,19 +102,19 @@ fun GuardiansSection(childId: Long) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = palette.cardBg),
         elevation = CardDefaults.cardElevation(2.dp),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Guardians", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Green900, modifier = Modifier.weight(1f))
+                Text("Guardians", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = palette.textColor, modifier = Modifier.weight(1f))
                 TextButton(onClick = { showForm = !showForm }) { Text(if (showForm) "Cancel" else "+ Add Guardian", fontSize = 12.sp) }
             }
 
             if (loading) {
                 Box(Modifier.fillMaxWidth().height(40.dp)) { CircularProgressIndicator(modifier = Modifier.height(20.dp), color = Green500) }
             } else if (guardians.isEmpty() && !showForm) {
-                Text("No guardians added yet.", fontSize = 12.sp, color = Color.Gray)
+                Text("No guardians added yet.", fontSize = 12.sp, color = palette.mutedColor)
             } else {
                 guardians.forEach { g ->
                     Row(
@@ -122,11 +124,11 @@ fun GuardiansSection(childId: Long) {
                         Column(Modifier.weight(1f)) {
                             Text(
                                 g.name + if (g.isPrimary) "  •  Primary" else "",
-                                fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Color(0xFF111827),
+                                fontSize = 13.sp, fontWeight = FontWeight.Medium, color = palette.textColor,
                             )
                             val sub = listOfNotNull(g.relationship, g.contactNumber).joinToString(" · ")
                                 .ifBlank { "—" } + if (g.userId != null) "  •  Portal access" else ""
-                            Text(sub, fontSize = 11.sp, color = Color.Gray)
+                            Text(sub, fontSize = 11.sp, color = palette.mutedColor)
                         }
                         IconButton(onClick = {
                             scope.launch {
@@ -154,7 +156,7 @@ fun GuardiansSection(childId: Long) {
                     OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                     Text(
                         "If this email already has a parent account, this child is linked to it instead of creating a new one.",
-                        fontSize = 10.sp, color = Color.Gray,
+                        fontSize = 10.sp, color = palette.mutedColor,
                     )
                 }
 

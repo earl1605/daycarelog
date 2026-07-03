@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.MonthlyReport
+import com.daycarelog.app.ui.theme.ScreenPalette
+import com.daycarelog.app.ui.theme.rememberScreenPalette
 import kotlinx.coroutines.launch
 
 private val Green500 = Color(0xFF16a34a)
@@ -51,6 +53,7 @@ private val Green700 = Color(0xFF15803d)
 @Composable
 fun ReportsScreen(onOpenDrawer: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val palette = rememberScreenPalette()
     val currentMonth = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM"))
     var month   by remember { mutableStateOf(currentMonth) }
     var report  by remember { mutableStateOf<MonthlyReport?>(null) }
@@ -76,7 +79,7 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFf0fdf4)),
+            .background(palette.pageBg),
     ) {
         Box(
             Modifier
@@ -139,7 +142,7 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                     }
                 }
                 report == null -> Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                    Text("No report data available.", color = Color.Gray)
+                    Text("No report data available.", color = palette.mutedColor)
                 }
                 else -> {
                     val r = report!!
@@ -147,11 +150,11 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                         elevation = CardDefaults.cardElevation(2.dp),
                     ) {
                         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text("Attendance Summary", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Green900)
+                            Text("Attendance Summary", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = palette.textColor)
                             Surface(color = Green100, shape = RoundedCornerShape(10.dp), modifier = Modifier.fillMaxWidth()) {
                                 Row(
                                     Modifier.padding(12.dp),
@@ -161,10 +164,10 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                                     Text(r.month, color = Green700, fontSize = 13.sp)
                                 }
                             }
-                            ReportRow("Total Enrolled", r.total.toString(), Green500)
-                            ReportRow("School Days", r.schoolDays.toString(), Color(0xFF2563eb))
-                            ReportRow("Total Present", r.presentCount.toString(), Color(0xFF16a34a))
-                            ReportRow("Total Absent",  r.absentCount.toString(),  Color(0xFFdc2626))
+                            ReportRow("Total Enrolled", r.total.toString(), Green500, palette)
+                            ReportRow("School Days", r.schoolDays.toString(), Color(0xFF2563eb), palette)
+                            ReportRow("Total Present", r.presentCount.toString(), Color(0xFF16a34a), palette)
+                            ReportRow("Total Absent",  r.absentCount.toString(),  Color(0xFFdc2626), palette)
                             // Attendance rate big badge
                             Box(
                                 Modifier
@@ -191,16 +194,17 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                             elevation = CardDefaults.cardElevation(2.dp),
                         ) {
                             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("Nutritional Status", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Green900)
+                                Text("Nutritional Status", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = palette.textColor)
                                 r.nutritionalStatus.entries.sortedBy { it.key }.forEach { (status, count) ->
                                     ReportRow(
                                         status.replace('_', ' ').replaceFirstChar { it.uppercase() },
                                         count.toString(),
                                         Color(0xFF7c3aed),
+                                        palette,
                                     )
                                 }
                             }
@@ -212,21 +216,21 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            colors = CardDefaults.cardColors(containerColor = palette.cardBg),
                             elevation = CardDefaults.cardElevation(2.dp),
                         ) {
                             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text("Children in Report (${r.children.size})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Green900)
+                                Text("Children in Report (${r.children.size})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = palette.textColor)
                                 r.children.forEach { child ->
                                     Surface(
-                                        color = Color(0xFFf9fafb),
+                                        color = palette.borderColor,
                                         shape = RoundedCornerShape(8.dp),
                                         modifier = Modifier.fillMaxWidth(),
                                     ) {
                                         Text(
                                             "• ${child.firstName} ${child.lastName}",
                                             fontSize = 13.sp,
-                                            color = Color(0xFF374151),
+                                            color = palette.textColor,
                                             modifier = Modifier.padding(8.dp),
                                         )
                                     }
@@ -242,13 +246,13 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
 }
 
 @Composable
-private fun ReportRow(label: String, value: String, valueColor: Color) {
+private fun ReportRow(label: String, value: String, valueColor: Color, palette: ScreenPalette) {
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, fontSize = 13.sp, color = Color(0xFF374151))
+        Text(label, fontSize = 13.sp, color = palette.textColor)
         Text(value, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = valueColor)
     }
 }
