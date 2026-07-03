@@ -54,7 +54,9 @@ export default function Sidebar({ open, onClose }) {
 
   function handleSignOut() {
     signOut()
-    toast.success('Signed out')
+    // Landing page's fixed top nav (with the "Get Started" button) sits at the very
+    // top of the screen - push this toast down below it instead of covering it.
+    toast.success('Signed out', { style: { marginTop: '76px' } })
     navigate('/')
   }
 
