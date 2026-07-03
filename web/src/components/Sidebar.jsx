@@ -94,7 +94,7 @@ export default function Sidebar({ open, onClose }) {
         ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:z-auto`}>
 
         <div className="flex items-center gap-2.5 px-4 py-4 border-b border-gray-200/70 dark:border-gray-700">
-          <img src="/favicon.svg" alt="DaycareLog" className="w-7 h-7 flex-shrink-0" />
+          <img src="/favicon.svg" alt="DaycareLog" className="w-7 h-7 flex-shrink-0 rounded-[7px] dark:ring-1 dark:ring-white/20" />
           <div className="min-w-0">
             <p className="font-bold text-gray-900 dark:text-gray-50 text-[15px] leading-tight truncate">DaycareLog</p>
             <p className="text-[11px] text-gray-400 dark:text-gray-500 tracking-wide uppercase truncate">Barangay System</p>
