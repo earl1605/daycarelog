@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
 import StatCard from '../components/StatCard'
 import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, HeartIcon, BarChartIcon, PlusIcon } from '../components/icons'
@@ -10,6 +11,8 @@ import toast from 'react-hot-toast'
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const [children,   setChildren]   = useState([])
   const [chartData,  setChartData]  = useState([])
   const [todayAtt,   setTodayAtt]   = useState([])
@@ -84,15 +87,22 @@ export default function Dashboard() {
         </div>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={chartData} barCategoryGap="30%" barGap={4}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F0F0EE" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
             <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
             <Tooltip
-              cursor={{ fill: '#F7F7F5' }}
-              contentStyle={{ borderRadius: '10px', border: '1px solid #E5E7EB', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', fontSize: '13px' }}
+              cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }}
+              contentStyle={{
+                borderRadius: '10px',
+                border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                fontSize: '13px',
+                backgroundColor: isDark ? '#1f2937' : '#fff',
+                color: isDark ? '#f9fafb' : '#111827',
+              }}
             />
             <Bar dataKey="present" name="Present" fill="#16a34a" radius={[4,4,0,0]} />
-            <Bar dataKey="absent"  name="Absent"  fill="#E5E7EB" radius={[4,4,0,0]} />
+            <Bar dataKey="absent"  name="Absent"  fill={isDark ? '#4b5563' : '#E5E7EB'} radius={[4,4,0,0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

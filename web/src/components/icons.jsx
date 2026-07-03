@@ -176,3 +176,20 @@ export function CopyIcon(props) {
     </svg>
   )
 }
+
+export function SunIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.5v2.3M12 19.2v2.3M4.5 12H2.2M21.8 12h-2.3M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6" />
+    </svg>
+  )
+}
+
+export function MoonIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M20 13.8A8.5 8.5 0 1 1 10.2 4a6.8 6.8 0 0 0 9.8 9.8Z" />
+    </svg>
+  )
+}

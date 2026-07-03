@@ -8,6 +8,60 @@
   body { @apply antialiased text-gray-900 font-sans; }
 }
 
+/* ── Dark mode ──────────────────────────────────────────────────────────
+ * Two-tier surface system in each theme, same relationship as light mode's
+ * white-page + #FAFAFA-secondary pattern, just inverted (dark UIs read best
+ * when "elevated" surfaces go lighter than the base, not darker):
+ *   light        -> #FFFFFF  (page canvas + cards)
+ *   not-so-light -> #FAFAFA / #F7F7F5 (sidebar, table headers, nested tiles)
+ *   dark         -> gray-900 (page canvas + cards - darkest tier)
+ *   not-so-dark  -> gray-800 (sidebar, table headers, nested tiles)
+ *
+ * These are plain class-selector overrides (not @apply) so `.dark .bg-white`
+ * (specificity 0,2,0) reliably beats the single-class Tailwind utility
+ * `.bg-white` (0,1,0) regardless of stylesheet order - this lets every page
+ * built with the app's existing utility classes go dark automatically,
+ * without hand-editing each file.
+ */
+.dark body { background-color: #111827; }
+
+.dark .bg-white               { background-color: #111827; }
+.dark .bg-\[\#FAFAFA\]        { background-color: #1f2937; }
+.dark .bg-\[\#F7F7F5\]        { background-color: #1f2937; }
+.dark .bg-gray-50             { background-color: #1f2937; }
+.dark .bg-gray-100            { background-color: #374151; }
+.dark .hover\:bg-gray-50:hover  { background-color: #374151; }
+.dark .hover\:bg-gray-100:hover { background-color: #374151; }
+.dark .hover\:bg-gray-200:hover { background-color: #4b5563; }
+
+.dark .border-gray-200            { border-color: #374151; }
+.dark .border-gray-200\/70        { border-color: #374151; }
+.dark .border-gray-100            { border-color: #374151; }
+.dark .border-gray-100\/70        { border-color: #374151; }
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+.dark .text-gray-900 { color: #f9fafb; }
+.dark .text-gray-800 { color: #f3f4f6; }
+.dark .text-gray-700 { color: #d1d5db; }
+.dark .text-gray-600 { color: #d1d5db; }
+.dark .text-gray-500 { color: #9ca3af; }
+.dark .text-gray-400 { color: #6b7280; }
+
+/* Bare form controls (most inputs in this app rely on the browser's default
+ * white background rather than an explicit bg-white class). */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.dark select,
+.dark textarea {
+  background-color: #1f2937;
+  color: #f9fafb;
+  border-color: #374151;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: #6b7280; }
+.dark input:disabled,
+.dark select:disabled { background-color: #111827; color: #6b7280; }
+
 @layer utilities {
   .animation-delay-100  { animation-delay: 0.1s; }
   .animation-delay-200  { animation-delay: 0.2s; }
