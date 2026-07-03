@@ -13,16 +13,16 @@ export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(getInitialTheme)
   const location = useLocation()
 
-  // Landing is a public marketing page with its own fixed gradient look —
-  // it should never switch to dark mode, regardless of the stored preference.
-  const isLanding = location.pathname === '/'
+  // Landing/Login/Register are public pages with their own fixed gradient
+  // look — they should never switch to dark mode, regardless of the stored preference.
+  const isPublicPage = ['/', '/login', '/register'].includes(location.pathname)
 
   // Tailwind's class-based dark mode strategy: toggling this class on <html> is
   // what every `dark:` variant (and the .dark CSS overrides in index.css) key off.
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark' && !isLanding)
+    document.documentElement.classList.toggle('dark', theme === 'dark' && !isPublicPage)
     localStorage.setItem('dcl_theme', theme)
-  }, [theme, isLanding])
+  }, [theme, isPublicPage])
 
   function toggleTheme() {
     setTheme(t => t === 'dark' ? 'light' : 'dark')
