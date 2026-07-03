@@ -41,4 +41,11 @@ public class HealthRecordService {
                 .build();
         return healthRecordRepository.save(record);
     }
+
+    public void delete(Long id) {
+        if (!healthRecordRepository.existsById(id)) {
+            throw new RuntimeException("Health record not found");
+        }
+        healthRecordRepository.deleteById(id);
+    }
 }

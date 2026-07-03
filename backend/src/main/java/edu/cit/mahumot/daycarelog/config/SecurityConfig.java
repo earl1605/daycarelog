@@ -72,8 +72,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/attendance/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers(HttpMethod.GET,  "/api/attendance", "/api/attendance/range", "/api/attendance/child/**").hasAnyRole("ADMIN", "STAFF")
 
-                .requestMatchers(HttpMethod.POST, "/api/health-records", "/api/health-records/**").hasAnyRole("ADMIN", "STAFF")
-                .requestMatchers(HttpMethod.GET,  "/api/health-records", "/api/health-records/child/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers(HttpMethod.POST,   "/api/health-records", "/api/health-records/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers(HttpMethod.DELETE, "/api/health-records/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers(HttpMethod.GET,    "/api/health-records", "/api/health-records/child/**").hasAnyRole("ADMIN", "STAFF")
 
                 .anyRequest().authenticated()
             )
