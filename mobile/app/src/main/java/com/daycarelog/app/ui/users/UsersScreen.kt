@@ -50,6 +50,7 @@ import com.daycarelog.app.data.model.CreateUserRequest
 import com.daycarelog.app.data.model.UpdateRoleRequest
 import com.daycarelog.app.data.model.UserDto
 import com.daycarelog.app.data.preferences.TokenDataStore
+import com.daycarelog.app.util.capitalizeWords
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -357,11 +358,11 @@ private fun CreateStaffDialog(
                 Text("A temporary password will be generated and shown once.", fontSize = 12.sp, color = Color.Gray)
                 formError?.let { Text(it, color = Red500, fontSize = 12.sp) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First name") }, singleLine = true, modifier = Modifier.weight(1f))
-                    OutlinedTextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last name") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = firstName, onValueChange = { firstName = capitalizeWords(it) }, label = { Text("First name") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = lastName, onValueChange = { lastName = capitalizeWords(it) }, label = { Text("Last name") }, singleLine = true, modifier = Modifier.weight(1f))
                 }
-                OutlinedTextField(value = middleName, onValueChange = { middleName = it }, label = { Text("Middle name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = suffix, onValueChange = { suffix = it }, label = { Text("Suffix") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = middleName, onValueChange = { middleName = capitalizeWords(it) }, label = { Text("Middle name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = suffix, onValueChange = { suffix = capitalizeWords(it) }, label = { Text("Suffix") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email address") }, singleLine = true, modifier = Modifier.fillMaxWidth())
 
                 Text("Role", fontSize = 12.sp, color = Color(0xFF374151), fontWeight = FontWeight.Medium)

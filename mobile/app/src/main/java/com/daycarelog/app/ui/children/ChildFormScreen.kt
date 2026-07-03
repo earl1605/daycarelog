@@ -45,6 +45,8 @@ import com.daycarelog.app.data.model.Child
 import com.daycarelog.app.ui.common.DateField
 import com.daycarelog.app.ui.common.digitsToIso
 import com.daycarelog.app.ui.common.isoToDigits
+import com.daycarelog.app.ui.guardians.GuardiansSection
+import com.daycarelog.app.util.capitalizeWords
 import kotlinx.coroutines.launch
 
 private val Green500 = Color(0xFF16a34a)
@@ -138,13 +140,13 @@ fun ChildFormScreen(childId: Long?, onBack: () -> Unit) {
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
-                        value = firstName, onValueChange = { firstName = it },
+                        value = firstName, onValueChange = { firstName = capitalizeWords(it) },
                         label = { Text("First Name *") }, singleLine = true,
                         modifier = Modifier.weight(1f),
                         colors = fieldColors, shape = RoundedCornerShape(12.dp),
                     )
                     OutlinedTextField(
-                        value = lastName, onValueChange = { lastName = it },
+                        value = lastName, onValueChange = { lastName = capitalizeWords(it) },
                         label = { Text("Last Name *") }, singleLine = true,
                         modifier = Modifier.weight(1f),
                         colors = fieldColors, shape = RoundedCornerShape(12.dp),
@@ -182,7 +184,7 @@ fun ChildFormScreen(childId: Long?, onBack: () -> Unit) {
                 }
 
                 OutlinedTextField(
-                    value = address, onValueChange = { address = it },
+                    value = address, onValueChange = { address = capitalizeWords(it) },
                     label = { Text("Address") }, singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     colors = fieldColors, shape = RoundedCornerShape(12.dp),
@@ -259,6 +261,11 @@ fun ChildFormScreen(childId: Long?, onBack: () -> Unit) {
                 ) {
                     if (saving) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = Color.White, strokeWidth = 2.dp)
                     else Text(if (isEdit) "Save Changes" else "Add Child", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                }
+
+                if (isEdit && childId != null) {
+                    Spacer(Modifier.height(4.dp))
+                    GuardiansSection(childId)
                 }
 
                 Spacer(Modifier.height(16.dp))

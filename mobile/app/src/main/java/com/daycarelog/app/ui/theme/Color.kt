@@ -29,3 +29,12 @@ val StatVioletBg = Color(0xFFEDE9FE)
 val StatVioletFg = Color(0xFF7C3AED)
 val StatAmberBg  = Color(0xFFFEF3C7)
 val StatAmberFg  = Color(0xFFD97706)
+
+// Dark theme surfaces — same two-tier relationship as the light palette above
+// (OffWhite/CardSurface vs White), just inverted: in a dark UI, "elevated" surfaces
+// (drawer, nested cards) read best a shade LIGHTER than the base page, not darker.
+val DarkBackground   = Color(0xFF111827) // darkest tier — page canvas
+val DarkSurface      = Color(0xFF1F2937) // not-so-dark tier — drawer, cards, chips
+val DarkOnBackground = Color(0xFFF9FAFB)
+val DarkMutedGray    = Color(0xFF9CA3AF)
+val DarkBorderGray   = Color(0xFF374151)

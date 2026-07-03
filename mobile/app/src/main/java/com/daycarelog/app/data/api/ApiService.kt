@@ -3,8 +3,12 @@ package com.daycarelog.app.data.api
 import com.daycarelog.app.data.model.AttendanceRecord
 import com.daycarelog.app.data.model.AuthResponse
 import com.daycarelog.app.data.model.Child
+import com.daycarelog.app.data.model.CreateGuardianResponse
 import com.daycarelog.app.data.model.CreateUserRequest
 import com.daycarelog.app.data.model.CreateUserResponse
+import com.daycarelog.app.data.model.Guardian
+import com.daycarelog.app.data.model.GuardianAccountResponse
+import com.daycarelog.app.data.model.GuardianRequest
 import com.daycarelog.app.data.model.HealthRecord
 import com.daycarelog.app.data.model.LoginRequest
 import com.daycarelog.app.data.model.MonthlyReport
@@ -44,6 +48,35 @@ interface ApiService {
 
     @DELETE("children/{id}")
     suspend fun deleteChild(@Path("id") id: Long)
+
+    // Parent-facing "mine" endpoints — resolve the caller's own linked children
+    // server-side from the JWT, never from a request param, so there's no ID to
+    // tamper with. Admin/Staff calling these just get an empty list back.
+    @GET("children/mine")
+    suspend fun getMyChildren(): List<Child>
+
+    @GET("attendance/mine")
+    suspend fun getMyAttendance(): List<AttendanceRecord>
+
+    @GET("health-records/mine")
+    suspend fun getMyHealthRecords(): List<HealthRecord>
+
+    // Guardians — per-child contact/portal-account management (Admin/Staff only)
+    @GET("children/{childId}/guardians")
+    suspend fun getGuardians(@Path("childId") childId: Long): List<Guardian>
+
+    @POST("children/{childId}/guardians")
+    suspend fun addGuardian(@Path("childId") childId: Long, @Body request: GuardianRequest): CreateGuardianResponse
+
+    @DELETE("children/{childId}/guardians/{guardianId}")
+    suspend fun deleteGuardian(@Path("childId") childId: Long, @Path("guardianId") guardianId: Long)
+
+    // Guardians — portal-account directory (Admin/Staff only)
+    @GET("guardians")
+    suspend fun getGuardianAccounts(): List<GuardianAccountResponse>
+
+    @DELETE("guardians/user/{userId}")
+    suspend fun removeGuardianAccount(@Path("userId") userId: Long)
 
     // Attendance
     @GET("attendance")

@@ -36,6 +36,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -61,6 +63,7 @@ import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.api.TokenProvider
 import com.daycarelog.app.data.model.UpdateProfileRequest
 import com.daycarelog.app.data.model.UserDto
+import com.daycarelog.app.data.preferences.ThemeState
 import com.daycarelog.app.data.preferences.TokenDataStore
 import com.daycarelog.app.util.capitalizeWords
 import com.daycarelog.app.util.capitalizedNameFieldValue
@@ -415,6 +418,33 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                         Text("Manage Staff", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Green900, modifier = Modifier.weight(1f))
                         Text("›", fontSize = 18.sp, color = Color.Gray)
                     }
+                }
+            }
+
+            // Appearance
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(2.dp),
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(if (ThemeState.isDarkMode) "🌙" else "☀️", fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Dark Mode", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Green900)
+                        Text(
+                            if (ThemeState.isDarkMode) "On" else "Off",
+                            fontSize = 12.sp, color = Color.Gray,
+                        )
+                    }
+                    Switch(
+                        checked = ThemeState.isDarkMode,
+                        onCheckedChange = { scope.launch { ThemeState.toggle(ctx) } },
+                        colors = SwitchDefaults.colors(checkedTrackColor = Green500),
+                    )
                 }
             }
 

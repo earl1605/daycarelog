@@ -60,10 +60,23 @@ private val statusColors = mapOf(
     "excused" to (Color(0xFF7c3aed) to Color(0xFFede9fe)),
 )
 
+// The daycare only operates Monday-Friday. If "today" is a weekend, default to the
+// most recent Friday rather than opening on a date that can never have attendance.
+private fun nearestWeekday(date: java.time.LocalDate): java.time.LocalDate = when (date.dayOfWeek) {
+    java.time.DayOfWeek.SATURDAY -> date.minusDays(1)
+    java.time.DayOfWeek.SUNDAY   -> date.minusDays(2)
+    else -> date
+}
+
+private fun isWeekend(dateStr: String): Boolean = try {
+    val d = java.time.LocalDate.parse(dateStr)
+    d.dayOfWeek == java.time.DayOfWeek.SATURDAY || d.dayOfWeek == java.time.DayOfWeek.SUNDAY
+} catch (e: Exception) { false }
+
 @Composable
 fun AttendanceScreen(onOpenDrawer: () -> Unit) {
     val scope   = rememberCoroutineScope()
-    var date    by remember { mutableStateOf(java.time.LocalDate.now().toString()) }
+    var date    by remember { mutableStateOf(nearestWeekday(java.time.LocalDate.now()).toString()) }
     var children by remember { mutableStateOf<List<Child>>(emptyList()) }
     var loading  by remember { mutableStateOf(true) }
     var saving   by remember { mutableStateOf(false) }
@@ -72,6 +85,10 @@ fun AttendanceScreen(onOpenDrawer: () -> Unit) {
     val statusMap = remember { mutableStateMapOf<Long, String>() }
 
     fun loadAttendance(d: String) {
+        if (isWeekend(d)) {
+            error = "Attendance can only be recorded for Monday–Friday"
+            return
+        }
         scope.launch {
             loading = true
             saved   = false

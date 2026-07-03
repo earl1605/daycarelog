@@ -14,6 +14,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "dc
 object TokenDataStore {
     private val TOKEN_KEY = stringPreferencesKey("dcl_token")
     private val USER_KEY  = stringPreferencesKey("dcl_user")
+    private val THEME_KEY = stringPreferencesKey("dcl_theme")
 
     fun getToken(context: Context): Flow<String?> =
         context.dataStore.data.map { it[TOKEN_KEY] }
@@ -29,7 +30,19 @@ object TokenDataStore {
     fun getUser(context: Context): Flow<String?> =
         context.dataStore.data.map { it[USER_KEY] }
 
+    fun getTheme(context: Context): Flow<String?> =
+        context.dataStore.data.map { it[THEME_KEY] }
+
+    suspend fun saveTheme(context: Context, theme: String) {
+        context.dataStore.edit { it[THEME_KEY] = theme }
+    }
+
+    // Clears the session (token/user) only — the theme preference is a device/app
+    // preference, not session data, so it must survive sign-out.
     suspend fun clear(context: Context) {
-        context.dataStore.edit { it.clear() }
+        context.dataStore.edit {
+            it.remove(TOKEN_KEY)
+            it.remove(USER_KEY)
+        }
     }
 }

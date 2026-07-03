@@ -54,10 +54,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.daycarelog.app.data.api.RetrofitClient
 import com.daycarelog.app.data.model.UserDto
+import com.daycarelog.app.data.preferences.ThemeState
 import com.daycarelog.app.data.preferences.TokenDataStore
 import com.daycarelog.app.ui.theme.BorderGray
 import com.daycarelog.app.ui.theme.CardSurface
 import com.daycarelog.app.ui.theme.Charcoal
+import com.daycarelog.app.ui.theme.DarkBorderGray
+import com.daycarelog.app.ui.theme.DarkMutedGray
+import com.daycarelog.app.ui.theme.DarkOnBackground
+import com.daycarelog.app.ui.theme.DarkSurface
+import com.daycarelog.app.ui.theme.Green30
 import com.daycarelog.app.ui.theme.Green40
 import com.daycarelog.app.ui.theme.Green95
 import com.daycarelog.app.ui.theme.MutedGray
@@ -90,6 +96,14 @@ fun DashboardScreen(
     val userJson by TokenDataStore.getUser(ctx).collectAsState(initial = null)
     val user = remember(userJson) { userJson?.let { Gson().fromJson(it, UserDto::class.java) } }
 
+    val isDark      = ThemeState.isDarkMode
+    val pageBg      = if (isDark) com.daycarelog.app.ui.theme.DarkBackground else White
+    val textColor   = if (isDark) DarkOnBackground else Charcoal
+    val mutedColor  = if (isDark) DarkMutedGray else MutedGray
+    val cardBg      = if (isDark) DarkSurface else CardSurface
+    val borderColor = if (isDark) DarkBorderGray else BorderGray
+    val chipBg      = if (isDark) Green30 else Green95
+
     var totalChildren  by remember { mutableStateOf<Int?>(null) }
     var activeChildren by remember { mutableStateOf<Int?>(null) }
     var presentToday   by remember { mutableStateOf<Int?>(null) }
@@ -108,7 +122,12 @@ fun DashboardScreen(
             val attendanceToday = RetrofitClient.api.getAttendance(todayStr)
             presentToday = attendanceToday.count { it.status == "present" }
 
-            val days = (6 downTo 0).map { today.minusDays(it.toLong()) }
+            // This week's Monday through Friday only - the daycare doesn't operate on
+            // weekends, so the chart never shows Sat/Sun columns regardless of what day
+            // today happens to be. (DayOfWeek.value is 1=Monday..7=Sunday.)
+            val mondayOffset = if (today.dayOfWeek == java.time.DayOfWeek.SUNDAY) 6L else (today.dayOfWeek.value - 1).toLong()
+            val monday = today.minusDays(mondayOffset)
+            val days = (0..4).map { monday.plusDays(it.toLong()) }
             val range = RetrofitClient.api.getAttendanceRange(days.first().toString(), days.last().toString())
             weeklyData = days.map { d ->
                 val dayStr = d.toString()
@@ -138,7 +157,7 @@ fun DashboardScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(pageBg)
             .verticalScroll(rememberScrollState()),
     ) {
         // ── Header ─────────────────────────────────────────────────────
@@ -147,11 +166,11 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 16.dp, top = 8.dp),
         ) {
             IconButton(onClick = onOpenDrawer) {
-                Icon(Icons.Outlined.Menu, contentDescription = "Open navigation", tint = Charcoal)
+                Icon(Icons.Outlined.Menu, contentDescription = "Open navigation", tint = textColor)
             }
             Column(Modifier.padding(start = 4.dp)) {
-                Text("$greeting, $displayName", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Charcoal)
-                Text(dateText, fontSize = 14.sp, color = MutedGray)
+                Text("$greeting, $displayName", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = textColor)
+                Text(dateText, fontSize = 14.sp, color = mutedColor)
             }
         }
 
@@ -169,42 +188,42 @@ fun DashboardScreen(
                 // ── Stat grid (2x2) ────────────────────────────────────
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        StatCard(Modifier.weight(1f), Icons.Outlined.Groups, "Active Children", activeChildren?.toString() ?: "—", StatGreenBg, StatGreenFg)
-                        StatCard(Modifier.weight(1f), Icons.AutoMirrored.Outlined.FactCheck, "Present Today", presentToday?.toString() ?: "—", StatBlueBg, StatBlueFg)
+                        StatCard(Modifier.weight(1f), Icons.Outlined.Groups, "Active Children", activeChildren?.toString() ?: "—", StatGreenBg, StatGreenFg, cardBg, borderColor, textColor, mutedColor)
+                        StatCard(Modifier.weight(1f), Icons.AutoMirrored.Outlined.FactCheck, "Present Today", presentToday?.toString() ?: "—", StatBlueBg, StatBlueFg, cardBg, borderColor, textColor, mutedColor)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        StatCard(Modifier.weight(1f), Icons.Outlined.PersonAddAlt, "Total Enrolled", totalChildren?.toString() ?: "—", StatVioletBg, StatVioletFg)
-                        StatCard(Modifier.weight(1f), Icons.Outlined.BarChart, "Attendance Rate", attendanceRate, StatAmberBg, StatAmberFg)
+                        StatCard(Modifier.weight(1f), Icons.Outlined.PersonAddAlt, "Total Enrolled", totalChildren?.toString() ?: "—", StatVioletBg, StatVioletFg, cardBg, borderColor, textColor, mutedColor)
+                        StatCard(Modifier.weight(1f), Icons.Outlined.BarChart, "Attendance Rate", attendanceRate, StatAmberBg, StatAmberFg, cardBg, borderColor, textColor, mutedColor)
                     }
                 }
 
                 // ── Weekly attendance chart ────────────────────────────
                 Column {
-                    SectionHeader("Weekly Attendance", "View all →", onTakeAttendance)
+                    SectionHeader("Weekly Attendance", "View all →", onTakeAttendance, textColor)
                     Spacer(Modifier.height(16.dp))
                     Box(
                         Modifier
                             .fillMaxWidth()
-                            .background(CardSurface, RoundedCornerShape(12.dp))
-                            .border(1.dp, BorderGray, RoundedCornerShape(12.dp))
+                            .background(cardBg, RoundedCornerShape(12.dp))
+                            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
                             .padding(16.dp),
                     ) {
-                        WeeklyAttendanceChart(weeklyData)
+                        WeeklyAttendanceChart(weeklyData, borderColor, mutedColor)
                     }
                 }
 
                 // ── Quick actions ───────────────────────────────────────
                 Column {
-                    SectionHeader("Quick Actions", null, null)
+                    SectionHeader("Quick Actions", null, null, textColor)
                     Spacer(Modifier.height(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            QuickActionCard(Modifier.weight(1f), Icons.Outlined.PersonAddAlt, "Add Child", onAddChild)
-                            QuickActionCard(Modifier.weight(1f), Icons.AutoMirrored.Outlined.FactCheck, "Take Attendance", onTakeAttendance)
+                            QuickActionCard(Modifier.weight(1f), Icons.Outlined.PersonAddAlt, "Add Child", onAddChild, cardBg, borderColor, chipBg, textColor)
+                            QuickActionCard(Modifier.weight(1f), Icons.AutoMirrored.Outlined.FactCheck, "Take Attendance", onTakeAttendance, cardBg, borderColor, chipBg, textColor)
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            QuickActionCard(Modifier.weight(1f), Icons.Outlined.MonitorHeart, "Health Record", onAddHealthRecord)
-                            QuickActionCard(Modifier.weight(1f), Icons.Outlined.BarChart, "View Reports", onViewReports)
+                            QuickActionCard(Modifier.weight(1f), Icons.Outlined.MonitorHeart, "Health Record", onAddHealthRecord, cardBg, borderColor, chipBg, textColor)
+                            QuickActionCard(Modifier.weight(1f), Icons.Outlined.BarChart, "View Reports", onViewReports, cardBg, borderColor, chipBg, textColor)
                         }
                     }
                 }
@@ -215,13 +234,13 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun SectionHeader(title: String, actionLabel: String?, onAction: (() -> Unit)?) {
+private fun SectionHeader(title: String, actionLabel: String?, onAction: (() -> Unit)?, textColor: Color = Charcoal) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Charcoal)
+        Text(title, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = textColor)
         if (actionLabel != null && onAction != null) {
             Text(
                 actionLabel,
@@ -242,11 +261,15 @@ private fun StatCard(
     value: String,
     badgeBg: Color,
     badgeFg: Color,
+    cardBg: Color = CardSurface,
+    borderColor: Color = BorderGray,
+    textColor: Color = Charcoal,
+    mutedColor: Color = MutedGray,
 ) {
     Row(
         modifier = modifier
-            .background(CardSurface, RoundedCornerShape(12.dp))
-            .border(1.dp, BorderGray, RoundedCornerShape(12.dp))
+            .background(cardBg, RoundedCornerShape(12.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -261,8 +284,8 @@ private fun StatCard(
             Icon(icon, contentDescription = null, tint = badgeFg, modifier = Modifier.size(20.dp))
         }
         Column {
-            Text(label, fontSize = 12.sp, color = MutedGray, maxLines = 1)
-            Text(value, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Charcoal)
+            Text(label, fontSize = 12.sp, color = mutedColor, maxLines = 1)
+            Text(value, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = textColor)
         }
     }
 }
@@ -273,13 +296,17 @@ private fun QuickActionCard(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
+    cardBg: Color = CardSurface,
+    borderColor: Color = BorderGray,
+    chipBg: Color = Green95,
+    textColor: Color = Charcoal,
 ) {
     Column(
         modifier = modifier
             .aspectRatio(1.6f)
             .clip(RoundedCornerShape(12.dp))
-            .background(CardSurface)
-            .border(1.dp, BorderGray, RoundedCornerShape(12.dp))
+            .background(cardBg)
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -289,18 +316,18 @@ private fun QuickActionCard(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(Green95),
+                .background(chipBg),
             contentAlignment = Alignment.Center,
         ) {
             Icon(icon, contentDescription = null, tint = Green40, modifier = Modifier.size(18.dp))
         }
         Spacer(Modifier.height(8.dp))
-        Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Charcoal, textAlign = TextAlign.Center)
+        Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = textColor, textAlign = TextAlign.Center)
     }
 }
 
 @Composable
-private fun WeeklyAttendanceChart(data: List<DayAttendance>) {
+private fun WeeklyAttendanceChart(data: List<DayAttendance>, gridColor: Color = BorderGray, mutedColor: Color = MutedGray) {
     var selected by remember { mutableStateOf<Int?>(null) }
     val maxVal = (data.maxOfOrNull { it.present } ?: 0).coerceAtLeast(1)
     val chartHeight = 120.dp
@@ -313,7 +340,7 @@ private fun WeeklyAttendanceChart(data: List<DayAttendance>) {
                 for (i in 0..steps) {
                     val y = stepY * i
                     drawLine(
-                        color = BorderGray,
+                        color = gridColor,
                         start = Offset(0f, y),
                         end = Offset(size.width, y),
                         strokeWidth = 1.dp.toPx(),
@@ -322,7 +349,7 @@ private fun WeeklyAttendanceChart(data: List<DayAttendance>) {
                 }
             }
             if (data.isEmpty()) {
-                Text("No attendance data yet", fontSize = 12.sp, color = MutedGray, modifier = Modifier.align(Alignment.Center))
+                Text("No attendance data yet", fontSize = 12.sp, color = mutedColor, modifier = Modifier.align(Alignment.Center))
             } else {
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     data.forEachIndexed { i, d ->
@@ -353,7 +380,7 @@ private fun WeeklyAttendanceChart(data: List<DayAttendance>) {
         Spacer(Modifier.height(6.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             data.forEach { d ->
-                Text(d.label, fontSize = 11.sp, color = MutedGray, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(d.label, fontSize = 11.sp, color = mutedColor, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
         }
     }

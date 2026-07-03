@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.ChildCare
 import androidx.compose.material.icons.automirrored.outlined.FactCheck
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.ManageAccounts
 import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.Settings
@@ -61,6 +62,7 @@ import androidx.navigation.compose.rememberNavController
 import com.daycarelog.app.R
 import com.daycarelog.app.data.api.TokenProvider
 import com.daycarelog.app.data.model.UserDto
+import com.daycarelog.app.data.preferences.ThemeState
 import com.daycarelog.app.data.preferences.TokenDataStore
 import com.daycarelog.app.ui.attendance.AttendanceScreen
 import com.daycarelog.app.ui.children.ChildFormScreen
@@ -72,6 +74,11 @@ import com.daycarelog.app.ui.reports.ReportsScreen
 import com.daycarelog.app.ui.settings.SettingsScreen
 import com.daycarelog.app.ui.theme.BorderGray
 import com.daycarelog.app.ui.theme.Charcoal
+import com.daycarelog.app.ui.theme.DarkBorderGray
+import com.daycarelog.app.ui.theme.DarkMutedGray
+import com.daycarelog.app.ui.theme.DarkOnBackground
+import com.daycarelog.app.ui.theme.DarkSurface
+import com.daycarelog.app.ui.theme.Green30
 import com.daycarelog.app.ui.theme.Green40
 import com.daycarelog.app.ui.theme.Green95
 import com.daycarelog.app.ui.theme.MutedGray
@@ -92,6 +99,13 @@ object InnerRoutes {
     const val REPORTS     = "reports"
     const val SETTINGS    = "settings"
     const val USERS       = "users"
+    const val GUARDIANS   = "guardians"
+
+    // Parent role only sees their own child's data - no Children/Reports/Users/Guardians,
+    // and no access to the Admin/Staff attendance-taking or health-record-entry screens.
+    const val PARENT_DASHBOARD  = "parent_dashboard"
+    const val PARENT_ATTENDANCE = "parent_attendance"
+    const val PARENT_HEALTH     = "parent_health"
 }
 
 private data class NavEntry(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
@@ -101,6 +115,7 @@ private val mainSection = listOf(
     NavEntry(InnerRoutes.CHILDREN,   "Children",       Icons.Outlined.ChildCare),
     NavEntry(InnerRoutes.ATTENDANCE, "Attendance",     Icons.AutoMirrored.Outlined.FactCheck),
     NavEntry(InnerRoutes.HEALTH,     "Health Records", Icons.Outlined.MonitorHeart),
+    NavEntry(InnerRoutes.GUARDIANS,  "Guardians",      Icons.Outlined.Groups),
 )
 private val managementSection = listOf(
     NavEntry(InnerRoutes.REPORTS,  "Reports",  Icons.Outlined.BarChart),
@@ -108,6 +123,14 @@ private val managementSection = listOf(
 )
 private val adminSection = listOf(
     NavEntry(InnerRoutes.USERS, "Users", Icons.Outlined.ManageAccounts),
+)
+private val parentMainSection = listOf(
+    NavEntry(InnerRoutes.PARENT_DASHBOARD,  "Dashboard",      Icons.Outlined.Home),
+    NavEntry(InnerRoutes.PARENT_ATTENDANCE, "Attendance",     Icons.AutoMirrored.Outlined.FactCheck),
+    NavEntry(InnerRoutes.PARENT_HEALTH,     "Health Records", Icons.Outlined.MonitorHeart),
+)
+private val parentManagementSection = listOf(
+    NavEntry(InnerRoutes.SETTINGS, "Settings", Icons.Outlined.Settings),
 )
 
 @Composable
@@ -127,6 +150,29 @@ fun MainScreen(onSignOut: () -> Unit) {
         if (json != null) user = Gson().fromJson(json, UserDto::class.java)
     }
     val isAdmin = user?.role == "admin"
+    val isParent = user?.role == "parent"
+
+    // The graph always starts at DASHBOARD (Admin/Staff's home). Once we know the
+    // caller is actually a Parent, replace it before they ever see Admin/Staff data -
+    // this can't be the NavHost's startDestination directly since that's fixed at
+    // first composition, before the cached user has finished loading from DataStore.
+    var redirectedForParent by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(user) {
+        if (!redirectedForParent && isParent) {
+            redirectedForParent = true
+            innerNav.navigate(InnerRoutes.PARENT_DASHBOARD) {
+                popUpTo(innerNav.graph.findStartDestination().id) { inclusive = true }
+            }
+        }
+    }
+
+    val isDark       = ThemeState.isDarkMode
+    val drawerBg     = if (isDark) DarkSurface else OffWhite
+    val drawerText   = if (isDark) DarkOnBackground else Charcoal
+    val mutedText    = if (isDark) DarkMutedGray else MutedGray
+    val dividerColor = if (isDark) DarkBorderGray else BorderGray
+    val activeBg     = if (isDark) Green30 else Green95
+    val activeText   = if (isDark) DarkOnBackground else Charcoal
 
     fun navigateTo(route: String) {
         innerNav.navigate(route) {
@@ -165,8 +211,8 @@ fun MainScreen(onSignOut: () -> Unit) {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = OffWhite,
-                drawerContentColor = Charcoal,
+                drawerContainerColor = drawerBg,
+                drawerContentColor = drawerText,
                 modifier = Modifier.width(280.dp),
             ) {
                 // ── Logo header ──────────────────────────────────────────
@@ -191,11 +237,11 @@ fun MainScreen(onSignOut: () -> Unit) {
                         )
                     }
                     Column {
-                        Text("DaycareLog", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Charcoal)
-                        Text("BARANGAY SYSTEM", fontSize = 10.sp, color = MutedGray, letterSpacing = 0.8.sp)
+                        Text("DaycareLog", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = drawerText)
+                        Text("BARANGAY SYSTEM", fontSize = 10.sp, color = mutedText, letterSpacing = 0.8.sp)
                     }
                 }
-                HorizontalDivider(color = BorderGray)
+                HorizontalDivider(color = dividerColor)
 
                 Column(
                     modifier = Modifier
@@ -204,33 +250,33 @@ fun MainScreen(onSignOut: () -> Unit) {
                         .padding(horizontal = 12.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    DrawerSectionLabel("MAIN")
-                    mainSection.forEach { item ->
-                        DrawerNavItem(item, currentRoute, ::navigateTo)
+                    DrawerSectionLabel("MAIN", mutedText)
+                    (if (isParent) parentMainSection else mainSection).forEach { item ->
+                        DrawerNavItem(item, currentRoute, ::navigateTo, activeBg, activeText, mutedText)
                     }
 
                     Spacer(Modifier.height(12.dp))
-                    HorizontalDivider(color = BorderGray)
+                    HorizontalDivider(color = dividerColor)
                     Spacer(Modifier.height(8.dp))
 
-                    DrawerSectionLabel("MANAGEMENT")
-                    managementSection.forEach { item ->
-                        DrawerNavItem(item, currentRoute, ::navigateTo)
+                    DrawerSectionLabel("MANAGEMENT", mutedText)
+                    (if (isParent) parentManagementSection else managementSection).forEach { item ->
+                        DrawerNavItem(item, currentRoute, ::navigateTo, activeBg, activeText, mutedText)
                     }
 
                     if (isAdmin) {
                         Spacer(Modifier.height(12.dp))
-                        HorizontalDivider(color = BorderGray)
+                        HorizontalDivider(color = dividerColor)
                         Spacer(Modifier.height(8.dp))
 
-                        DrawerSectionLabel("ADMIN")
+                        DrawerSectionLabel("ADMIN", mutedText)
                         adminSection.forEach { item ->
-                            DrawerNavItem(item, currentRoute, ::navigateTo)
+                            DrawerNavItem(item, currentRoute, ::navigateTo, activeBg, activeText, mutedText)
                         }
                     }
                 }
 
-                HorizontalDivider(color = BorderGray)
+                HorizontalDivider(color = dividerColor)
                 // ── User footer ──────────────────────────────────────────
                 Column(Modifier.padding(12.dp)) {
                     Row(
@@ -245,16 +291,16 @@ fun MainScreen(onSignOut: () -> Unit) {
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(Green95),
+                                .background(if (isDark) Green30 else Green95),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(initial.toString(), color = Green40, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }
                         Column(Modifier.weight(1f)) {
-                            Text(displayName, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Charcoal, maxLines = 1)
+                            Text(displayName, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = drawerText, maxLines = 1)
                             Text(
                                 user?.role?.replaceFirstChar { it.uppercase() } ?: "",
-                                fontSize = 11.sp, color = MutedGray,
+                                fontSize = 11.sp, color = mutedText,
                             )
                         }
                     }
@@ -262,9 +308,9 @@ fun MainScreen(onSignOut: () -> Unit) {
                         onClick = { showSignOutDialog = true },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null, modifier = Modifier.size(16.dp), tint = MutedGray)
+                        Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null, modifier = Modifier.size(16.dp), tint = mutedText)
                         Spacer(Modifier.width(8.dp))
-                        Text("Sign out", fontSize = 13.sp, color = MutedGray, modifier = Modifier.weight(1f))
+                        Text("Sign out", fontSize = 13.sp, color = mutedText, modifier = Modifier.weight(1f))
                     }
                 }
             }
@@ -324,25 +370,44 @@ fun MainScreen(onSignOut: () -> Unit) {
                 composable(InnerRoutes.USERS) {
                     UsersScreen(onBack = { innerNav.popBackStack() })
                 }
+                composable(InnerRoutes.GUARDIANS) {
+                    com.daycarelog.app.ui.guardians.GuardiansScreen(onOpenDrawer = openDrawer)
+                }
+                composable(InnerRoutes.PARENT_DASHBOARD) {
+                    com.daycarelog.app.ui.parent.ParentDashboardScreen(onOpenDrawer = openDrawer)
+                }
+                composable(InnerRoutes.PARENT_ATTENDANCE) {
+                    com.daycarelog.app.ui.parent.ParentAttendanceScreen(onOpenDrawer = openDrawer)
+                }
+                composable(InnerRoutes.PARENT_HEALTH) {
+                    com.daycarelog.app.ui.parent.ParentHealthScreen(onOpenDrawer = openDrawer)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun DrawerSectionLabel(text: String) {
+private fun DrawerSectionLabel(text: String, mutedText: androidx.compose.ui.graphics.Color) {
     Text(
         text,
         fontSize = 11.sp,
         fontWeight = FontWeight.SemiBold,
-        color = MutedGray,
+        color = mutedText,
         letterSpacing = 0.8.sp,
         modifier = Modifier.padding(start = 12.dp, top = 4.dp, bottom = 4.dp),
     )
 }
 
 @Composable
-private fun DrawerNavItem(item: NavEntry, currentRoute: String?, onClick: (String) -> Unit) {
+private fun DrawerNavItem(
+    item: NavEntry,
+    currentRoute: String?,
+    onClick: (String) -> Unit,
+    activeBg: androidx.compose.ui.graphics.Color,
+    activeText: androidx.compose.ui.graphics.Color,
+    mutedText: androidx.compose.ui.graphics.Color,
+) {
     val selected = currentRoute == item.route ||
         currentRoute?.startsWith("${item.route}/") == true
     NavigationDrawerItem(
@@ -352,11 +417,11 @@ private fun DrawerNavItem(item: NavEntry, currentRoute: String?, onClick: (Strin
         onClick = { onClick(item.route) },
         shape = RoundedCornerShape(8.dp),
         colors = NavigationDrawerItemDefaults.colors(
-            selectedContainerColor = Green95,
-            selectedIconColor = Charcoal,
-            selectedTextColor = Charcoal,
-            unselectedIconColor = MutedGray,
-            unselectedTextColor = MutedGray,
+            selectedContainerColor = activeBg,
+            selectedIconColor = activeText,
+            selectedTextColor = activeText,
+            unselectedIconColor = mutedText,
+            unselectedTextColor = mutedText,
         ),
         modifier = Modifier.padding(vertical = 1.dp),
     )
