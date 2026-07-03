@@ -8,8 +8,8 @@ import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <ThemeProvider>
         <App />
         <Toaster
           position="top-right"
@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             success: { iconTheme: { primary: '#16a34a', secondary: '#fff' } },
           }}
         />
-      </BrowserRouter>
-    </ThemeProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   </React.StrictMode>
 )
