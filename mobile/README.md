@@ -4,7 +4,7 @@ Kotlin + Jetpack Compose (Material 3) Android client for DaycareLog, a daycare m
 
 ## Tech stack
 
-- **Kotlin** + **Jetpack Compose** (Material 3, fixed brand color scheme — no dynamic/wallpaper-based theming)
+- **Kotlin** + **Jetpack Compose** (Material 3; manual light/dark mode toggle in Settings — no Android system dynamic/wallpaper-based theming)
 - **Navigation Compose** — in-app routing
 - **Retrofit** + **Gson** — REST API client
 - **Jetpack DataStore (Preferences)** — persisted auth token/user session
@@ -13,6 +13,7 @@ Kotlin + Jetpack Compose (Material 3) Android client for DaycareLog, a daycare m
 ## Requirements
 
 - Android Studio (or the Gradle wrapper + Android SDK on the command line)
+- The Gradle toolchain is deliberately pinned to versions compatible with **Android Studio Iguana (2023.2.1)** — AGP 8.3.2, Gradle 8.4, Kotlin 1.9.22, Compose Compiler 1.5.10 — rather than the latest available versions.
 
 ## Run
 
@@ -39,19 +40,24 @@ app/src/main/java/com/daycarelog/app/
 │   ├── main/             MainScreen — the Navigation Drawer shell wrapping every other screen
 │   ├── dashboard/        Stat grid, weekly attendance chart, quick actions
 │   ├── children/         Children list + add/edit form
-│   ├── attendance/       Daily attendance
-│   ├── health/           Health records list + add form
+│   ├── attendance/       Daily attendance (weekdays only)
+│   ├── health/           Health records list + add/delete form
+│   ├── guardians/        Guardians directory (portal accounts) + per-child GuardiansSection
+│   ├── parent/           Read-only Parent screens — Dashboard, Attendance, Health Records (`/mine` endpoints)
 │   ├── reports/          Monthly report
 │   ├── users/            Admin-only user management
-│   ├── settings/         Profile (editable name fields) + sign out
+│   ├── settings/         Profile (editable name fields), dark mode toggle, sign out
 │   ├── common/           Shared composables (date picker field)
-│   └── theme/            Fixed Material 3 color scheme, typography
+│   └── theme/            Material 3 color scheme (light + dark), ScreenPalette theming helper, typography
 └── util/TextUtils.kt     Shared name-capitalization logic
 ```
 
 ## Notable behavior
 
-- **Navigation**: `MainScreen.kt` wraps the app in a `ModalNavigationDrawer` grouped into Main / Management / Admin sections (Admin only shown for the `admin` role), matching the [web sidebar](../web)'s design. Every top-level screen has a menu icon to reopen the drawer.
+- **Navigation**: `MainScreen.kt` wraps the app in a `ModalNavigationDrawer` grouped into Main / Management / Admin sections for Admin/Staff/Teacher, or a read-only Parent section for the `parent` role, matching the [web sidebar](../web)'s design. Every top-level screen has a menu icon to reopen the drawer.
+- **Theming**: a manual light/dark mode toggle (`ThemeState.kt`, DataStore-persisted, survives sign-out) drives a `rememberScreenPalette()` helper threaded through every screen's cards/rows, mirroring the web app's two-tier light/dark surface design.
+- **Guardians & Parent portal**: Admin/Staff manage guardians per child (`GuardiansSection`) or via a standalone directory (`GuardiansScreen`), optionally creating a `parent`-role portal login tied to one or more children. Parent users only see the read-only Dashboard/Attendance/Health screens under `ui/parent/`, sourced from `/mine` endpoints resolved server-side from the JWT.
+- **Attendance**: restricted to weekdays (Monday–Friday) — the date picker defaults to the nearest weekday and rejects weekend dates before submission.
 - **Name fields**: First/Last/Middle Name inputs on Registration and the Settings profile form auto-capitalize each word as you type (`util/TextUtils.kt`, shared by both screens), via `KeyboardCapitalization.Words` plus a `capitalizeWords()` pass before saving — without overriding intentional casing like "McDonald" or disturbing cursor position mid-edit.
 - **Auth**: JWT + user JSON persisted in DataStore; `NavGraph.kt` checks for a saved token on launch to decide between the Login screen and the main app.
 - **Gotcha**: `painterResource()` cannot load `<adaptive-icon>` mipmap resources (e.g. `R.mipmap.ic_launcher_round`) — throws at runtime, not compile time. Use a plain vector `drawable` instead (see `R.drawable.ic_child`, used for the drawer logo and Login screen icon).
