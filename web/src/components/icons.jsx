@@ -193,3 +193,22 @@ export function MoonIcon(props) {
     </svg>
   )
 }
+
+export function EyeIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+export function EyeOffIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3 3l18 18" />
+      <path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c7 0 10.5 7 10.5 7a13.6 13.6 0 0 1-3.1 4M6.6 6.6C3.5 8.6 1.5 12 1.5 12S5 19 12 19a10.7 10.7 0 0 0 4.4-.9" />
+      <path d="M9.9 10.1a3 3 0 0 0 4 4" />
+    </svg>
+  )
+}

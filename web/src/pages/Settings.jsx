@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
-import { UsersIcon, KeyIcon } from '../components/icons'
+import { UsersIcon, KeyIcon, EyeIcon, EyeOffIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
 function resizeImage(file, maxSize = 256) {
@@ -32,6 +32,7 @@ export default function Settings() {
   const [newPass,    setNewPass]    = useState('')
   const [confirm,    setConfirm]    = useState('')
   const [saving,     setSaving]     = useState(false)
+  const [showPass,   setShowPass]   = useState({ curPass: false, newPass: false, confirm: false })
   const [preview,    setPreview]    = useState(user?.profilePhoto ?? null)
   const fileRef = useRef()
 
@@ -165,10 +166,26 @@ export default function Settings() {
             <p className="text-xs text-gray-400 mt-1">Use at least 6 characters. You'll need your current password to confirm.</p>
           </div>
 
-          {[['Current Password', curPass, setCurPass], ['New Password', newPass, setNewPass], ['Confirm New Password', confirm, setConfirm]].map(([label, val, setter]) => (
+          {[['Current Password', curPass, setCurPass, 'curPass'], ['New Password', newPass, setNewPass, 'newPass'], ['Confirm New Password', confirm, setConfirm, 'confirm']].map(([label, val, setter, key]) => (
             <div key={label}>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-              <input type="password" value={val} onChange={e => setter(e.target.value)} className={inputClass} />
+              <div className="relative">
+                <input
+                  type={showPass[key] ? 'text' : 'password'}
+                  value={val}
+                  onChange={e => setter(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(s => ({ ...s, [key]: !s[key] }))}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600"
+                  tabIndex={-1}
+                  aria-label={showPass[key] ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+                >
+                  {showPass[key] ? <EyeOffIcon width={17} height={17} /> : <EyeIcon width={17} height={17} />}
+                </button>
+              </div>
             </div>
           ))}
 
