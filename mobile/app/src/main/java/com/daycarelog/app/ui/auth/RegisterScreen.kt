@@ -123,7 +123,7 @@ fun RegisterScreen(
                                 label = { Text("Suffix", fontSize = 12.sp) },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(suffixExpanded) },
                                 shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                                modifier = Modifier.fillMaxWidth().menuAnchor(),
                             )
                             ExposedDropdownMenu(expanded = suffixExpanded, onDismissRequest = { suffixExpanded = false }) {
                                 suffixes.forEach { s ->

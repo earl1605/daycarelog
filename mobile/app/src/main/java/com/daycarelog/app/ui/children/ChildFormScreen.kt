@@ -21,7 +21,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -170,7 +169,7 @@ fun ChildFormScreen(childId: Long?, onBack: () -> Unit) {
                         onValueChange = {}, readOnly = true,
                         label = { Text("Sex *") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(sexExpanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
                         colors = fieldColors, shape = RoundedCornerShape(12.dp),
                     )
                     ExposedDropdownMenu(expanded = sexExpanded, onDismissRequest = { sexExpanded = false }) {
@@ -207,7 +206,7 @@ fun ChildFormScreen(childId: Long?, onBack: () -> Unit) {
                         onValueChange = {}, readOnly = true,
                         label = { Text("Enrollment Status") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(statusExpanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
                         colors = fieldColors, shape = RoundedCornerShape(12.dp),
                     )
                     ExposedDropdownMenu(expanded = statusExpanded, onDismissRequest = { statusExpanded = false }) {

@@ -22,7 +22,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -139,7 +138,7 @@ fun HealthFormScreen(onBack: () -> Unit) {
                         onValueChange = {}, readOnly = true,
                         label = { Text("Child *") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(childExpanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                        modifier = Modifier.fillMaxWidth().menuAnchor(),
                         colors = fieldColors, shape = RoundedCornerShape(12.dp),
                     )
                     ExposedDropdownMenu(expanded = childExpanded, onDismissRequest = { childExpanded = false }) {

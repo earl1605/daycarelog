@@ -29,7 +29,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -188,7 +187,7 @@ fun GuardiansScreen(onOpenDrawer: () -> Unit) {
                             value = selectedChild?.let { "${it.firstName} ${it.lastName}" } ?: "Select a child…",
                             onValueChange = {}, readOnly = true,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(childExpanded) },
-                            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                            modifier = Modifier.fillMaxWidth().menuAnchor(),
                         )
                         ExposedDropdownMenu(expanded = childExpanded, onDismissRequest = { childExpanded = false }) {
                             children.forEach { c ->
@@ -213,7 +212,7 @@ fun GuardiansScreen(onOpenDrawer: () -> Unit) {
                                     scope.launch {
                                         try {
                                             val res = RetrofitClient.api.addGuardian(
-                                                child.id!!,
+                                                child.id,
                                                 GuardianRequest(
                                                     name = name.trim(), relationship = relationship.trim(),
                                                     contactNumber = contactNumber.trim(), address = address.trim(),

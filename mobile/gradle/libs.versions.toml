@@ -1,19 +1,25 @@
 [versions]
-agp = "9.2.1"
-kotlin = "2.2.10"
-coreKtx = "1.16.0"
+# Pinned to Android Studio Iguana (2023.2.1) compatible versions - AGP 8.3.x is the
+# newest AGP that Iguana's sync engine understands; Gradle 8.4 is AGP 8.3's required
+# minimum/default (see gradle-wrapper.properties). Kotlin 1.9.22 predates the Kotlin
+# 2.0 Compose compiler Gradle plugin, so Compose is wired via the classic
+# composeOptions.kotlinCompilerExtensionVersion mechanism in app/build.gradle.kts
+# instead of the kotlin.plugin.compose plugin used by newer Kotlin/AGP combos.
+agp = "8.3.2"
+kotlin = "1.9.22"
+coreKtx = "1.12.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.9.1"
-activityCompose = "1.10.1"
-composeBom = "2026.02.01"
-navigationCompose = "2.9.0"
-retrofit = "2.11.0"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+lifecycleRuntimeKtx = "2.7.0"
+activityCompose = "1.8.2"
+composeBom = "2024.02.00"
+navigationCompose = "2.7.7"
+retrofit = "2.9.0"
 okhttp = "4.12.0"
-datastore = "1.1.4"
-coroutines = "1.10.2"
-lifecycleViewmodelCompose = "2.9.1"
+datastore = "1.0.0"
+coroutines = "1.7.3"
+lifecycleViewmodelCompose = "2.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,4 +47,4 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
