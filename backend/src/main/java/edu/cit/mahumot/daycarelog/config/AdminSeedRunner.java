@@ -33,26 +33,31 @@ public class AdminSeedRunner implements CommandLineRunner {
     // indefinitely after the first admin has been created.
     @Override
     public void run(String... args) {
-        if (userRepository.countByRole("admin") > 0) {
+        String email = seedEmail == null ? "" : seedEmail.trim();
+        String password = seedPassword == null ? "" : seedPassword.trim();
+
+        long adminCount = userRepository.countByRole("admin");
+        log.info("AdminSeedRunner: existing admin count = {}, ADMIN_SEED_EMAIL set = {}", adminCount, !email.isBlank());
+        if (adminCount > 0) {
             return;
         }
-        if (seedEmail.isBlank() || seedPassword.isBlank()) {
+        if (email.isBlank() || password.isBlank()) {
             log.warn("No admin account exists and ADMIN_SEED_EMAIL/ADMIN_SEED_PASSWORD are not set — " +
                     "set both env vars and redeploy to create the first admin account.");
             return;
         }
-        if (userRepository.existsByEmail(seedEmail)) {
-            log.warn("ADMIN_SEED_EMAIL ({}) already belongs to an existing non-admin account — skipping seed.", seedEmail);
+        if (userRepository.existsByEmail(email)) {
+            log.warn("ADMIN_SEED_EMAIL ({}) already belongs to an existing non-admin account — skipping seed.", email);
             return;
         }
         User admin = User.builder()
-                .email(seedEmail)
-                .password(passwordEncoder.encode(seedPassword))
+                .email(email)
+                .password(passwordEncoder.encode(password))
                 .firstName("Admin")
                 .lastName("")
                 .role("admin")
                 .build();
         userRepository.save(admin);
-        log.info("Seeded initial admin account: {}", seedEmail);
+        log.info("Seeded initial admin account: {}", email);
     }
 }
