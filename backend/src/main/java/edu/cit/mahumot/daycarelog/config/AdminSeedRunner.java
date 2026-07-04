@@ -37,7 +37,8 @@ public class AdminSeedRunner implements CommandLineRunner {
         String password = seedPassword == null ? "" : seedPassword.trim();
 
         long adminCount = userRepository.countByRole("admin");
-        log.info("AdminSeedRunner: existing admin count = {}, ADMIN_SEED_EMAIL set = {}", adminCount, !email.isBlank());
+        log.info("AdminSeedRunner: existing admin count = {}, seed email set = {}, seed password set = {}",
+                adminCount, !email.isBlank(), !password.isBlank());
         if (adminCount > 0) {
             return;
         }
