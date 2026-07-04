@@ -1,6 +1,7 @@
 package edu.cit.mahumot.daycarelog.dto;
 
 public class UpdateProfileRequest {
+    private String email;
     private String firstName;
     private String lastName;
     private String middleName;
@@ -8,6 +9,9 @@ public class UpdateProfileRequest {
     private String currentPassword;
     private String newPassword;
     private String profilePhoto;
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }

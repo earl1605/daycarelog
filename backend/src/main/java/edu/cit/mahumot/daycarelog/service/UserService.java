@@ -93,6 +93,12 @@ public class UserService {
 
     public User updateProfile(Long id, UpdateProfileRequest req) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        if (req.getEmail() != null && !req.getEmail().isBlank() && !req.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(req.getEmail())) {
+                throw new RuntimeException("Email already in use");
+            }
+            user.setEmail(req.getEmail());
+        }
         if (req.getFirstName()   != null) user.setFirstName(req.getFirstName());
         if (req.getLastName()    != null) user.setLastName(req.getLastName());
         if (req.getMiddleName()  != null) user.setMiddleName(req.getMiddleName());
