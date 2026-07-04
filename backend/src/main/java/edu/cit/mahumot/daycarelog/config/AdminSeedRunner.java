@@ -28,6 +28,9 @@ public class AdminSeedRunner implements CommandLineRunner {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // Runs once per boot: only creates the seed admin when no admin-role
+    // account exists yet, so it's safe to leave ADMIN_SEED_EMAIL/PASSWORD set
+    // indefinitely after the first admin has been created.
     @Override
     public void run(String... args) {
         if (userRepository.countByRole("admin") > 0) {
