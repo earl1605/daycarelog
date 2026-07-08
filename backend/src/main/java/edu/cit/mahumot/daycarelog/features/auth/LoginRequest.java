@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.dto;
+package edu.cit.mahumot.daycarelog.features.auth;
 
 public class LoginRequest {
     private String email;

@@ -1,7 +1,5 @@
-package edu.cit.mahumot.daycarelog.controller;
+package edu.cit.mahumot.daycarelog.features.auth;
 
-import edu.cit.mahumot.daycarelog.dto.*;
-import edu.cit.mahumot.daycarelog.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
