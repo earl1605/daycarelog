@@ -1,10 +1,7 @@
-package edu.cit.mahumot.daycarelog.controller;
+package edu.cit.mahumot.daycarelog.features.children;
 
-import edu.cit.mahumot.daycarelog.dto.ChildRequest;
-import edu.cit.mahumot.daycarelog.model.Child;
-import edu.cit.mahumot.daycarelog.security.JwtUtil;
-import edu.cit.mahumot.daycarelog.service.ChildService;
-import edu.cit.mahumot.daycarelog.service.GuardianService;
+import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
+import edu.cit.mahumot.daycarelog.features.guardians.GuardianService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

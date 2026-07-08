@@ -1,8 +1,5 @@
-package edu.cit.mahumot.daycarelog.service;
+package edu.cit.mahumot.daycarelog.features.children;
 
-import edu.cit.mahumot.daycarelog.dto.ChildRequest;
-import edu.cit.mahumot.daycarelog.model.Child;
-import edu.cit.mahumot.daycarelog.repository.ChildRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
