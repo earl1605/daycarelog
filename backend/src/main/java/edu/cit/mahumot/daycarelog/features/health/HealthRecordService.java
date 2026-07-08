@@ -1,8 +1,5 @@
-package edu.cit.mahumot.daycarelog.service;
+package edu.cit.mahumot.daycarelog.features.health;
 
-import edu.cit.mahumot.daycarelog.dto.HealthRecordRequest;
-import edu.cit.mahumot.daycarelog.model.HealthRecord;
-import edu.cit.mahumot.daycarelog.repository.HealthRecordRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

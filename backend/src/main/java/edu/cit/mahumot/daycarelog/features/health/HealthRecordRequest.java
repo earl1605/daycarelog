@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.dto;
+package edu.cit.mahumot.daycarelog.features.health;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -1,10 +1,7 @@
-package edu.cit.mahumot.daycarelog.controller;
+package edu.cit.mahumot.daycarelog.features.health;
 
-import edu.cit.mahumot.daycarelog.dto.HealthRecordRequest;
-import edu.cit.mahumot.daycarelog.model.HealthRecord;
-import edu.cit.mahumot.daycarelog.security.JwtUtil;
-import edu.cit.mahumot.daycarelog.service.GuardianService;
-import edu.cit.mahumot.daycarelog.service.HealthRecordService;
+import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
+import edu.cit.mahumot.daycarelog.features.guardians.GuardianService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

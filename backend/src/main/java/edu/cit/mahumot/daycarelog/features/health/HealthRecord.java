@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.model;
+package edu.cit.mahumot.daycarelog.features.health;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;

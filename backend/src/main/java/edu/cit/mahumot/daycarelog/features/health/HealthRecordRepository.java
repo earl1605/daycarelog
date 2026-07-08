@@ -1,6 +1,5 @@
-package edu.cit.mahumot.daycarelog.repository;
+package edu.cit.mahumot.daycarelog.features.health;
 
-import edu.cit.mahumot.daycarelog.model.HealthRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 import java.util.List;
