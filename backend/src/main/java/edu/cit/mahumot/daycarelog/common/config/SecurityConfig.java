@@ -1,6 +1,6 @@
-package edu.cit.mahumot.daycarelog.config;
+package edu.cit.mahumot.daycarelog.common.config;
 
-import edu.cit.mahumot.daycarelog.security.JwtAuthFilter;
+import edu.cit.mahumot.daycarelog.common.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

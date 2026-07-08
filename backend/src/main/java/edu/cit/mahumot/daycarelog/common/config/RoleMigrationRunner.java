@@ -1,6 +1,6 @@
-package edu.cit.mahumot.daycarelog.config;
+package edu.cit.mahumot.daycarelog.common.config;
 
-import edu.cit.mahumot.daycarelog.repository.UserRepository;
+import edu.cit.mahumot.daycarelog.features.users.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

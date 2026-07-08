@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.security;
+package edu.cit.mahumot.daycarelog.common.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.util;
+package edu.cit.mahumot.daycarelog.common.util;
 
 import java.security.SecureRandom;
 

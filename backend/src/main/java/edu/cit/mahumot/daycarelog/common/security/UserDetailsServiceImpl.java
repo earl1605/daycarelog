@@ -1,7 +1,7 @@
-package edu.cit.mahumot.daycarelog.security;
+package edu.cit.mahumot.daycarelog.common.security;
 
-import edu.cit.mahumot.daycarelog.model.User;
-import edu.cit.mahumot.daycarelog.repository.UserRepository;
+import edu.cit.mahumot.daycarelog.features.users.User;
+import edu.cit.mahumot.daycarelog.features.users.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.config;
+package edu.cit.mahumot.daycarelog.common.config;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
