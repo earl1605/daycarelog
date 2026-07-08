@@ -1,6 +1,5 @@
-package edu.cit.mahumot.daycarelog.repository;
+package edu.cit.mahumot.daycarelog.features.guardians;
 
-import edu.cit.mahumot.daycarelog.model.Guardian;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

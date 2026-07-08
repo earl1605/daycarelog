@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.dto;
+package edu.cit.mahumot.daycarelog.features.guardians;
 
 public class GuardianRequest {
     private String name;

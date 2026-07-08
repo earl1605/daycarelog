@@ -1,14 +1,10 @@
-package edu.cit.mahumot.daycarelog.service;
+package edu.cit.mahumot.daycarelog.features.guardians;
 
-import edu.cit.mahumot.daycarelog.dto.GuardianAccountResponse;
-import edu.cit.mahumot.daycarelog.dto.GuardianAccountResponse.ChildSummary;
-import edu.cit.mahumot.daycarelog.dto.GuardianRequest;
-import edu.cit.mahumot.daycarelog.model.Guardian;
-import edu.cit.mahumot.daycarelog.model.User;
-import edu.cit.mahumot.daycarelog.repository.ChildRepository;
-import edu.cit.mahumot.daycarelog.repository.GuardianRepository;
-import edu.cit.mahumot.daycarelog.repository.UserRepository;
-import edu.cit.mahumot.daycarelog.util.TempPasswordGenerator;
+import edu.cit.mahumot.daycarelog.features.guardians.GuardianAccountResponse.ChildSummary;
+import edu.cit.mahumot.daycarelog.features.users.User;
+import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
+import edu.cit.mahumot.daycarelog.features.users.UserRepository;
+import edu.cit.mahumot.daycarelog.common.util.TempPasswordGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

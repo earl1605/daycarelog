@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.model;
+package edu.cit.mahumot.daycarelog.features.guardians;
 
 import jakarta.persistence.*;
 
