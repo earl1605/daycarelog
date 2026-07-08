@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.dto;
+package edu.cit.mahumot.daycarelog.features.users;
 
 public class CreateUserRequest {
     private String email;

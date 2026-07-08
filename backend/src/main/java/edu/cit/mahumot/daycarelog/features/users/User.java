@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.model;
+package edu.cit.mahumot.daycarelog.features.users;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

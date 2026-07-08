@@ -1,10 +1,6 @@
-package edu.cit.mahumot.daycarelog.service;
+package edu.cit.mahumot.daycarelog.features.users;
 
-import edu.cit.mahumot.daycarelog.dto.CreateUserRequest;
-import edu.cit.mahumot.daycarelog.dto.UpdateProfileRequest;
-import edu.cit.mahumot.daycarelog.model.User;
-import edu.cit.mahumot.daycarelog.repository.UserRepository;
-import edu.cit.mahumot.daycarelog.util.TempPasswordGenerator;
+import edu.cit.mahumot.daycarelog.common.util.TempPasswordGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

@@ -1,9 +1,6 @@
-package edu.cit.mahumot.daycarelog.controller;
+package edu.cit.mahumot.daycarelog.features.users;
 
-import edu.cit.mahumot.daycarelog.dto.*;
-import edu.cit.mahumot.daycarelog.model.User;
-import edu.cit.mahumot.daycarelog.security.JwtUtil;
-import edu.cit.mahumot.daycarelog.service.UserService;
+import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
