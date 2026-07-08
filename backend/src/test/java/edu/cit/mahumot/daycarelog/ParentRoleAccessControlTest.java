@@ -1,7 +1,15 @@
 package edu.cit.mahumot.daycarelog;
 
-import edu.cit.mahumot.daycarelog.model.*;
-import edu.cit.mahumot.daycarelog.repository.*;
+import edu.cit.mahumot.daycarelog.features.users.User;
+import edu.cit.mahumot.daycarelog.features.users.UserRepository;
+import edu.cit.mahumot.daycarelog.features.children.Child;
+import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
+import edu.cit.mahumot.daycarelog.features.attendance.Attendance;
+import edu.cit.mahumot.daycarelog.features.attendance.AttendanceRepository;
+import edu.cit.mahumot.daycarelog.features.health.HealthRecord;
+import edu.cit.mahumot.daycarelog.features.health.HealthRecordRepository;
+import edu.cit.mahumot.daycarelog.features.guardians.Guardian;
+import edu.cit.mahumot.daycarelog.features.guardians.GuardianRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
