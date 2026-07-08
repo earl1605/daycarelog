@@ -1,11 +1,11 @@
-package edu.cit.mahumot.daycarelog.controller;
+package edu.cit.mahumot.daycarelog.features.reports;
 
-import edu.cit.mahumot.daycarelog.model.Attendance;
-import edu.cit.mahumot.daycarelog.model.Child;
-import edu.cit.mahumot.daycarelog.model.HealthRecord;
-import edu.cit.mahumot.daycarelog.repository.AttendanceRepository;
-import edu.cit.mahumot.daycarelog.repository.ChildRepository;
-import edu.cit.mahumot.daycarelog.repository.HealthRecordRepository;
+import edu.cit.mahumot.daycarelog.features.attendance.Attendance;
+import edu.cit.mahumot.daycarelog.features.children.Child;
+import edu.cit.mahumot.daycarelog.features.health.HealthRecord;
+import edu.cit.mahumot.daycarelog.features.attendance.AttendanceRepository;
+import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
+import edu.cit.mahumot.daycarelog.features.health.HealthRecordRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
