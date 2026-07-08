@@ -1,10 +1,7 @@
-package edu.cit.mahumot.daycarelog.controller;
+package edu.cit.mahumot.daycarelog.features.attendance;
 
-import edu.cit.mahumot.daycarelog.dto.AttendanceRequest;
-import edu.cit.mahumot.daycarelog.model.Attendance;
-import edu.cit.mahumot.daycarelog.security.JwtUtil;
-import edu.cit.mahumot.daycarelog.service.AttendanceService;
-import edu.cit.mahumot.daycarelog.service.GuardianService;
+import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
+import edu.cit.mahumot.daycarelog.features.guardians.GuardianService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package edu.cit.mahumot.daycarelog.dto;
+package edu.cit.mahumot.daycarelog.features.attendance;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

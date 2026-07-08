@@ -1,8 +1,5 @@
-package edu.cit.mahumot.daycarelog.service;
+package edu.cit.mahumot.daycarelog.features.attendance;
 
-import edu.cit.mahumot.daycarelog.dto.AttendanceRequest;
-import edu.cit.mahumot.daycarelog.model.Attendance;
-import edu.cit.mahumot.daycarelog.repository.AttendanceRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
