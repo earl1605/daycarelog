@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { PlusIcon, TrashIcon, KeyIcon, CopyIcon } from './icons'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
+import { validateEmailFormat, getEmailTypoSuggestion } from '../utils/emailValidation'
 import toast from 'react-hot-toast'
 
 const emptyForm = { name: '', relationship: '', contactNumber: '', isPrimary: false, createPortalAccount: false, email: '' }
@@ -14,6 +15,8 @@ export default function GuardiansSection({ childId }) {
   const [saving,      setSaving]      = useState(false)
   const [deletingId,  setDeletingId]  = useState(null)
   const [tempPassword, setTempPassword] = useState(null) // { name, password }
+  const [emailError,      setEmailError]      = useState('')
+  const [emailSuggestion, setEmailSuggestion] = useState('')
 
   useEffect(() => {
     api.guardians.list(childId).then(setGuardians).catch(e => toast.error(e.message)).finally(() => setLoading(false))
@@ -22,10 +25,32 @@ export default function GuardiansSection({ childId }) {
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })) }
   function setCapitalized(field) { return handleCapitalizedNameInput(v => setForm(f => ({ ...f, [field]: v }))) }
 
+  function setEmailField(e) {
+    setForm(f => ({ ...f, email: e.target.value }))
+    setEmailError('')
+    setEmailSuggestion('')
+  }
+
+  function handleEmailBlur() {
+    const result = validateEmailFormat(form.email)
+    setEmailError(result.valid ? '' : result.message)
+    setEmailSuggestion(getEmailTypoSuggestion(form.email) || '')
+  }
+
+  function acceptEmailSuggestion() {
+    setForm(f => ({ ...f, email: emailSuggestion }))
+    setEmailSuggestion('')
+    setEmailError('')
+  }
+
   async function handleAdd(e) {
     e.preventDefault()
     if (!form.name.trim()) { toast.error('Guardian name is required'); return }
     if (form.createPortalAccount && !form.email.trim()) { toast.error('Email is required to create a portal account'); return }
+    if (form.createPortalAccount) {
+      const emailCheck = validateEmailFormat(form.email)
+      if (!emailCheck.valid) { setEmailError(emailCheck.message); toast.error(emailCheck.message); return }
+    }
     setSaving(true)
     try {
       const res = await api.guardians.add(childId, {
@@ -39,6 +64,8 @@ export default function GuardiansSection({ childId }) {
       setGuardians(g => [...g, res.guardian])
       setShowForm(false)
       setForm(emptyForm)
+      setEmailError('')
+      setEmailSuggestion('')
       if (res.tempPassword) {
         setTempPassword({ name: res.guardian.name, password: res.tempPassword })
       } else {
@@ -133,14 +160,21 @@ export default function GuardiansSection({ childId }) {
           {form.createPortalAccount && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email *</label>
-              <input type="email" value={form.email} onChange={set('email')} placeholder="parent@example.com"
+              <input type="email" value={form.email} onChange={setEmailField} onBlur={handleEmailBlur} placeholder="parent@example.com"
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
+              {emailSuggestion && (
+                <button type="button" onClick={acceptEmailSuggestion}
+                  className="text-xs text-primary-600 hover:underline mt-1">
+                  Did you mean <span className="font-semibold">{emailSuggestion}</span>?
+                </button>
+              )}
               <p className="text-xs text-gray-400 mt-1">If this email already has a parent account, this child is linked to it instead of creating a new one.</p>
             </div>
           )}
 
           <div className="flex gap-3">
-            <button type="button" onClick={() => { setShowForm(false); setForm(emptyForm) }}
+            <button type="button" onClick={() => { setShowForm(false); setForm(emptyForm); setEmailError(''); setEmailSuggestion('') }}
               className="flex-1 border border-gray-200 text-gray-700 font-medium py-2.5 rounded-xl hover:bg-gray-50 transition-colors">Cancel</button>
             <button type="submit" disabled={saving}
               className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors">
