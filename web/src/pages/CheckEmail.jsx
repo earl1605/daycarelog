@@ -37,6 +37,11 @@ export default function CheckEmail() {
     navigate(user?.role === 'parent' ? '/parent/dashboard' : '/dashboard')
   }
 
+  function handleSignOut() {
+    signOut()
+    navigate('/login')
+  }
+
   async function handleVerify(e) {
     e.preventDefault()
     setError('')
@@ -109,7 +114,7 @@ export default function CheckEmail() {
           </button>
         </p>
 
-        <button onClick={signOut} className="text-xs text-gray-400 hover:text-gray-600 mt-6 underline-offset-2 hover:underline">
+        <button onClick={handleSignOut} className="text-xs text-gray-400 hover:text-gray-600 mt-6 underline-offset-2 hover:underline">
           Not you? Sign out
         </button>
         <p className="text-xs text-gray-400 mt-2">
