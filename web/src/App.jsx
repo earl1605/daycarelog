@@ -8,6 +8,8 @@ import Layout             from './components/Layout'
 import Landing            from './pages/Landing'
 import Login              from './pages/Login'
 import Register           from './pages/Register'
+import CheckEmail         from './pages/CheckEmail'
+import VerifyEmail        from './pages/VerifyEmail'
 import Dashboard          from './pages/Dashboard'
 import Children           from './pages/Children'
 import ChildForm          from './pages/ChildForm'
@@ -27,9 +29,11 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/"         element={<Landing />} />
-        <Route path="/login"    element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/"             element={<Landing />} />
+        <Route path="/login"        element={<Login />} />
+        <Route path="/register"     element={<Register />} />
+        <Route path="/check-email"  element={<CheckEmail />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>

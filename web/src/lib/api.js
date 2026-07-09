@@ -18,8 +18,24 @@ async function request(path, options = {}) {
 
   if (!res.ok) {
     let msg = `Request failed (${res.status})`
-    try { msg = (await res.json()).message ?? msg } catch (_) {}
-    throw new Error(msg)
+    let code = null
+    try {
+      const body = await res.json()
+      msg = body.message ?? msg
+      code = body.code ?? null
+    } catch (_) {}
+
+    // Backstop for any endpoint returning EMAIL_NOT_VERIFIED, regardless of what
+    // the locally-cached user object says - the server (via the JWT claim) is the
+    // source of truth. Skipped on the verification screens themselves to avoid a
+    // redirect loop while the user is actively trying to verify.
+    if (code === 'EMAIL_NOT_VERIFIED' && !/^\/(check-email|verify-email)/.test(window.location.pathname)) {
+      window.location.href = '/check-email'
+    }
+
+    const err = new Error(msg)
+    err.code = code
+    throw err
   }
 
   // 204 No Content
@@ -31,6 +47,12 @@ export const api = {
   auth: {
     login:    (email, password)              => request('/auth/login',    { method: 'POST', body: JSON.stringify({ email, password }) }),
     register: (email, password, firstName, lastName, middleName, suffix) => request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, firstName, lastName, middleName, suffix }) }),
+    verifyByToken:        token       => request('/auth/verify-email', { method: 'POST', body: JSON.stringify({ token }) }),
+    verifyByCode:         (email, code) => request('/auth/verify-email', { method: 'POST', body: JSON.stringify({ email, code }) }),
+    resendVerification:   email       => request('/auth/resend-verification', { method: 'POST', body: JSON.stringify({ email }) }),
+    me:                   ()          => request('/auth/me'),
+    refreshToken:         ()          => request('/auth/refresh-token', { method: 'POST' }),
+    logout:               ()          => request('/auth/logout', { method: 'POST' }),
   },
   children: {
     list:   ()          => request('/children'),

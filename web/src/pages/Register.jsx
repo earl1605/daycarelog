@@ -49,8 +49,8 @@ export default function Register() {
       setFormError(error.message)
       toast.error(error.message)
     } else {
-      toast.success('Account created! Please sign in.')
-      navigate('/login')
+      toast.success('Account created! Check your email to verify it.')
+      navigate(`/check-email?email=${encodeURIComponent(email)}`)
     }
   }
 
