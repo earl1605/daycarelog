@@ -32,7 +32,7 @@ class VerificationEndpointsTest {
     @Autowired private UserRepository userRepository;
     @MockitoSpyBean private EmailService emailService;
 
-    private static final String EMAIL = "verify-test@example.com";
+    private static final String EMAIL = "verify-test@test.daycarelog";
     private static final String PASSWORD = "TestPass123";
 
     @BeforeEach
@@ -50,7 +50,7 @@ class VerificationEndpointsTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
@@ -63,13 +63,22 @@ class VerificationEndpointsTest {
         Map<String, Object> body = Map.of(
                 "email", EMAIL, "password", PASSWORD,
                 "firstName", "Verify", "lastName", "Test");
-        String response = mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token").doesNotExist())
+                .andExpect(jsonPath("$.user").doesNotExist());
+
+        // register() no longer hands back a session (see AuthController#register) -
+        // log in to get a token for the still-unverified account instead.
+        String loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(Map.of("email", EMAIL, "password", PASSWORD))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        JsonNode json = objectMapper.readTree(response);
+        JsonNode json = objectMapper.readTree(loginResponse);
         assertThat(json.get("user").get("emailVerified").asBoolean()).isFalse();
         String token = json.get("token").asText();
 
