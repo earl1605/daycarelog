@@ -1,5 +1,6 @@
 package edu.cit.mahumot.daycarelog.features.guardians;
 
+import edu.cit.mahumot.daycarelog.common.email.EmailRegistrationValidator;
 import edu.cit.mahumot.daycarelog.features.guardians.GuardianAccountResponse.ChildSummary;
 import edu.cit.mahumot.daycarelog.features.users.User;
 import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
@@ -23,15 +24,18 @@ public class GuardianService {
     private final ChildRepository childRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationService verificationService;
+    private final EmailRegistrationValidator emailRegistrationValidator;
 
     public GuardianService(GuardianRepository guardianRepository, UserRepository userRepository,
                             ChildRepository childRepository, PasswordEncoder passwordEncoder,
-                            VerificationService verificationService) {
+                            VerificationService verificationService,
+                            EmailRegistrationValidator emailRegistrationValidator) {
         this.guardianRepository = guardianRepository;
         this.userRepository = userRepository;
         this.childRepository = childRepository;
         this.passwordEncoder = passwordEncoder;
         this.verificationService = verificationService;
+        this.emailRegistrationValidator = emailRegistrationValidator;
     }
 
     public List<Guardian> findByChild(Long childId) {
@@ -65,7 +69,13 @@ public class GuardianService {
             if (req.getEmail() == null || req.getEmail().isBlank()) {
                 throw new RuntimeException("Email is required to create a parent portal account");
             }
-            Optional<User> existing = userRepository.findByEmail(req.getEmail());
+            // Same three layers as public registration (format -> disposable/reserved
+            // domain -> MX), run before deciding whether to reuse or create - a staff
+            // member fat-fingering an email shouldn't silently create an
+            // unreachable parent account either.
+            String email = emailRegistrationValidator.validate(req.getEmail());
+            guardian.setEmail(email);
+            Optional<User> existing = userRepository.findByEmail(email);
             User parentUser;
             if (existing.isPresent()) {
                 parentUser = existing.get();
@@ -76,7 +86,7 @@ public class GuardianService {
             } else {
                 tempPassword = TempPasswordGenerator.generate();
                 parentUser = User.builder()
-                        .email(req.getEmail())
+                        .email(email)
                         .password(passwordEncoder.encode(tempPassword))
                         .firstName(req.getName())
                         .role("parent")

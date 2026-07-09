@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -12,6 +14,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     long countByRole(String role);
     long countByRoleAndIsActiveTrue(String role);
+
+    // Cleanup-job target: accounts that never verified within the grace period.
+    List<User> findByEmailVerifiedFalseAndCreatedAtBefore(LocalDateTime cutoff);
 
     @Modifying
     @Transactional

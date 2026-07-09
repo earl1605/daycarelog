@@ -1,10 +1,12 @@
 package edu.cit.mahumot.daycarelog.features.auth;
 
+import edu.cit.mahumot.daycarelog.common.email.EmailValidationException;
 import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
 import edu.cit.mahumot.daycarelog.features.users.User;
 import edu.cit.mahumot.daycarelog.features.users.UserRepository;
 import edu.cit.mahumot.daycarelog.features.verification.VerificationException;
 import edu.cit.mahumot.daycarelog.features.verification.VerificationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +29,20 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
+    // Always returns the same 201 + generic message, whether this is a brand-new
+    // account or the email is already registered - never reveals which. The three
+    // email-quality checks (format/disposable/MX) are the one exception: those are
+    // about the email's general validity, not about any specific account's
+    // existence, so they surface distinct, actionable error codes.
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         try {
-            return ResponseEntity.ok(authService.register(req));
+            authService.register(req);
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "message", "Registration received. Please check your email to verify your account."));
+        } catch (EmailValidationException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(Map.of("message", e.getMessage(), "code", e.getCode()));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

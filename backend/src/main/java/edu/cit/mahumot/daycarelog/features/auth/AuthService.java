@@ -1,5 +1,6 @@
 package edu.cit.mahumot.daycarelog.features.auth;
 
+import edu.cit.mahumot.daycarelog.common.email.EmailRegistrationValidator;
 import edu.cit.mahumot.daycarelog.features.users.User;
 import edu.cit.mahumot.daycarelog.features.users.UserRepository;
 import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
@@ -14,23 +15,34 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final VerificationService verificationService;
+    private final EmailRegistrationValidator emailRegistrationValidator;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-                        VerificationService verificationService) {
+                        VerificationService verificationService, EmailRegistrationValidator emailRegistrationValidator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.verificationService = verificationService;
+        this.emailRegistrationValidator = emailRegistrationValidator;
     }
 
-    public AuthResponse register(RegisterRequest req) {
-        if (userRepository.existsByEmail(req.getEmail())) {
-            throw new RuntimeException("Email already in use");
+    // Runs format -> disposable/reserved-domain -> MX record checks (in that order,
+    // first failure wins) before ever touching the database. Deliberately does NOT
+    // return anything revealing whether the account already existed: if it does,
+    // this silently no-ops (no new row, no verification email) and the caller gets
+    // back the exact same generic response as a brand-new registration - see
+    // AuthController, which is why this method returns void rather than AuthResponse.
+    public void register(RegisterRequest req) {
+        String email = emailRegistrationValidator.validate(req.getEmail());
+
+        if (userRepository.existsByEmail(email)) {
+            return;
         }
+
         // Self-registration always yields STAFF. ADMIN accounts can only be created
         // by an existing admin (UserController/UserService) or the first-admin seed runner.
         User user = User.builder()
-                .email(req.getEmail())
+                .email(email)
                 .password(passwordEncoder.encode(req.getPassword()))
                 .firstName(req.getFirstName())
                 .lastName(req.getLastName())
@@ -41,7 +53,6 @@ public class AuthService {
                 .build();
         user = userRepository.save(user);
         verificationService.issueVerification(user);
-        return buildResponse(user);
     }
 
     public AuthResponse login(LoginRequest req) {

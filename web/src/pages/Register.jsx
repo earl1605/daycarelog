@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
+import { validateEmailFormat, getEmailTypoSuggestion } from '../utils/emailValidation'
 import toast from 'react-hot-toast'
 
 function EyeIcon({ open }) {
@@ -33,6 +34,20 @@ export default function Register() {
   const [showPass,    setShowPass]    = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [formError,   setFormError]   = useState('')
+  const [emailError,      setEmailError]      = useState('')
+  const [emailSuggestion, setEmailSuggestion] = useState('')
+
+  function handleEmailBlur() {
+    const result = validateEmailFormat(email)
+    setEmailError(result.valid ? '' : result.message)
+    setEmailSuggestion(getEmailTypoSuggestion(email) || '')
+  }
+
+  function acceptEmailSuggestion() {
+    setEmail(emailSuggestion)
+    setEmailSuggestion('')
+    setEmailError('')
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -40,6 +55,8 @@ export default function Register() {
     if (!firstName.trim() || !lastName.trim() || !email || !password || !confirm) {
       setFormError('Please fill in all required fields'); return
     }
+    const emailCheck = validateEmailFormat(email)
+    if (!emailCheck.valid) { setEmailError(emailCheck.message); setFormError(emailCheck.message); return }
     if (password.length < 6) { setFormError('Password must be at least 6 characters'); return }
     if (password !== confirm) { setFormError('Passwords do not match'); return }
     setLoading(true)
@@ -144,8 +161,17 @@ export default function Register() {
             {/* Email */}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Email address <span className="text-red-400">*</span></label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+              <input type="email" value={email}
+                onChange={e => { setEmail(e.target.value); setEmailError(''); setEmailSuggestion('') }}
+                onBlur={handleEmailBlur}
                 placeholder="you@example.com" className={inputClass} autoComplete="email" />
+              {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
+              {emailSuggestion && (
+                <button type="button" onClick={acceptEmailSuggestion}
+                  className="text-xs text-primary-600 hover:underline mt-1">
+                  Did you mean <span className="font-semibold">{emailSuggestion}</span>?
+                </button>
+              )}
             </div>
 
             {/* Password + Confirm stacked on mobile */}

@@ -15,4 +15,7 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
     List<VerificationToken> findByUserIdAndConsumedAtIsNull(Long userId);
 
     long countByUserIdAndTypeAndCreatedAtAfter(Long userId, String type, LocalDateTime after);
+
+    // Cleanup-job support: removes now-orphaned tokens once their User row is deleted.
+    void deleteByUserId(Long userId);
 }

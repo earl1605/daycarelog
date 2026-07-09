@@ -34,8 +34,11 @@ interface ApiService {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): AuthResponse
 
+    // Registration no longer returns a session - it always creates an unverified
+    // account (or silently no-ops for a duplicate email, to avoid enumeration), so
+    // there's no real token/user to hand back. See AuthController#register.
     @POST("auth/register")
-    suspend fun register(@Body request: RegisterRequest): AuthResponse
+    suspend fun register(@Body request: RegisterRequest): GenericMessageResponse
 
     @POST("auth/verify-email")
     suspend fun verifyEmail(@Body request: VerifyEmailRequest): VerifyEmailResponse

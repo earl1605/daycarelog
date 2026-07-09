@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { PlusIcon, KeyIcon, CopyIcon, TrashIcon, AlertTriangleIcon, UsersIcon } from '../components/icons'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
+import { validateEmailFormat, getEmailTypoSuggestion } from '../utils/emailValidation'
 import toast from 'react-hot-toast'
 
 const emptyForm = {
@@ -20,6 +21,8 @@ export default function Guardians() {
   const [confirmUserId, setConfirmUserId] = useState(null)
   const [removing,  setRemoving]  = useState(null)
   const [tempPassword, setTempPassword] = useState(null) // { name, password }
+  const [emailError,      setEmailError]      = useState('')
+  const [emailSuggestion, setEmailSuggestion] = useState('')
 
   useEffect(() => { load() }, [])
 
@@ -36,10 +39,30 @@ export default function Guardians() {
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.value })) }
   function setCapitalized(field) { return handleCapitalizedNameInput(v => setForm(f => ({ ...f, [field]: v }))) }
 
+  function setEmailField(e) {
+    setForm(f => ({ ...f, email: e.target.value }))
+    setEmailError('')
+    setEmailSuggestion('')
+  }
+
+  function handleEmailBlur() {
+    const result = validateEmailFormat(form.email)
+    setEmailError(result.valid ? '' : result.message)
+    setEmailSuggestion(getEmailTypoSuggestion(form.email) || '')
+  }
+
+  function acceptEmailSuggestion() {
+    setForm(f => ({ ...f, email: emailSuggestion }))
+    setEmailSuggestion('')
+    setEmailError('')
+  }
+
   async function handleCreate(e) {
     e.preventDefault()
     if (!form.firstName.trim() || !form.lastName.trim()) { toast.error('First and last name are required'); return }
     if (!form.email.trim()) { toast.error('Email is required'); return }
+    const emailCheck = validateEmailFormat(form.email)
+    if (!emailCheck.valid) { setEmailError(emailCheck.message); toast.error(emailCheck.message); return }
     if (!form.childId) { toast.error('Please select a child'); return }
 
     const name = [form.firstName, form.middleName, form.lastName, form.suffix].map(s => s.trim()).filter(Boolean).join(' ')
@@ -54,6 +77,8 @@ export default function Guardians() {
         createPortalAccount: true,
       })
       setForm(emptyForm)
+      setEmailError('')
+      setEmailSuggestion('')
       await load()
       if (res.tempPassword) setTempPassword({ name, password: res.tempPassword })
       else toast.success('Child linked to existing guardian account')
@@ -127,8 +152,15 @@ export default function Guardians() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email:</label>
-              <input type="email" value={form.email} onChange={set('email')}
+              <input type="email" value={form.email} onChange={setEmailField} onBlur={handleEmailBlur}
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
+              {emailSuggestion && (
+                <button type="button" onClick={acceptEmailSuggestion}
+                  className="text-xs text-primary-600 hover:underline mt-1">
+                  Did you mean <span className="font-semibold">{emailSuggestion}</span>?
+                </button>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact number:</label>
