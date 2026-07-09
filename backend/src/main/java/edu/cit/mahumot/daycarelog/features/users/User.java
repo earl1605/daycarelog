@@ -43,6 +43,13 @@ public class User {
     @Column(name = "is_active", nullable = false, columnDefinition = "boolean default true")
     private Boolean isActive = true;
 
+    // Column default is true so ALTER TABLE backfills every pre-existing account as
+    // already verified - this feature must not lock out users who signed up before
+    // it existed. New accounts explicitly set this to false where verification is
+    // required (see AuthService.register, GuardianService.addGuardian).
+    @Column(name = "email_verified", nullable = false, columnDefinition = "boolean default true")
+    private Boolean emailVerified = true;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -85,6 +92,9 @@ public class User {
     public Boolean getIsActive() { return isActive; }
     public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 
+    public Boolean getEmailVerified() { return emailVerified; }
+    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -98,6 +108,7 @@ public class User {
         private String lastName;
         private String middleName;
         private String suffix;
+        private Boolean emailVerified;
 
         public Builder email(String email) { this.email = email; return this; }
         public Builder password(String password) { this.password = password; return this; }
@@ -106,6 +117,7 @@ public class User {
         public Builder lastName(String lastName) { this.lastName = lastName; return this; }
         public Builder middleName(String middleName) { this.middleName = middleName; return this; }
         public Builder suffix(String suffix) { this.suffix = suffix; return this; }
+        public Builder emailVerified(boolean emailVerified) { this.emailVerified = emailVerified; return this; }
 
         public User build() {
             User u = new User();
@@ -116,6 +128,7 @@ public class User {
             u.lastName = this.lastName;
             u.middleName = this.middleName;
             u.suffix = this.suffix;
+            if (this.emailVerified != null) u.emailVerified = this.emailVerified;
             return u;
         }
     }

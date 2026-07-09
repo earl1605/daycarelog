@@ -1,5 +1,6 @@
 package edu.cit.mahumot.daycarelog.common.config;
 
+import edu.cit.mahumot.daycarelog.common.security.EmailVerificationFilter;
 import edu.cit.mahumot.daycarelog.common.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,9 +26,11 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final EmailVerificationFilter emailVerificationFilter;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, EmailVerificationFilter emailVerificationFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.emailVerificationFilter = emailVerificationFilter;
     }
 
     @Bean
@@ -78,7 +81,8 @@ public class SecurityConfig {
 
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(emailVerificationFilter, JwtAuthFilter.class);
         return http.build();
     }
 

@@ -198,7 +198,7 @@ class ParentRoleAccessControlTest {
     }
 
     @Test
-    void adminAddingGuardianWithPortalAccountCreatesAWorkingParentLogin() {
+    void adminAddingGuardianWithPortalAccountCreatesAWorkingParentLoginOnceVerified() {
         String adminToken = loginAndGetToken(ADMIN_EMAIL, PASSWORD);
         HttpHeaders headers = authHeaders(adminToken);
 
@@ -212,10 +212,27 @@ class ParentRoleAccessControlTest {
         String tempPassword = (String) res.getBody().get("tempPassword");
         assertThat(tempPassword).isNotBlank();
 
+        // A newly-created parent portal account requires email verification, same as
+        // public self-registration - it can log in, but every endpoint except the
+        // auth self-service ones is blocked until verified.
+        User newParent = userRepository.findByEmail("newmom@test.daycarelog").orElseThrow();
+        assertThat(newParent.getEmailVerified()).isFalse();
+
         String parentToken = loginAndGetToken("newmom@test.daycarelog", tempPassword);
         HttpHeaders parentHeaders = authHeaders(parentToken);
+        ResponseEntity<String> blocked = restTemplate.exchange(
+                url("/api/children/mine"), HttpMethod.GET, new HttpEntity<>(parentHeaders), String.class);
+        assertThat(blocked.getStatusCode().value()).isEqualTo(403);
+        assertThat(blocked.getBody()).contains("EMAIL_NOT_VERIFIED");
+
+        // Simulate clicking the verification link/entering the code, then re-login to
+        // pick up a token whose emailVerified claim reflects the now-verified account.
+        newParent.setEmailVerified(true);
+        userRepository.save(newParent);
+        String verifiedToken = loginAndGetToken("newmom@test.daycarelog", tempPassword);
         ResponseEntity<List> mine = restTemplate.exchange(
-                url("/api/children/mine"), HttpMethod.GET, new HttpEntity<>(parentHeaders), List.class);
+                url("/api/children/mine"), HttpMethod.GET, new HttpEntity<>(authHeaders(verifiedToken)), List.class);
+        assertThat(mine.getStatusCode().is2xxSuccessful()).isTrue();
         assertThat(mine.getBody()).hasSize(1);
         assertThat((Integer) ((Map) mine.getBody().get(0)).get("id")).isEqualTo(childBId.intValue());
     }

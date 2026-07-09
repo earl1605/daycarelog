@@ -48,6 +48,11 @@ public class UserService {
             throw new RuntimeException("Role must be 'admin' or 'staff'");
         }
         String tempPassword = TempPasswordGenerator.generate();
+        // No .emailVerified(false) here, deliberately: an Admin creating another
+        // Staff/Admin account (and handing over the temp password directly) is
+        // already an admin-vouched-for account, unlike public self-registration or
+        // parent accounts created during enrollment - both of which do require
+        // email verification. Leaves the entity's default of true.
         User user = User.builder()
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(tempPassword))

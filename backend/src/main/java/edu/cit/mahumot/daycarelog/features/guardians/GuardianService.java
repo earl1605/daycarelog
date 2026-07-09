@@ -5,6 +5,7 @@ import edu.cit.mahumot.daycarelog.features.users.User;
 import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
 import edu.cit.mahumot.daycarelog.features.users.UserRepository;
 import edu.cit.mahumot.daycarelog.common.util.TempPasswordGenerator;
+import edu.cit.mahumot.daycarelog.features.verification.VerificationService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +22,16 @@ public class GuardianService {
     private final UserRepository userRepository;
     private final ChildRepository childRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationService verificationService;
 
     public GuardianService(GuardianRepository guardianRepository, UserRepository userRepository,
-                            ChildRepository childRepository, PasswordEncoder passwordEncoder) {
+                            ChildRepository childRepository, PasswordEncoder passwordEncoder,
+                            VerificationService verificationService) {
         this.guardianRepository = guardianRepository;
         this.userRepository = userRepository;
         this.childRepository = childRepository;
         this.passwordEncoder = passwordEncoder;
+        this.verificationService = verificationService;
     }
 
     public List<Guardian> findByChild(Long childId) {
@@ -76,8 +80,10 @@ public class GuardianService {
                         .password(passwordEncoder.encode(tempPassword))
                         .firstName(req.getName())
                         .role("parent")
+                        .emailVerified(false)
                         .build();
                 parentUser = userRepository.save(parentUser);
+                verificationService.issueVerification(parentUser);
             }
             guardian.setUserId(parentUser.getId());
         }

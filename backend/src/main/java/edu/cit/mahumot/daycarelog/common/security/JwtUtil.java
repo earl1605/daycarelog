@@ -24,10 +24,11 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String email, Long userId, String role) {
+    public String generateToken(String email, Long userId, String role, boolean emailVerified) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("role", role);
+        claims.put("emailVerified", emailVerified);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
@@ -47,6 +48,13 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return (String) parseClaims(token).get("role");
+    }
+
+    // Absent on tokens minted before this claim existed - treated as verified so
+    // pre-existing sessions aren't suddenly locked out until they naturally expire.
+    public boolean extractEmailVerified(String token) {
+        Object claim = parseClaims(token).get("emailVerified");
+        return !(claim instanceof Boolean) || (Boolean) claim;
     }
 
     public boolean validateToken(String token) {

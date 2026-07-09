@@ -25,10 +25,11 @@ public class AuthResponse {
         private String suffix;
         private String role;
         private String profilePhoto;
+        private boolean emailVerified;
 
         public UserDto(Long id, String email, String fullName, String firstName,
                        String lastName, String middleName, String suffix,
-                       String role, String profilePhoto) {
+                       String role, String profilePhoto, boolean emailVerified) {
             this.id = id;
             this.email = email;
             this.fullName = fullName;
@@ -38,6 +39,7 @@ public class AuthResponse {
             this.suffix = suffix;
             this.role = role;
             this.profilePhoto = profilePhoto;
+            this.emailVerified = emailVerified;
         }
 
         public Long getId() { return id; }
@@ -49,5 +51,6 @@ public class AuthResponse {
         public String getSuffix() { return suffix; }
         public String getRole() { return role; }
         public String getProfilePhoto() { return profilePhoto; }
+        public boolean isEmailVerified() { return emailVerified; }
     }
 }
