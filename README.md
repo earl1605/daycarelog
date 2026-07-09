@@ -33,12 +33,13 @@ Set these before running (locally or on your deploy platform) — never commit r
 | `JWT_SECRET` | Long random string used to sign JWTs |
 | `ADMIN_SEED_EMAIL` | (optional) Email for the first admin account, seeded on startup |
 | `ADMIN_SEED_PASSWORD` | (optional) Password for the first admin account, seeded on startup |
-| `MAIL_MODE` | (optional) Set to `console` to log verification emails to stdout instead of sending them - see [Email verification](#email-verification) below |
-| `MAIL_HOST` | SMTP host (e.g. `smtp.gmail.com`) - required unless `MAIL_MODE=console` |
+| `RESEND_API_KEY` | **Recommended for production.** API key from [resend.com](https://resend.com) - sends verification emails over HTTPS instead of SMTP. Takes priority over `MAIL_HOST` whenever set - see [Email verification](#email-verification) below |
+| `MAIL_MODE` | (optional) Set to `console` to log verification emails to stdout instead of sending them |
+| `MAIL_HOST` | SMTP host (e.g. `smtp.gmail.com`) - only used if `RESEND_API_KEY` is unset; many PaaS hosts (Railway included) block outbound SMTP ports entirely, so prefer `RESEND_API_KEY` unless you know SMTP works on your host |
 | `MAIL_PORT` | (optional) SMTP port, defaults to `587` |
 | `MAIL_USERNAME` | SMTP username |
 | `MAIL_PASSWORD` | SMTP password (a Gmail **app password**, not your regular Gmail password - see below) |
-| `MAIL_FROM` | (optional) "From" address on verification emails, defaults to `no-reply@daycarelog.local` |
+| `MAIL_FROM` | (optional) "From" address on verification emails, defaults to `no-reply@daycarelog.local` - with Resend, this must be `onboarding@resend.dev` or an address on a domain you've verified with Resend |
 | `WEB_BASE_URL` | Public URL of the React web app, used to build the verification link (e.g. `https://daycarelog.vercel.app`) |
 | `EMAIL_MX_CHECK_ENABLED` | (optional) Set to `false` to skip the DNS MX/A lookup at registration - see [Blocking dummy/fake emails](#blocking-dummyfake-emails) below. Defaults to `true` |
 
@@ -57,7 +58,16 @@ Link: http://localhost:5173/verify-email?token=...
 Code: 123456
 ```
 
-**Production / real emails via Gmail:**
+**Production / real emails via Resend (recommended):**
+
+Raw SMTP is blocked outbound on some PaaS hosts - Railway confirmed this in practice (connections to `smtp.gmail.com:587` just time out). [Resend](https://resend.com) sends over HTTPS instead, which isn't affected.
+
+1. Sign up at [resend.com](https://resend.com) and copy an API key from the dashboard.
+2. Set `RESEND_API_KEY=<your key>`.
+3. Set `MAIL_FROM=onboarding@resend.dev` for quick testing - note this only lets you send **to the email address you signed up to Resend with**. To email arbitrary users (real production use), verify a domain you own under Resend's Domains page and use an address on that domain as `MAIL_FROM` instead.
+4. Set `WEB_BASE_URL` to your deployed web app's URL so the link inside the email points somewhere real.
+
+**Production / real emails via Gmail SMTP (fallback, only if `RESEND_API_KEY` is unset):**
 
 1. Enable 2-Step Verification on the Gmail account you want to send from (required for app passwords).
 2. Go to [Google Account → Security → App passwords](https://myaccount.google.com/apppasswords), create one for "Mail", and copy the 16-character password.
@@ -68,7 +78,7 @@ Code: 123456
    MAIL_USERNAME=your-address@gmail.com
    MAIL_PASSWORD=<the 16-character app password, no spaces>
    ```
-4. Do **not** set `MAIL_MODE` (or set it to anything other than `console`) so real sending is used.
+4. Do **not** set `MAIL_MODE` (or set it to anything other than `console`) so real sending is used. Only use this path if you've confirmed your host doesn't block outbound SMTP - if verification emails silently never arrive, check your deploy logs for a `SocketTimeoutException` and switch to Resend instead.
 
 ### Blocking dummy/fake emails
 
