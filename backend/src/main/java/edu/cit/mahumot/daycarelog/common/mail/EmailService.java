@@ -1,5 +1,6 @@
 package edu.cit.mahumot.daycarelog.common.mail;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,20 +9,31 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+    private static final URI RESEND_ENDPOINT = URI.create("https://api.resend.com/emails");
 
     // No JavaMailSender bean exists unless spring.mail.host is configured, so this is
     // Optional rather than a hard dependency - local dev with MAIL_MODE=console needs
     // no SMTP configuration at all.
     private final JavaMailSender mailSender;
+    private final ObjectMapper objectMapper;
+    private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
-    public EmailService(Optional<JavaMailSender> mailSender) {
+    public EmailService(Optional<JavaMailSender> mailSender, ObjectMapper objectMapper) {
         this.mailSender = mailSender.orElse(null);
+        this.objectMapper = objectMapper;
     }
 
     @Value("${app.mail.mode:smtp}")
@@ -33,10 +45,22 @@ public class EmailService {
     @Value("${app.web.base-url:http://localhost:5173}")
     private String webBaseUrl;
 
+    // Raw SMTP (ports 25/465/587) is blocked outbound on some PaaS hosts (e.g. Railway),
+    // so a configured connection just times out instead of failing cleanly. Resend's
+    // HTTPS API (port 443) sidesteps that. Takes priority over SMTP whenever set; SMTP
+    // stays as a fallback for hosts where the port genuinely isn't blocked.
+    @Value("${app.email.resend-api-key:}")
+    private String resendApiKey;
+
     public void sendVerificationEmail(String toEmail, String recipientName, String rawToken, String rawCode) {
         String link = webBaseUrl + "/verify-email?token=" + rawToken;
         String subject = "Verify your DaycareLog account";
         String html = buildHtml(recipientName, link, rawCode);
+
+        if (!resendApiKey.isBlank()) {
+            sendViaResend(toEmail, subject, html);
+            return;
+        }
 
         if (isConsoleMode()) {
             log.info(
@@ -59,6 +83,32 @@ public class EmailService {
             // caller (registration/resend already succeeded) - it's logged so an admin
             // can investigate, and the user can always hit "Resend" again.
             log.error("Failed to send verification email to {}", toEmail, e);
+        }
+    }
+
+    private void sendViaResend(String toEmail, String subject, String html) {
+        try {
+            String body = objectMapper.writeValueAsString(Map.of(
+                    "from", fromAddress,
+                    "to", List.of(toEmail),
+                    "subject", subject,
+                    "html", html
+            ));
+            HttpRequest request = HttpRequest.newBuilder(RESEND_ENDPOINT)
+                    .header("Authorization", "Bearer " + resendApiKey)
+                    .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(10))
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 300) {
+                log.error("Resend API returned {} sending verification email to {}: {}",
+                        response.statusCode(), toEmail, response.body());
+            }
+        } catch (Exception e) {
+            // Same fail-soft policy as the SMTP path - never let a mail-provider outage
+            // turn into a 500 on registration/resend.
+            log.error("Failed to send verification email via Resend to {}", toEmail, e);
         }
     }
 
