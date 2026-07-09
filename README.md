@@ -40,6 +40,7 @@ Set these before running (locally or on your deploy platform) — never commit r
 | `MAIL_PASSWORD` | SMTP password (a Gmail **app password**, not your regular Gmail password - see below) |
 | `MAIL_FROM` | (optional) "From" address on verification emails, defaults to `no-reply@daycarelog.local` |
 | `WEB_BASE_URL` | Public URL of the React web app, used to build the verification link (e.g. `https://daycarelog.vercel.app`) |
+| `EMAIL_MX_CHECK_ENABLED` | (optional) Set to `false` to skip the DNS MX/A lookup at registration - see [Blocking dummy/fake emails](#blocking-dummyfake-emails) below. Defaults to `true` |
 
 ### Email verification
 
@@ -68,6 +69,22 @@ Code: 123456
    MAIL_PASSWORD=<the 16-character app password, no spaces>
    ```
 4. Do **not** set `MAIL_MODE` (or set it to anything other than `console`) so real sending is used.
+
+### Blocking dummy/fake emails
+
+Registration (public Staff/BHW sign-up, and Parent/Guardian accounts created from the Guardians page) runs an email address through three layers before an account is created and a verification email is sent. Each layer runs in order and stops at the first failure:
+
+1. **Format** (`EmailFormatValidator`) - rejects malformed addresses: missing/invalid TLD, leading/trailing or consecutive dots, embedded whitespace, addresses over 254 characters. Returns `EMAIL_INVALID_FORMAT`.
+2. **Disposable/reserved domains** (`DisposableEmailService`) - rejects known temporary-email providers (loaded from `backend/src/main/resources/disposable-domains.txt`) and RFC 2606 reserved domains/TLDs (`example.com`, `.test`, `.invalid`, etc). Returns `DISPOSABLE_EMAIL`.
+3. **DNS MX/A record check** (`MxRecordService`) - confirms the domain can actually receive mail (has an MX record, or falls back to an A record per RFC 5321 §5.1). Uses the JDK's built-in JNDI DNS resolver - no external dependency. Results are cached for 1 hour per domain; a DNS timeout (3s) or resolver failure **fails open** (registration is allowed, and a warning is logged) rather than blocking a real user. Returns `EMAIL_DOMAIN_INVALID`. Controlled by `EMAIL_MX_CHECK_ENABLED` (default `true`) - set to `false` for offline local dev, since it would otherwise reject every address.
+
+Email verification (the link/code flow above) remains the final proof that the address is real and owned by the registrant - these three layers only filter out addresses that are obviously fake or unreachable before a verification email is even sent.
+
+To avoid leaking which emails are already registered, registering with an email that already has an account returns the exact same response as a brand-new registration (no new verification email is sent for the existing account).
+
+**Updating the disposable-domain blocklist:** add or remove one domain per line in `backend/src/main/resources/disposable-domains.txt` (`#`-prefixed lines and blank lines are ignored) and redeploy - no code changes needed. Don't add domains that merely *sound* generic (e.g. `email.com`, `mail.com`) - only add domains that are verifiably disposable/temporary-email services.
+
+A daily scheduled job (`UnverifiedAccountCleanupJob`, 3am server time) permanently deletes accounts that are still unverified 7 days after registration, so mistyped or abandoned dummy signups don't pile up. Accounts with linked Guardian records are skipped and left for manual admin follow-up instead of being deleted out from under real child data.
 
 ### Run
 
