@@ -39,7 +39,7 @@ Set these before running (locally or on your deploy platform) — never commit r
 | `MAIL_PORT` | (optional) SMTP port, defaults to `587` |
 | `MAIL_USERNAME` | SMTP username |
 | `MAIL_PASSWORD` | SMTP password (a Gmail **app password**, not your regular Gmail password - see below) |
-| `MAIL_FROM` | (optional) "From" address on verification emails, defaults to `no-reply@daycarelog.local` - with Resend, this must be `onboarding@resend.dev` or an address on a domain you've verified with Resend |
+| `MAIL_FROM` | (optional) "From" address on verification emails, defaults to `no-reply@daycarelog.local` - with Resend, the address itself must be `onboarding@resend.dev` or one on a domain you've verified with Resend, but you can set a display name too, e.g. `DaycareLog <onboarding@resend.dev>`, so it shows as "DaycareLog" in the recipient's inbox instead of the raw address |
 | `WEB_BASE_URL` | Public URL of the React web app, used to build the verification link (e.g. `https://daycarelog.vercel.app`) |
 | `EMAIL_MX_CHECK_ENABLED` | (optional) Set to `false` to skip the DNS MX/A lookup at registration - see [Blocking dummy/fake emails](#blocking-dummyfake-emails) below. Defaults to `true` |
 
