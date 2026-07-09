@@ -22,7 +22,7 @@ import java.util.Optional;
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-    private static final URI RESEND_ENDPOINT = URI.create("https://api.resend.com/emails");
+    private static final URI BREVO_ENDPOINT = URI.create("https://api.brevo.com/v3/smtp/email");
 
     // No JavaMailSender bean exists unless spring.mail.host is configured, so this is
     // Optional rather than a hard dependency - local dev with MAIL_MODE=console needs
@@ -46,19 +46,21 @@ public class EmailService {
     private String webBaseUrl;
 
     // Raw SMTP (ports 25/465/587) is blocked outbound on some PaaS hosts (e.g. Railway),
-    // so a configured connection just times out instead of failing cleanly. Resend's
-    // HTTPS API (port 443) sidesteps that. Takes priority over SMTP whenever set; SMTP
-    // stays as a fallback for hosts where the port genuinely isn't blocked.
-    @Value("${app.email.resend-api-key:}")
-    private String resendApiKey;
+    // so a configured connection just times out instead of failing cleanly. Brevo's
+    // HTTPS API (port 443) sidesteps that, and - unlike Resend's sandbox mode - can send
+    // to any recipient once the sender address is verified (no domain purchase needed).
+    // Takes priority over SMTP whenever set; SMTP stays as a fallback for hosts where the
+    // port genuinely isn't blocked.
+    @Value("${app.email.brevo-api-key:}")
+    private String brevoApiKey;
 
     public void sendVerificationEmail(String toEmail, String recipientName, String rawToken, String rawCode) {
         String link = webBaseUrl + "/verify-email?token=" + rawToken;
         String subject = "Verify your DaycareLog account";
         String html = buildHtml(recipientName, link, rawCode);
 
-        if (!resendApiKey.isBlank()) {
-            sendViaResend(toEmail, subject, html);
+        if (!brevoApiKey.isBlank()) {
+            sendViaBrevo(toEmail, subject, html);
             return;
         }
 
@@ -86,31 +88,49 @@ public class EmailService {
         }
     }
 
-    private void sendViaResend(String toEmail, String subject, String html) {
+    private void sendViaBrevo(String toEmail, String subject, String html) {
         try {
+            FromAddress from = parseFromAddress();
             String body = objectMapper.writeValueAsString(Map.of(
-                    "from", fromAddress,
-                    "to", List.of(toEmail),
+                    "sender", Map.of("name", from.name(), "email", from.email()),
+                    "to", List.of(Map.of("email", toEmail)),
                     "subject", subject,
-                    "html", html
+                    "htmlContent", html
             ));
-            HttpRequest request = HttpRequest.newBuilder(RESEND_ENDPOINT)
-                    .header("Authorization", "Bearer " + resendApiKey)
+            HttpRequest request = HttpRequest.newBuilder(BREVO_ENDPOINT)
+                    .header("api-key", brevoApiKey)
                     .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
                     .timeout(Duration.ofSeconds(10))
                     .POST(HttpRequest.BodyPublishers.ofString(body))
                     .build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 300) {
-                log.error("Resend API returned {} sending verification email to {}: {}",
+                log.error("Brevo API returned {} sending verification email to {}: {}",
                         response.statusCode(), toEmail, response.body());
             }
         } catch (Exception e) {
             // Same fail-soft policy as the SMTP path - never let a mail-provider outage
             // turn into a 500 on registration/resend.
-            log.error("Failed to send verification email via Resend to {}", toEmail, e);
+            log.error("Failed to send verification email via Brevo to {}", toEmail, e);
         }
     }
+
+    // Brevo's API wants sender name/email as separate JSON fields, unlike SMTP's single
+    // "Name <email>" string - MAIL_FROM keeps using that familiar format, split here.
+    private FromAddress parseFromAddress() {
+        String value = fromAddress.trim();
+        int lt = value.indexOf('<');
+        int gt = value.indexOf('>');
+        if (lt >= 0 && gt > lt) {
+            String name = value.substring(0, lt).trim();
+            String email = value.substring(lt + 1, gt).trim();
+            return new FromAddress(name.isEmpty() ? "DaycareLog" : name, email);
+        }
+        return new FromAddress("DaycareLog", value);
+    }
+
+    private record FromAddress(String name, String email) {}
 
     private boolean isConsoleMode() {
         return "console".equalsIgnoreCase(mailMode) || mailSender == null;

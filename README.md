@@ -33,13 +33,13 @@ Set these before running (locally or on your deploy platform) — never commit r
 | `JWT_SECRET` | Long random string used to sign JWTs |
 | `ADMIN_SEED_EMAIL` | (optional) Email for the first admin account, seeded on startup |
 | `ADMIN_SEED_PASSWORD` | (optional) Password for the first admin account, seeded on startup |
-| `RESEND_API_KEY` | **Recommended for production.** API key from [resend.com](https://resend.com) - sends verification emails over HTTPS instead of SMTP. Takes priority over `MAIL_HOST` whenever set - see [Email verification](#email-verification) below |
+| `BREVO_API_KEY` | **Recommended for production.** API key from [brevo.com](https://brevo.com) - sends verification emails over HTTPS instead of SMTP, and can reach any recipient once your sender address is verified (no domain purchase needed). Takes priority over `MAIL_HOST` whenever set - see [Email verification](#email-verification) below |
 | `MAIL_MODE` | (optional) Set to `console` to log verification emails to stdout instead of sending them |
-| `MAIL_HOST` | SMTP host (e.g. `smtp.gmail.com`) - only used if `RESEND_API_KEY` is unset; many PaaS hosts (Railway included) block outbound SMTP ports entirely, so prefer `RESEND_API_KEY` unless you know SMTP works on your host |
+| `MAIL_HOST` | SMTP host (e.g. `smtp.gmail.com`) - only used if `BREVO_API_KEY` is unset; many PaaS hosts (Railway included) block outbound SMTP ports entirely, so prefer `BREVO_API_KEY` unless you know SMTP works on your host |
 | `MAIL_PORT` | (optional) SMTP port, defaults to `587` |
 | `MAIL_USERNAME` | SMTP username |
 | `MAIL_PASSWORD` | SMTP password (a Gmail **app password**, not your regular Gmail password - see below) |
-| `MAIL_FROM` | (optional) "From" address on verification emails, defaults to `no-reply@daycarelog.local` - with Resend, the address itself must be `onboarding@resend.dev` or one on a domain you've verified with Resend, but you can set a display name too, e.g. `DaycareLog <onboarding@resend.dev>`, so it shows as "DaycareLog" in the recipient's inbox instead of the raw address |
+| `MAIL_FROM` | (optional) "From" address on verification emails, defaults to `no-reply@daycarelog.local` - with Brevo, the address itself must be one you've verified as a sender in Brevo's dashboard, but you can add a display name too, e.g. `DaycareLog <you@gmail.com>`, so it shows as "DaycareLog" in the recipient's inbox instead of the raw address |
 | `WEB_BASE_URL` | Public URL of the React web app, used to build the verification link (e.g. `https://daycarelog.vercel.app`) |
 | `EMAIL_MX_CHECK_ENABLED` | (optional) Set to `false` to skip the DNS MX/A lookup at registration - see [Blocking dummy/fake emails](#blocking-dummyfake-emails) below. Defaults to `true` |
 
@@ -58,14 +58,17 @@ Link: http://localhost:5173/verify-email?token=...
 Code: 123456
 ```
 
-**Production / real emails via Resend (recommended):**
+**Production / real emails via Brevo (recommended):**
 
-Raw SMTP is blocked outbound on some PaaS hosts - Railway confirmed this in practice (connections to `smtp.gmail.com:587` just time out). [Resend](https://resend.com) sends over HTTPS instead, which isn't affected.
+Raw SMTP is blocked outbound on some PaaS hosts - Railway confirmed this in practice (connections to `smtp.gmail.com:587` just time out). [Brevo](https://brevo.com) sends over HTTPS instead, which isn't affected - and unlike some competitors (e.g. Resend), it doesn't require owning/verifying a whole domain to email arbitrary recipients, only a single sender address.
 
-1. Sign up at [resend.com](https://resend.com) and copy an API key from the dashboard.
-2. Set `RESEND_API_KEY=<your key>`.
-3. Set `MAIL_FROM=onboarding@resend.dev` for quick testing - note this only lets you send **to the email address you signed up to Resend with**. To email arbitrary users (real production use), verify a domain you own under Resend's Domains page and use an address on that domain as `MAIL_FROM` instead.
-4. Set `WEB_BASE_URL` to your deployed web app's URL so the link inside the email points somewhere real.
+1. Sign up at [brevo.com](https://brevo.com) (free tier: 300 emails/day, forever).
+2. Under **Settings → Senders, Domains & Dedicated IPs → Senders**, add the email address you want to send from (e.g. your own Gmail) and verify it - Brevo emails you a confirmation link.
+3. Under **SMTP & API → API Keys**, generate an API key.
+4. Set `BREVO_API_KEY=<your key>` and `MAIL_FROM=DaycareLog <the-address-you-just-verified>`. The email address in `MAIL_FROM` must exactly match the sender you verified in step 2, or Brevo will reject the send.
+5. Set `WEB_BASE_URL` to your deployed web app's URL so the link inside the email points somewhere real.
+
+Once the sender is verified, you can send to *any* recipient - no per-domain setup needed, unlike Resend's sandbox mode.
 
 **Production / real emails via Gmail SMTP (fallback, only if `RESEND_API_KEY` is unset):**
 
