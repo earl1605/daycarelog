@@ -27,8 +27,6 @@ const groups = [
   },
 ]
 
-// Parent role only sees their own child's data - no Children/Reports/Users, and
-// no access to the Admin/Staff attendance-taking or health-record-entry pages.
 const parentGroups = [
   {
     label: 'Main',
@@ -55,8 +53,6 @@ export default function Sidebar({ open, onClose }) {
 
   function handleSignOut() {
     signOut()
-    // Landing page's fixed top nav (with the "Get Started" button) sits at the very
-    // top of the screen - push this toast down below it instead of covering it.
     toast.success('Signed out', { style: { marginTop: '76px' } })
     navigate('/')
   }

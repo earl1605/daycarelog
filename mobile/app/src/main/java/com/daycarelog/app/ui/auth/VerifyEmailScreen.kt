@@ -180,7 +180,6 @@ fun VerifyEmailScreen(
     }
 }
 
-/** Six single-digit boxes with auto-advance forward on input and back on backspace-when-empty. */
 @Composable
 private fun CodeInputBoxes(
     values: List<String>,

@@ -49,7 +49,6 @@ class VerificationServiceTest {
                 .thenReturn("fresh.jwt.token");
     }
 
-    // ── code/token generation ────────────────────────────────────────────
 
     @Test
     void sixDigitCodeIsAlwaysExactlySixDigits() {
@@ -65,11 +64,10 @@ class VerificationServiceTest {
         for (int i = 0; i < 50; i++) {
             String token = service.generateUrlSafeToken();
             assertThat(token).doesNotContain("+", "/", "=");
-            assertThat(token.length()).isGreaterThanOrEqualTo(40); // 32 bytes, base64url, no padding
+            assertThat(token.length()).isGreaterThanOrEqualTo(40);
         }
     }
 
-    // ── hashing ──────────────────────────────────────────────────────────
 
     @Test
     void hashingIsDeterministicAndNeverEqualsTheRawValue() {
@@ -78,7 +76,7 @@ class VerificationServiceTest {
         String hash2 = VerificationService.hash(raw);
         assertThat(hash1).isEqualTo(hash2);
         assertThat(hash1).isNotEqualTo(raw);
-        assertThat(hash1).hasSize(64); // SHA-256 hex digest
+        assertThat(hash1).hasSize(64);
     }
 
     @Test
@@ -86,7 +84,6 @@ class VerificationServiceTest {
         assertThat(VerificationService.hash("111111")).isNotEqualTo(VerificationService.hash("222222"));
     }
 
-    // ── issueVerification ────────────────────────────────────────────────
 
     @Test
     void issueVerificationSavesOneLinkTokenAndOneCodeTokenAndSendsBothInOneEmail() {
@@ -103,7 +100,6 @@ class VerificationServiceTest {
         VerificationToken linkToken = saved.stream().filter(t -> t.getType().equals(VerificationToken.TYPE_EMAIL_LINK)).findFirst().orElseThrow();
         VerificationToken codeToken = saved.stream().filter(t -> t.getType().equals(VerificationToken.TYPE_EMAIL_CODE)).findFirst().orElseThrow();
 
-        // link outlives the code (24h vs 15min)
         assertThat(linkToken.getExpiresAt()).isAfter(codeToken.getExpiresAt());
 
         ArgumentCaptor<String> rawTokenCaptor = ArgumentCaptor.forClass(String.class);
@@ -111,12 +107,10 @@ class VerificationServiceTest {
         verify(emailService).sendVerificationEmail(eq(user.getEmail()), eq(user.getFullName()),
                 rawTokenCaptor.capture(), rawCodeCaptor.capture());
 
-        // the raw values emailed must hash to exactly what was persisted
         assertThat(VerificationService.hash(rawTokenCaptor.getValue())).isEqualTo(linkToken.getTokenHash());
         assertThat(VerificationService.hash(rawCodeCaptor.getValue())).isEqualTo(codeToken.getTokenHash());
     }
 
-    // ── verifyByToken ────────────────────────────────────────────────────
 
     @Test
     void verifyByTokenWithUnknownTokenThrowsTokenInvalid() {
@@ -159,7 +153,6 @@ class VerificationServiceTest {
         verify(jwtUtil).generateToken(user.getEmail(), user.getId(), user.getRole(), true);
     }
 
-    // ── verifyByCode ─────────────────────────────────────────────────────
 
     @Test
     void verifyByCodeWithUnknownEmailThrowsTokenInvalid() {
@@ -203,7 +196,7 @@ class VerificationServiceTest {
     void verifyByCodeFifthWrongAttemptInvalidatesTokenAndThrowsTooManyAttempts() {
         VerificationToken codeToken = tokenWith(VerificationToken.TYPE_EMAIL_CODE, LocalDateTime.now().plusMinutes(10));
         codeToken.setTokenHash(VerificationService.hash("999999"));
-        codeToken.setAttempts(4); // one more wrong guess hits the max of 5
+        codeToken.setAttempts(4);
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(tokenRepository.findFirstByUserIdAndTypeAndConsumedAtIsNullOrderByCreatedAtDesc(user.getId(), VerificationToken.TYPE_EMAIL_CODE))
                 .thenReturn(Optional.of(codeToken));
@@ -213,7 +206,7 @@ class VerificationServiceTest {
                 .satisfies(e -> assertThat(((VerificationException) e).getCode()).isEqualTo("TOO_MANY_ATTEMPTS"));
 
         assertThat(codeToken.getAttempts()).isEqualTo(5);
-        assertThat(codeToken.getConsumedAt()).isNotNull(); // invalidated, can't be retried
+        assertThat(codeToken.getConsumedAt()).isNotNull();
     }
 
     @Test
@@ -232,13 +225,12 @@ class VerificationServiceTest {
         assertThat(result.token()).isEqualTo("fresh.jwt.token");
     }
 
-    // ── resend rate limiting ─────────────────────────────────────────────
 
     @Test
     void resendForUnknownEmailIsANoOp() {
         when(userRepository.findByEmail("nobody@example.com")).thenReturn(Optional.empty());
 
-        service.resend("nobody@example.com"); // must not throw
+        service.resend("nobody@example.com");
 
         verifyNoInteractions(emailService);
         verify(tokenRepository, never()).save(any());
@@ -259,7 +251,7 @@ class VerificationServiceTest {
     void resendUnderTheHourlyLimitReissuesVerification() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(tokenRepository.countByUserIdAndTypeAndCreatedAtAfter(eq(user.getId()), eq(VerificationToken.TYPE_EMAIL_CODE), any()))
-                .thenReturn(2L); // under MAX_RESEND_PER_HOUR (3)
+                .thenReturn(2L);
 
         service.resend(user.getEmail());
 
@@ -271,7 +263,7 @@ class VerificationServiceTest {
     void resendAtTheHourlyLimitThrowsRateLimited() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(tokenRepository.countByUserIdAndTypeAndCreatedAtAfter(eq(user.getId()), eq(VerificationToken.TYPE_EMAIL_CODE), any()))
-                .thenReturn(3L); // at MAX_RESEND_PER_HOUR
+                .thenReturn(3L);
 
         assertThatThrownBy(() -> service.resend(user.getEmail()))
                 .isInstanceOf(VerificationException.class)

@@ -11,7 +11,6 @@ export default function Layout() {
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Mobile top bar */}
         <header className="lg:hidden flex items-center gap-3 px-4 py-3 bg-[#F7F7F5] dark:bg-gray-800 border-b border-gray-200/70 dark:border-gray-700">
           <button
             onClick={() => setSidebarOpen(true)}

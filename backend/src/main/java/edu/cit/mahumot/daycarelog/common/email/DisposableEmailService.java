@@ -18,10 +18,6 @@ public class DisposableEmailService {
 
     private static final Logger log = LoggerFactory.getLogger(DisposableEmailService.class);
 
-    // RFC 2606 reserves these exact domains, and these TLDs entirely, for
-    // documentation/testing - they can never receive real mail. Deliberately NOT
-    // included: domains that merely "sound fake" but are real providers (e.g.
-    // email.com, mail.com) - only verifiably reserved/disposable domains are blocked.
     private static final Set<String> RESERVED_DOMAINS = Set.of(
             "example.com", "example.net", "example.org", "example.edu"
     );
@@ -47,7 +43,6 @@ public class DisposableEmailService {
         }
     }
 
-    /** @param domain already-lowercased domain part of an email (no leading '@'). */
     public boolean isBlocked(String domain) {
         if (domain == null || domain.isEmpty()) return false;
         if (RESERVED_DOMAINS.contains(domain)) return true;
@@ -64,7 +59,6 @@ public class DisposableEmailService {
         }
     }
 
-    /** Test/ops visibility only - not used by production validation logic. */
     int blocklistSize() {
         return disposableDomains.size();
     }

@@ -81,7 +81,7 @@ fun GuardiansScreen(onOpenDrawer: () -> Unit) {
     var childExpanded by remember { mutableStateOf(false) }
     var creating      by remember { mutableStateOf(false) }
     var formError     by remember { mutableStateOf<String?>(null) }
-    var tempPassword  by remember { mutableStateOf<Pair<String, String>?>(null) } // name to password
+    var tempPassword  by remember { mutableStateOf<Pair<String, String>?>(null) }
     var confirmRemove by remember { mutableStateOf<GuardianAccountResponse?>(null) }
 
     fun load() {

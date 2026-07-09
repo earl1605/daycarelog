@@ -25,10 +25,6 @@ async function request(path, options = {}) {
       code = body.code ?? null
     } catch (_) {}
 
-    // Backstop for any endpoint returning EMAIL_NOT_VERIFIED, regardless of what
-    // the locally-cached user object says - the server (via the JWT claim) is the
-    // source of truth. Skipped on the verification screens themselves to avoid a
-    // redirect loop while the user is actively trying to verify.
     if (code === 'EMAIL_NOT_VERIFIED' && !/^\/(check-email|verify-email)/.test(window.location.pathname)) {
       window.location.href = '/check-email'
     }
@@ -38,7 +34,6 @@ async function request(path, options = {}) {
     throw err
   }
 
-  // 204 No Content
   if (res.status === 204) return null
   return res.json()
 }

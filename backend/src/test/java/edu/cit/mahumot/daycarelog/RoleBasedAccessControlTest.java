@@ -70,8 +70,6 @@ class RoleBasedAccessControlTest {
     void selfRegistrationCannotProduceAnAdminAccount() {
         long adminsBefore = userRepository.countByRole("admin");
 
-        // Even if a malicious client smuggles a "role" field into the payload, no admin
-        // account can result from /api/auth/register today (the field is no longer read).
         Map<String, Object> body = Map.of(
                 "email", "wannabe-admin@test.daycarelog",
                 "password", PASSWORD,
@@ -123,7 +121,6 @@ class RoleBasedAccessControlTest {
         String tempPassword = (String) created.getBody().get("tempPassword");
         assertThat(tempPassword).isNotBlank();
 
-        // the generated temp password must actually work
         String newStaffToken = loginAndGetToken("newstaff@test.daycarelog", tempPassword);
         assertThat(newStaffToken).isNotBlank();
     }
@@ -132,7 +129,6 @@ class RoleBasedAccessControlTest {
     void deactivationTakesEffectImmediatelyEvenWithAnExistingToken() {
         String staffToken = loginAndGetToken(STAFF_EMAIL, PASSWORD);
 
-        // sanity check: token works on a generically-authenticated endpoint before deactivation
         ResponseEntity<String> before = restTemplate.exchange(
                 url("/api/children"), HttpMethod.GET, new HttpEntity<>(authHeaders(staffToken)), String.class);
         assertThat(before.getStatusCode().is2xxSuccessful()).isTrue();
@@ -144,12 +140,10 @@ class RoleBasedAccessControlTest {
                 new HttpEntity<>(authHeaders(adminToken)), String.class);
         assertThat(deactivateRes.getStatusCode().is2xxSuccessful()).isTrue();
 
-        // the SAME, already-issued token must now be rejected — no waiting for expiry
         ResponseEntity<String> afterChildren = restTemplate.exchange(
                 url("/api/children"), HttpMethod.GET, new HttpEntity<>(authHeaders(staffToken)), String.class);
         assertThat(afterChildren.getStatusCode().is2xxSuccessful()).isFalse();
 
-        // and a fresh login attempt must also fail with a clear message
         Map<String, Object> loginBody = Map.of("email", STAFF_EMAIL, "password", PASSWORD);
         ResponseEntity<String> loginAfter = restTemplate.postForEntity(url("/api/auth/login"), loginBody, String.class);
         assertThat(loginAfter.getStatusCode().is2xxSuccessful()).isFalse();

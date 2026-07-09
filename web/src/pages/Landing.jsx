@@ -46,7 +46,6 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-animated-gradient text-white overflow-x-hidden">
 
-      {/* Global floating circles — kept very subtle so text stays readable */}
       <div className="fixed inset-0 pointer-events-none select-none overflow-hidden z-0">
         <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/[0.03] animate-float-slow" />
         <div className="absolute top-1/3 -right-20 w-72 h-72 rounded-full bg-white/[0.03] animate-float animation-delay-400" />
@@ -57,7 +56,6 @@ export default function Landing() {
         <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full bg-white/[0.03] animate-float-slow animation-delay-800" />
       </div>
 
-      {/* ── Nav ── */}
       <nav className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 md:px-12 py-3 md:py-4 z-20 bg-black/10 backdrop-blur-sm">
         <span className="flex items-center gap-2 sm:gap-3">
           <img src="/favicon.svg" alt="DaycareLog" className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
@@ -73,7 +71,6 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ── Hero ── */}
       <section className="relative min-h-screen flex flex-col items-center justify-center z-10 pt-24">
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-black/20 backdrop-blur-sm text-white text-sm font-medium px-4 py-2 rounded-full mb-6 animate-fade-in">
@@ -109,7 +106,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Stats ── */}
       <section className="relative z-10 py-12">
         <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((s, i) => (
@@ -121,7 +117,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Features ── */}
       <section ref={featRef} className="relative z-10 py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 reveal">
@@ -141,7 +136,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── How it works ── */}
       <section ref={stepsRef} className="relative z-10 py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16 reveal">
@@ -160,7 +154,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
       <section ref={ctaRef} className="relative z-10 py-24 px-6">
         <div className="max-w-2xl mx-auto text-center reveal">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 text-shadow-strong">
@@ -175,7 +168,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
       <footer className="relative z-10 bg-black/20 backdrop-blur-sm text-green-100 py-8 px-6 text-center text-sm">
         <div className="flex items-center justify-center gap-2 mb-1">
           <img src="/favicon.svg" alt="" className="w-6 h-6" />

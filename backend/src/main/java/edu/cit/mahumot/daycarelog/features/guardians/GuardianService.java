@@ -42,7 +42,6 @@ public class GuardianService {
         return guardianRepository.findByChildId(childId);
     }
 
-    // Every child linked to this parent user, via their guardian rows.
     public List<Long> findChildIdsForUser(Long userId) {
         return guardianRepository.findByUserId(userId).stream().map(Guardian::getChildId).toList();
     }
@@ -69,10 +68,6 @@ public class GuardianService {
             if (req.getEmail() == null || req.getEmail().isBlank()) {
                 throw new RuntimeException("Email is required to create a parent portal account");
             }
-            // Same three layers as public registration (format -> disposable/reserved
-            // domain -> MX), run before deciding whether to reuse or create - a staff
-            // member fat-fingering an email shouldn't silently create an
-            // unreachable parent account either.
             String email = emailRegistrationValidator.validate(req.getEmail());
             guardian.setEmail(email);
             Optional<User> existing = userRepository.findByEmail(email);
@@ -82,7 +77,6 @@ public class GuardianService {
                 if (!"parent".equals(parentUser.getRole())) {
                     throw new RuntimeException("Email already belongs to an existing non-parent account");
                 }
-                // Reusing an existing parent account so the same login covers multiple children.
             } else {
                 tempPassword = TempPasswordGenerator.generate();
                 parentUser = User.builder()
@@ -111,9 +105,6 @@ public class GuardianService {
         guardianRepository.deleteById(guardianId);
     }
 
-    // One row per parent-portal-account, aggregating every child that account is
-    // linked to. Contact-only guardians (no userId) don't have a login and are
-    // managed from the child's own edit page instead, so they're excluded here.
     public List<GuardianAccountResponse> findAllAccounts() {
         List<Guardian> rows = guardianRepository.findByUserIdIsNotNull();
         return rows.stream()
@@ -140,8 +131,6 @@ public class GuardianService {
                 .toList();
     }
 
-    // Unlinks every child from this parent account (does not delete the User login
-    // itself - that's a separate, more destructive action available on the Users page).
     @Transactional
     public void removeAllForUser(Long userId) {
         guardianRepository.deleteByUserId(userId);

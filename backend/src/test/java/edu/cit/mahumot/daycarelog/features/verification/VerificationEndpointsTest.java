@@ -42,7 +42,6 @@ class VerificationEndpointsTest {
                 .sendVerificationEmail(anyString(), any(), anyString(), anyString());
     }
 
-    /** Registers a fresh account and captures the raw link token + code the email would contain. */
     private String[] registerAndCaptureRawTokenAndCode() throws Exception {
         Map<String, Object> body = Map.of(
                 "email", EMAIL, "password", PASSWORD,
@@ -70,8 +69,6 @@ class VerificationEndpointsTest {
                 .andExpect(jsonPath("$.token").doesNotExist())
                 .andExpect(jsonPath("$.user").doesNotExist());
 
-        // register() no longer hands back a session (see AuthController#register) -
-        // log in to get a token for the still-unverified account instead.
         String loginResponse = mockMvc.perform(post("/api/auth/login")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(Map.of("email", EMAIL, "password", PASSWORD))))
@@ -86,7 +83,6 @@ class VerificationEndpointsTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
 
-        // the auth self-service endpoints stay reachable even while unverified
         mockMvc.perform(get("/api/auth/me").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
@@ -160,7 +156,6 @@ class VerificationEndpointsTest {
                     .andExpect(jsonPath("$.code").value("TOKEN_INVALID"));
         }
 
-        // 5th wrong attempt: invalidated instead of just "wrong"
         mockMvc.perform(post("/api/auth/verify-email")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(Map.of("email", EMAIL, "code", "000000"))))
@@ -186,7 +181,7 @@ class VerificationEndpointsTest {
 
     @Test
     void resendIsRateLimitedAfterThreePerHour() throws Exception {
-        registerAndCaptureRawTokenAndCode(); // registration itself issues 1 code
+        registerAndCaptureRawTokenAndCode();
 
         for (int i = 0; i < 2; i++) {
             mockMvc.perform(post("/api/auth/resend-verification")
@@ -195,7 +190,6 @@ class VerificationEndpointsTest {
                     .andExpect(status().isOk());
         }
 
-        // registration (1) + 2 resends = 3 issuances within the hour; the next one is over the limit
         mockMvc.perform(post("/api/auth/resend-verification")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(Map.of("email", EMAIL))))

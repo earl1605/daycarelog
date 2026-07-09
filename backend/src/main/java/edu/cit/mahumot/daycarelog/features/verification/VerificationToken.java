@@ -19,7 +19,6 @@ public class VerificationToken {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    // SHA-256 hex digest of the raw token/code - the raw value is never persisted.
     @Column(name = "token_hash", nullable = false)
     private String tokenHash;
 
@@ -32,7 +31,6 @@ public class VerificationToken {
     @Column(name = "consumed_at")
     private LocalDateTime consumedAt;
 
-    // EMAIL_CODE only: wrong-guess counter, invalidated at MAX_CODE_ATTEMPTS.
     @Column(nullable = false)
     private Integer attempts = 0;
 

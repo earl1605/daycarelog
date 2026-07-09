@@ -12,10 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// Dummy/mistyped-email signups that never verify would otherwise accumulate forever
-// (they're already blocked from doing anything else - see EmailVerificationFilter -
-// but the row itself still sits in the users table). Runs once daily and permanently
-// deletes any account that is still unverified after GRACE_PERIOD_DAYS.
 @Component
 public class UnverifiedAccountCleanupJob {
 
@@ -33,7 +29,7 @@ public class UnverifiedAccountCleanupJob {
         this.tokenRepository = tokenRepository;
     }
 
-    @Scheduled(cron = "0 0 3 * * *") // daily at 3am server time
+    @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void cleanupUnverifiedAccounts() {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(GRACE_PERIOD_DAYS);
@@ -42,10 +38,6 @@ public class UnverifiedAccountCleanupJob {
         int deleted = 0;
         int skipped = 0;
         for (User user : stale) {
-            // A PARENT account created during child enrollment already has a Guardian
-            // row linking it to a real child before verification even happens -
-            // deleting the User out from under that link would orphan real data, so
-            // leave both alone for manual admin follow-up instead.
             if (!guardianRepository.findByUserId(user.getId()).isEmpty()) {
                 skipped++;
                 log.info("Skipping cleanup of unverified account {} - has linked guardian records", user.getEmail());

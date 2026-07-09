@@ -123,7 +123,6 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-2.5">
 
-            {/* Name row 1 */}
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">First Name <span className="text-red-400">*</span></label>
@@ -137,7 +136,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Name row 2 */}
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Middle Name</label>
@@ -158,7 +156,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Email address <span className="text-red-400">*</span></label>
               <input type="email" value={email}
@@ -174,7 +171,6 @@ export default function Register() {
               )}
             </div>
 
-            {/* Password + Confirm stacked on mobile */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Password <span className="text-red-400">*</span></label>

@@ -42,7 +42,6 @@ class MxRecordServiceTest {
 
         assertThat(service.hasValidMx("good.com")).isTrue();
         assertThat(service.hasValidMx("bad.com")).isFalse();
-        // re-check to confirm both cached results stuck rather than one clobbering the other
         assertThat(service.hasValidMx("good.com")).isTrue();
         assertThat(service.hasValidMx("bad.com")).isFalse();
     }
@@ -80,7 +79,7 @@ class MxRecordServiceTest {
     @Test
     void validateDoesNotThrowWhenMxCheckIsEnabledAndDomainHasRecords() {
         MxRecordService service = new MxRecordService(true, domain -> true);
-        service.validate(domain()); // must not throw
+        service.validate(domain());
     }
 
     @Test
@@ -88,10 +87,10 @@ class MxRecordServiceTest {
         AtomicInteger calls = new AtomicInteger();
         MxRecordService service = new MxRecordService(false, domain -> {
             calls.incrementAndGet();
-            return false; // would fail if the lookup were actually performed
+            return false;
         });
 
-        service.validate(domain()); // must not throw even though the fake lookup returns false
+        service.validate(domain());
         assertThat(calls.get()).isEqualTo(0);
     }
 

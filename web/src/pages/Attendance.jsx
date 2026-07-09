@@ -6,13 +6,11 @@ import toast from 'react-hot-toast'
 const STATUS_OPTS   = ['present', 'absent', 'late', 'excused']
 const STATUS_COLORS = { present: 'bg-green-100 text-green-700', absent: 'bg-red-100 text-red-700', late: 'bg-yellow-100 text-yellow-700', excused: 'bg-blue-100 text-blue-700' }
 
-// The daycare only operates Monday-Friday. If "today" is a weekend, default to the
-// most recent Friday rather than opening on a date that can never have attendance.
 function nearestWeekday(d) {
   const day = d.getDay()
   const result = new Date(d)
-  if (day === 0) result.setDate(result.getDate() - 2) // Sunday -> Friday
-  else if (day === 6) result.setDate(result.getDate() - 1) // Saturday -> Friday
+  if (day === 0) result.setDate(result.getDate() - 2)
+  else if (day === 6) result.setDate(result.getDate() - 1)
   return result
 }
 

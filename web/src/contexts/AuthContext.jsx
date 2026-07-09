@@ -12,9 +12,6 @@ export function AuthProvider({ children }) {
   const isAdmin  = user?.role === 'admin'
   const isStaff  = user?.role === 'admin' || user?.role === 'staff'
   const isParent = user?.role === 'parent'
-  // Strict !== false (not just falsy): a cached user object saved before this
-  // field existed has emailVerified === undefined, and must still be treated as
-  // verified - it predates the requirement, same as the backend's column default.
   const isEmailVerified = user?.emailVerified !== false
 
   function persistSession(token, user) {
@@ -54,9 +51,6 @@ export function AuthProvider({ children }) {
     setUser(merged)
   }
 
-  // Called by the verify-email link page and the check-email code form once the
-  // backend confirms verification - both return a fresh token (emailVerified: true)
-  // and the updated user in the same shape as signIn's response.
   function completeVerification(token, user) {
     persistSession(token, user)
   }

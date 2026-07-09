@@ -130,7 +130,6 @@ fun HealthFormScreen(onBack: () -> Unit) {
                     }
                 }
 
-                // Child picker
                 ExposedDropdownMenuBox(
                     expanded = childExpanded,
                     onExpandedChange = { childExpanded = it },

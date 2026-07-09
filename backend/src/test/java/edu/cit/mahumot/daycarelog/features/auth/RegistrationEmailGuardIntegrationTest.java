@@ -23,10 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// Covers the registration-time email guard layers end to end (format -> disposable ->
-// MX), on top of the unit tests for each individual layer. The MX layer is faked here
-// via @MockitoBean rather than hitting real DNS - the test/application.properties
-// default (app.email.mx-check-enabled=false) would otherwise skip it entirely.
 @SpringBootTest
 @AutoConfigureMockMvc
 class RegistrationEmailGuardIntegrationTest {
@@ -112,9 +108,7 @@ class RegistrationEmailGuardIntegrationTest {
                 .andExpect(jsonPath("$.user").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
 
-        // identical response shape for "already registered" as for "brand new" - no enumeration
         assertThat(secondResponse).isEqualTo(firstResponse);
-        // exactly one verification email for the real (first) registration only
         verify(emailService, times(1)).sendVerificationEmail(eq(GMAIL), any(), anyString(), anyString());
     }
 }

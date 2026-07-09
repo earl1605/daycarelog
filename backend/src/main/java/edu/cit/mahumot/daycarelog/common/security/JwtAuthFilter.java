@@ -36,8 +36,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (jwtUtil.validateToken(token)) {
                 String email = jwtUtil.extractEmail(token);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                // Re-checked fresh from the DB on every request: a deactivated account is
-                // locked out immediately, without waiting for its existing token to expire.
                 if (userDetails.isEnabled()) {
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

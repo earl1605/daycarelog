@@ -27,8 +27,6 @@ public class HealthRecordController {
         return healthRecordService.findAll();
     }
 
-    // Parent-facing: all health records for the caller's own linked children,
-    // resolved server-side from the JWT rather than an accepted child ID.
     @GetMapping("/mine")
     public ResponseEntity<?> getMine(@RequestHeader("Authorization") String authHeader) {
         Long userId = jwtUtil.extractUserId(authHeader.substring(7));

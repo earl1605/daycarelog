@@ -20,7 +20,7 @@ export default function Guardians() {
   const [resettingId, setResettingId] = useState(null)
   const [confirmUserId, setConfirmUserId] = useState(null)
   const [removing,  setRemoving]  = useState(null)
-  const [tempPassword, setTempPassword] = useState(null) // { name, password }
+  const [tempPassword, setTempPassword] = useState(null)
   const [emailError,      setEmailError]      = useState('')
   const [emailSuggestion, setEmailSuggestion] = useState('')
 
@@ -260,7 +260,6 @@ export default function Guardians() {
         </div>
       )}
 
-      {/* One-time temp password modal */}
       {tempPassword && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-scale-in">
@@ -288,7 +287,6 @@ export default function Guardians() {
         </div>
       )}
 
-      {/* Confirm remove modal */}
       {confirmUserId && confirmTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-scale-in">

@@ -15,7 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRole(String role);
     long countByRoleAndIsActiveTrue(String role);
 
-    // Cleanup-job target: accounts that never verified within the grace period.
     List<User> findByEmailVerifiedFalseAndCreatedAtBefore(LocalDateTime cutoff);
 
     @Modifying

@@ -4,19 +4,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.regex.Pattern;
 
-// Stricter than a bare @Email annotation: rejects shapes that pass most basic email
-// regexes but are still obviously wrong (double dots, no TLD, embedded whitespace).
 @Component
 public class EmailFormatValidator {
 
-    private static final int MAX_LENGTH = 254; // RFC 5321 §4.5.3.1.3
+    private static final int MAX_LENGTH = 254;
 
-    // Practical (not full RFC 5322) local-part/domain-label character sets.
     private static final Pattern LOCAL_PART = Pattern.compile("^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*$");
     private static final Pattern DOMAIN_LABEL = Pattern.compile("^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$");
     private static final Pattern TLD = Pattern.compile("^[A-Za-z]{2,}$");
 
-    /** Trims and lowercases, then validates. Returns the normalized email on success. */
     public String normalizeAndValidate(String rawEmail) {
         if (rawEmail == null || rawEmail.isBlank()) {
             throw invalid("Email address is required.");

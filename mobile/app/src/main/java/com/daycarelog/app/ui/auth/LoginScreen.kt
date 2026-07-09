@@ -85,7 +85,6 @@ fun LoginScreen(
             .background(Brush.verticalGradient(listOf(Green900, Green500)))
             .imePadding(),
     ) {
-        // ── Hero section ──────────────────────────────────────────────
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -96,7 +95,6 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(horizontal = 24.dp),
             ) {
-                // Logo bubble
                 Surface(
                     shape = CircleShape,
                     color = Color.White.copy(alpha = 0.18f),
@@ -124,7 +122,6 @@ fun LoginScreen(
                     modifier = Modifier.padding(top = 4.dp),
                 )
                 Spacer(Modifier.height(20.dp))
-                // Feature pills row
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("👶 Children", "📋 Attendance", "❤️ Health").forEach { label ->
                         Surface(
@@ -143,7 +140,6 @@ fun LoginScreen(
             }
         }
 
-        // ── Form card ─────────────────────────────────────────────────
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
@@ -169,7 +165,6 @@ fun LoginScreen(
                     modifier = Modifier.padding(top = 2.dp, bottom = 18.dp),
                 )
 
-                // Success banner
                 if (!banner.isNullOrBlank()) {
                     Surface(
                         color = Green100,
@@ -187,7 +182,6 @@ fun LoginScreen(
                     }
                 }
 
-                // Error banner
                 if (!errorMsg.isNullOrBlank()) {
                     Surface(
                         color = Color(0xFFfee2e2),

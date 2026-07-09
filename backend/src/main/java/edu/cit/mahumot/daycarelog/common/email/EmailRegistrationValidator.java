@@ -2,11 +2,6 @@ package edu.cit.mahumot.daycarelog.common.email;
 
 import org.springframework.stereotype.Component;
 
-// Single entry point for "is this email worth sending a verification message to" -
-// used by both public STAFF self-registration and Admin/Staff-created PARENT
-// accounts, so the two flows can never drift apart. Runs format -> disposable/
-// reserved-domain blocklist -> MX record check, in that order, returning the first
-// failure only.
 @Component
 public class EmailRegistrationValidator {
 
@@ -22,7 +17,6 @@ public class EmailRegistrationValidator {
         this.mxRecordService = mxRecordService;
     }
 
-    /** @return the normalized (trimmed, lowercased) email, once all three layers pass. */
     public String validate(String rawEmail) {
         String email = formatValidator.normalizeAndValidate(rawEmail);
         String domain = email.substring(email.indexOf('@') + 1);

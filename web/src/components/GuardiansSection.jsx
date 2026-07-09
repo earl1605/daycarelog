@@ -14,7 +14,7 @@ export default function GuardiansSection({ childId }) {
   const [form,        setForm]        = useState(emptyForm)
   const [saving,      setSaving]      = useState(false)
   const [deletingId,  setDeletingId]  = useState(null)
-  const [tempPassword, setTempPassword] = useState(null) // { name, password }
+  const [tempPassword, setTempPassword] = useState(null)
   const [emailError,      setEmailError]      = useState('')
   const [emailSuggestion, setEmailSuggestion] = useState('')
 

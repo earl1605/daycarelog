@@ -13,7 +13,7 @@ class DisposableEmailServiceTest {
     @BeforeEach
     void setUp() {
         service = new DisposableEmailService();
-        service.loadBlocklist(); // @PostConstruct isn't invoked without a Spring context
+        service.loadBlocklist();
     }
 
     @Test
@@ -76,6 +76,6 @@ class DisposableEmailServiceTest {
 
     @Test
     void validateDoesNotThrowForARealDomain() {
-        service.validate("gmail.com"); // must not throw
+        service.validate("gmail.com");
     }
 }

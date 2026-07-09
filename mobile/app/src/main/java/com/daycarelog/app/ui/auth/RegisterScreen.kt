@@ -87,7 +87,6 @@ fun RegisterScreen(
                         }
                     }
 
-                    // Name row 1
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = firstName, onValueChange = { firstName = capitalizedNameFieldValue(it) },
@@ -103,7 +102,6 @@ fun RegisterScreen(
                         )
                     }
 
-                    // Name row 2
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = middleName, onValueChange = { middleName = capitalizedNameFieldValue(it) },
@@ -136,7 +134,6 @@ fun RegisterScreen(
                         }
                     }
 
-                    // Email
                     OutlinedTextField(
                         value = email, onValueChange = { email = it; errorMsg = null },
                         label = { Text("Email address *") }, singleLine = true,
@@ -144,7 +141,6 @@ fun RegisterScreen(
                         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
                     )
 
-                    // Password
                     OutlinedTextField(
                         value = password, onValueChange = { password = it; errorMsg = null },
                         label = { Text("Password *") }, singleLine = true,
@@ -154,7 +150,6 @@ fun RegisterScreen(
                         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
                     )
 
-                    // Confirm password
                     OutlinedTextField(
                         value = confirm, onValueChange = { confirm = it; errorMsg = null },
                         label = { Text("Confirm Password *") }, singleLine = true,

@@ -101,8 +101,6 @@ object InnerRoutes {
     const val USERS       = "users"
     const val GUARDIANS   = "guardians"
 
-    // Parent role only sees their own child's data - no Children/Reports/Users/Guardians,
-    // and no access to the Admin/Staff attendance-taking or health-record-entry screens.
     const val PARENT_DASHBOARD  = "parent_dashboard"
     const val PARENT_ATTENDANCE = "parent_attendance"
     const val PARENT_HEALTH     = "parent_health"
@@ -152,10 +150,6 @@ fun MainScreen(onSignOut: () -> Unit) {
     val isAdmin = user?.role == "admin"
     val isParent = user?.role == "parent"
 
-    // The graph always starts at DASHBOARD (Admin/Staff's home). Once we know the
-    // caller is actually a Parent, replace it before they ever see Admin/Staff data -
-    // this can't be the NavHost's startDestination directly since that's fixed at
-    // first composition, before the cached user has finished loading from DataStore.
     var redirectedForParent by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(user) {
         if (!redirectedForParent && isParent) {
@@ -215,7 +209,6 @@ fun MainScreen(onSignOut: () -> Unit) {
                 drawerContentColor = drawerText,
                 modifier = Modifier.width(280.dp),
             ) {
-                // ── Logo header ──────────────────────────────────────────
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -277,7 +270,6 @@ fun MainScreen(onSignOut: () -> Unit) {
                 }
 
                 HorizontalDivider(color = dividerColor)
-                // ── User footer ──────────────────────────────────────────
                 Column(Modifier.padding(12.dp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

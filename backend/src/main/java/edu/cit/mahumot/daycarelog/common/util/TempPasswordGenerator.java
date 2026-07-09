@@ -2,8 +2,6 @@ package edu.cit.mahumot.daycarelog.common.util;
 
 import java.security.SecureRandom;
 
-// Shared by UserService (staff/admin creation) and GuardianService (parent account
-// creation) so both produce temp passwords the same way instead of duplicating it.
 public final class TempPasswordGenerator {
 
     private static final String CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";

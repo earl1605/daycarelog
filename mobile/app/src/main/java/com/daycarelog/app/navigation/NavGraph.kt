@@ -43,9 +43,6 @@ fun DaycareLogNavGraph() {
             startDest = LOGIN
         } else {
             TokenProvider.token = token
-            // A stored token from a still-unverified session must not silently land on
-            // MAIN just because a token exists - re-check the cached user's status too,
-            // otherwise closing and reopening the app would bypass the verification gate.
             val userJson = TokenDataStore.getUser(ctx).first()
             val user = userJson?.let { runCatching { Gson().fromJson(it, UserDto::class.java) }.getOrNull() }
             startDest = if (user != null && !user.isEmailVerified()) {
@@ -79,9 +76,6 @@ fun DaycareLogNavGraph() {
         composable(REGISTER) {
             RegisterScreen(
                 onRegisterSuccess = { email ->
-                    // Public registration always creates an unverified account - go
-                    // straight to verification (code entry works without a session),
-                    // matching the web app's post-registration flow.
                     nav.navigate("$VERIFY_EMAIL/${encode(email)}") { popUpTo(0) { inclusive = true } }
                 },
                 onNavigateToLogin = { nav.popBackStack() },

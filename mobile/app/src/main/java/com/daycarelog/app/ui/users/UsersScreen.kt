@@ -82,7 +82,7 @@ fun UsersScreen(onBack: () -> Unit) {
 
     var showCreateDialog    by remember { mutableStateOf(false) }
     var confirmDeleteTarget by remember { mutableStateOf<UserDto?>(null) }
-    var tempPasswordReveal  by remember { mutableStateOf<Pair<String, String>?>(null) } // name, password
+    var tempPasswordReveal  by remember { mutableStateOf<Pair<String, String>?>(null) }
 
     fun refresh() {
         scope.launch {
@@ -285,7 +285,6 @@ private fun UserRow(
                 }
             }
 
-            // Role toggle
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 roles.forEach { r ->
                     val selected = user.role == r
@@ -310,7 +309,6 @@ private fun UserRow(
                 }
             }
 
-            // Actions
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 TextButton(onClick = onResetPassword, enabled = !busy, contentPadding = PaddingValues(0.dp)) {
                     Text("🔑 Reset", color = Blue600, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)

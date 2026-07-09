@@ -236,7 +236,6 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // Profile card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -247,7 +246,6 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                     Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    // Avatar with camera badge
                     Box(
                         modifier = Modifier.size(90.dp),
                         contentAlignment = Alignment.BottomEnd,
@@ -292,7 +290,6 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                                 }
                             }
                         }
-                        // Camera badge
                         Box(
                             modifier = Modifier
                                 .size(28.dp)
@@ -339,7 +336,6 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                 }
             }
 
-            // Account details
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -423,7 +419,6 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                 }
             }
 
-            // Appearance
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -450,7 +445,6 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                 }
             }
 
-            // About
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),

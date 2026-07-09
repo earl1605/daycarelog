@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-// Admin/Staff only (enforced in SecurityConfig) - the Parent/Guardian portal-account
-// directory, as opposed to GuardianController which manages one child's contacts.
 @RestController
 @RequestMapping("/api/guardians")
 public class GuardianAccountController {

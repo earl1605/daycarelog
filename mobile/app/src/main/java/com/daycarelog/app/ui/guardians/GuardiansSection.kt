@@ -49,10 +49,6 @@ import kotlinx.coroutines.launch
 private val Green500 = Color(0xFF16a34a)
 private val Green900 = Color(0xFF052e16)
 
-// Per-child guardian contacts/portal-account management, embedded in ChildFormScreen's
-// edit mode - supports contact-only guardians as well as ones with a "parent" login
-// (createPortalAccount), which is what distinguishes this from the standalone
-// GuardiansScreen directory (that one only manages/lists portal accounts).
 @Composable
 fun GuardiansSection(childId: Long) {
     val scope = rememberCoroutineScope()

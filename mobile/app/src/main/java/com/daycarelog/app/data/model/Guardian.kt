@@ -12,8 +12,6 @@ data class Guardian(
     val userId: Long? = null,
 )
 
-// POST /children/{childId}/guardians body — createPortalAccount=true always creates
-// (or reuses, by email) a "parent" role login and returns a one-time temp password.
 data class GuardianRequest(
     val name: String,
     val relationship: String? = null,
@@ -29,8 +27,6 @@ data class CreateGuardianResponse(
     val tempPassword: String?,
 )
 
-// GET /guardians — one row per parent-portal-account, aggregating every child that
-// account is linked to. Contact-only guardians (no userId) aren't included.
 data class GuardianAccountResponse(
     val userId: Long,
     val name: String?,

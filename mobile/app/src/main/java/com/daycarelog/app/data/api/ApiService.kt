@@ -30,13 +30,9 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
-    // Auth
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): AuthResponse
 
-    // Registration no longer returns a session - it always creates an unverified
-    // account (or silently no-ops for a duplicate email, to avoid enumeration), so
-    // there's no real token/user to hand back. See AuthController#register.
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): GenericMessageResponse
 
@@ -52,7 +48,6 @@ interface ApiService {
     @POST("auth/refresh-token")
     suspend fun refreshToken(): AuthResponse
 
-    // Children
     @GET("children")
     suspend fun getChildren(): List<Child>
 
@@ -68,9 +63,6 @@ interface ApiService {
     @DELETE("children/{id}")
     suspend fun deleteChild(@Path("id") id: Long)
 
-    // Parent-facing "mine" endpoints — resolve the caller's own linked children
-    // server-side from the JWT, never from a request param, so there's no ID to
-    // tamper with. Admin/Staff calling these just get an empty list back.
     @GET("children/mine")
     suspend fun getMyChildren(): List<Child>
 
@@ -80,7 +72,6 @@ interface ApiService {
     @GET("health-records/mine")
     suspend fun getMyHealthRecords(): List<HealthRecord>
 
-    // Guardians — per-child contact/portal-account management (Admin/Staff only)
     @GET("children/{childId}/guardians")
     suspend fun getGuardians(@Path("childId") childId: Long): List<Guardian>
 
@@ -90,14 +81,12 @@ interface ApiService {
     @DELETE("children/{childId}/guardians/{guardianId}")
     suspend fun deleteGuardian(@Path("childId") childId: Long, @Path("guardianId") guardianId: Long)
 
-    // Guardians — portal-account directory (Admin/Staff only)
     @GET("guardians")
     suspend fun getGuardianAccounts(): List<GuardianAccountResponse>
 
     @DELETE("guardians/user/{userId}")
     suspend fun removeGuardianAccount(@Path("userId") userId: Long)
 
-    // Attendance
     @GET("attendance")
     suspend fun getAttendance(@Query("date") date: String): List<AttendanceRecord>
 
@@ -107,7 +96,6 @@ interface ApiService {
     @POST("attendance/bulk")
     suspend fun saveAttendanceBulk(@Body records: List<AttendanceRecord>): List<AttendanceRecord>
 
-    // Health records
     @GET("health-records")
     suspend fun getHealthRecords(): List<HealthRecord>
 
@@ -117,15 +105,12 @@ interface ApiService {
     @DELETE("health-records/{id}")
     suspend fun deleteHealthRecord(@Path("id") id: Long)
 
-    // Reports
     @GET("reports/monthly")
     suspend fun getMonthlyReport(@Query("month") month: String): MonthlyReport
 
-    // Users
     @PUT("users/{id}")
     suspend fun updateProfile(@Path("id") id: Long, @Body request: UpdateProfileRequest): UserDto
 
-    // Users — admin only
     @GET("users")
     suspend fun getUsers(): List<UserDto>
 

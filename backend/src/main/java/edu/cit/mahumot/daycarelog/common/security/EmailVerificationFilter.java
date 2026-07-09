@@ -11,9 +11,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Set;
 
-// Unverified users can log in, but every endpoint except the ones below is blocked
-// with 403 EMAIL_NOT_VERIFIED until they verify - enforced here rather than per
-// controller so a new endpoint can't accidentally forget the check.
 @Component
 public class EmailVerificationFilter extends OncePerRequestFilter {
 

@@ -22,15 +22,9 @@ data class UserDto(
     val role: String,
     val profilePhoto: String?,
     val isActive: Boolean = true,
-    // Nullable (not a primitive default): Gson's reflective deserializer ignores
-    // Kotlin default parameter values for data classes with non-default-able
-    // primary constructor args, so a cached JSON blob saved before this field
-    // existed would silently deserialize to `false` if this were `Boolean = true`.
-    // Null is treated the same as true wherever this is read.
     val emailVerified: Boolean? = null,
 )
 
-// True if the account is verified, or predates this field existing (see UserDto.emailVerified).
 fun UserDto.isEmailVerified(): Boolean = emailVerified != false
 
 data class AuthResponse(
@@ -38,8 +32,6 @@ data class AuthResponse(
     val user: UserDto,
 )
 
-// Either { token } (from the emailed link) or { email, code } (typed in manually) -
-// both are valid, interchangeable ways to verify.
 data class VerifyEmailRequest(
     val token: String? = null,
     val email: String? = null,
@@ -64,7 +56,6 @@ data class UpdateProfileRequest(
     val suffix: String? = null,
 )
 
-// Admin-only user management
 data class CreateUserRequest(
     val email: String,
     val firstName: String,

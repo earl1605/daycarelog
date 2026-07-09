@@ -29,11 +29,6 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
-    // Always returns the same 201 + generic message, whether this is a brand-new
-    // account or the email is already registered - never reveals which. The three
-    // email-quality checks (format/disposable/MX) are the one exception: those are
-    // about the email's general validity, not about any specific account's
-    // existence, so they surface distinct, actionable error codes.
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         try {
@@ -84,8 +79,6 @@ public class AuthController {
         } catch (VerificationException e) {
             return errorResponse(e);
         }
-        // Always the same generic response so this endpoint can't be used to test
-        // whether an email address has an account.
         return ResponseEntity.ok(Map.of(
                 "message", "If that email needs verification, we've sent a new code and link."));
     }
@@ -101,11 +94,6 @@ public class AuthController {
         return ResponseEntity.ok(dto);
     }
 
-    // Re-issues a JWT reflecting the current DB state. Needed because emailVerified
-    // is baked into the token at issue time: verifying on one device (or via the web
-    // link) doesn't retroactively change a token already held by another device -
-    // that device must call this (e.g. after "I verified in my browser") to get a
-    // token whose emailVerified claim is actually true.
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String authHeader) {
         User user = currentUser(authHeader);
@@ -118,10 +106,6 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(token, dto));
     }
 
-    // JWT auth is stateless - there is no server-side session to invalidate. This
-    // exists so clients have a stable endpoint to call before discarding their
-    // locally stored token, and so it can be explicitly allow-listed alongside the
-    // other pre-verification endpoints.
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok(Map.of("message", "Logged out."));

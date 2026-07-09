@@ -43,10 +43,6 @@ public class User {
     @Column(name = "is_active", nullable = false, columnDefinition = "boolean default true")
     private Boolean isActive = true;
 
-    // Column default is true so ALTER TABLE backfills every pre-existing account as
-    // already verified - this feature must not lock out users who signed up before
-    // it existed. New accounts explicitly set this to false where verification is
-    // required (see AuthService.register, GuardianService.addGuardian).
     @Column(name = "email_verified", nullable = false, columnDefinition = "boolean default true")
     private Boolean emailVerified = true;
 

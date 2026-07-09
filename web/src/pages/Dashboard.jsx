@@ -29,9 +29,6 @@ export default function Dashboard() {
         setChildren(kids)
         setTodayAtt(att)
 
-        // This week's Monday through Friday only — the daycare doesn't operate on
-        // weekends, so the chart never shows Sat/Sun columns regardless of what day
-        // today happens to be.
         const now = new Date()
         const mondayOffset = now.getDay() === 0 ? 6 : now.getDay() - 1
         const monday = new Date(now)

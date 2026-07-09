@@ -26,13 +26,6 @@ sealed class VerifyEmailState {
     data class Error(val message: String, val code: String? = null) : VerifyEmailState()
 }
 
-/**
- * [verifyEmail], [resendVerification], [fetchMe], [refreshToken], and [persistSession] are
- * constructor-injected (defaulting to the real network/storage calls) purely so the `do*`
- * methods below can be unit-tested with plain fakes via `runBlocking`, without needing
- * Android's Dispatchers.Main (which viewModelScope requires and which isn't available in a
- * plain JVM test without kotlinx-coroutines-test) or a real Android Context for DataStore.
- */
 class VerifyEmailViewModel(
     private val verifyEmail: suspend (VerifyEmailRequest) -> VerifyEmailResponse =
         { RetrofitClient.api.verifyEmail(it) },
@@ -69,9 +62,6 @@ class VerifyEmailViewModel(
         }
     }
 
-    // "I verified in my browser" - re-checks /me with whatever token this session already
-    // has (from a prior login), and if now verified, exchanges it for a fresh one whose
-    // emailVerified claim actually reflects that.
     fun checkStatus(context: Context) {
         viewModelScope.launch {
             _state.value = VerifyEmailState.Loading

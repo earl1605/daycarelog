@@ -99,7 +99,6 @@ fun ChildFormScreen(childId: Long?, onBack: () -> Unit) {
             .fillMaxSize()
             .background(palette.pageBg),
     ) {
-        // Top bar
         Box(
             Modifier
                 .fillMaxWidth()

@@ -62,8 +62,6 @@ private val statusColors = mapOf(
     "excused" to (Color(0xFF7c3aed) to Color(0xFFede9fe)),
 )
 
-// The daycare only operates Monday-Friday. If "today" is a weekend, default to the
-// most recent Friday rather than opening on a date that can never have attendance.
 private fun nearestWeekday(date: java.time.LocalDate): java.time.LocalDate = when (date.dayOfWeek) {
     java.time.DayOfWeek.SATURDAY -> date.minusDays(1)
     java.time.DayOfWeek.SUNDAY   -> date.minusDays(2)

@@ -122,9 +122,6 @@ fun DashboardScreen(
             val attendanceToday = RetrofitClient.api.getAttendance(todayStr)
             presentToday = attendanceToday.count { it.status == "present" }
 
-            // This week's Monday through Friday only - the daycare doesn't operate on
-            // weekends, so the chart never shows Sat/Sun columns regardless of what day
-            // today happens to be. (DayOfWeek.value is 1=Monday..7=Sunday.)
             val mondayOffset = if (today.dayOfWeek == java.time.DayOfWeek.SUNDAY) 6L else (today.dayOfWeek.value - 1).toLong()
             val monday = today.minusDays(mondayOffset)
             val days = (0..4).map { monday.plusDays(it.toLong()) }
@@ -160,7 +157,6 @@ fun DashboardScreen(
             .background(pageBg)
             .verticalScroll(rememberScrollState()),
     ) {
-        // ── Header ─────────────────────────────────────────────────────
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 16.dp, top = 8.dp),
@@ -185,7 +181,6 @@ fun DashboardScreen(
                     CircularProgressIndicator(color = Green40)
                 }
             } else {
-                // ── Stat grid (2x2) ────────────────────────────────────
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         StatCard(Modifier.weight(1f), Icons.Outlined.Groups, "Active Children", activeChildren?.toString() ?: "—", StatGreenBg, StatGreenFg, cardBg, borderColor, textColor, mutedColor)
@@ -197,7 +192,6 @@ fun DashboardScreen(
                     }
                 }
 
-                // ── Weekly attendance chart ────────────────────────────
                 Column {
                     SectionHeader("Weekly Attendance", "View all →", onTakeAttendance, textColor)
                     Spacer(Modifier.height(16.dp))
@@ -212,7 +206,6 @@ fun DashboardScreen(
                     }
                 }
 
-                // ── Quick actions ───────────────────────────────────────
                 Column {
                     SectionHeader("Quick Actions", null, null, textColor)
                     Spacer(Modifier.height(16.dp))

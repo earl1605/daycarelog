@@ -50,8 +50,6 @@ public class JwtUtil {
         return (String) parseClaims(token).get("role");
     }
 
-    // Absent on tokens minted before this claim existed - treated as verified so
-    // pre-existing sessions aren't suddenly locked out until they naturally expire.
     public boolean extractEmailVerified(String token) {
         Object claim = parseClaims(token).get("emailVerified");
         return !(claim instanceof Boolean) || (Boolean) claim;

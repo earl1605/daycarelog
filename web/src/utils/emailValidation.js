@@ -1,11 +1,8 @@
-// Mirrors the strict format rules enforced server-side by EmailFormatValidator -
-// catches obviously-wrong addresses inline, before a round trip to the backend.
-const MAX_LENGTH = 254 // RFC 5321 §4.5.3.1.3
+const MAX_LENGTH = 254
 const LOCAL_PART = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*$/
 const DOMAIN_LABEL = /^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/
 const TLD = /^[A-Za-z]{2,}$/
 
-/** @returns {{ valid: boolean, message: string|null }} */
 export function validateEmailFormat(rawEmail) {
   if (!rawEmail || !rawEmail.trim()) return invalid('Email address is required.')
   const email = rawEmail.trim()
@@ -45,8 +42,6 @@ function invalid(message) {
   return { valid: false, message }
 }
 
-// Common one-letter-off misspellings of major providers. Deliberately a fixed map
-// (not fuzzy-matching) so it only ever fires on domains we're confident about.
 const TYPO_DOMAIN_MAP = {
   'gmial.com': 'gmail.com',
   'gnail.com': 'gmail.com',
@@ -60,7 +55,6 @@ const TYPO_DOMAIN_MAP = {
   'outllok.com': 'outlook.com',
 }
 
-/** @returns {string|null} the corrected full address, or null if no known-typo domain matches. */
 export function getEmailTypoSuggestion(rawEmail) {
   if (!rawEmail || !rawEmail.includes('@')) return null
   const at = rawEmail.lastIndexOf('@')

@@ -1,7 +1,5 @@
 package edu.cit.mahumot.daycarelog.features.auth;
 
-// Either { "token": "..." } (web link) or { "email": "...", "code": "123456" }
-// (Android / manual entry) - both are valid, interchangeable ways to verify.
 public class VerifyEmailRequest {
     private String token;
     private String email;

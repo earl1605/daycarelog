@@ -90,9 +90,7 @@ export default function Settings() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
-        {/* Profile */}
         <div className="bg-white rounded-xl border border-gray-200/70 overflow-hidden">
-          {/* Identity header */}
           <div className="p-6 flex items-center gap-4 bg-[#FAFAFA] border-b border-gray-200/70">
             <button type="button" onClick={() => fileRef.current.click()}
               className="relative group w-16 h-16 rounded-full overflow-hidden ring-4 ring-white shadow-sm shrink-0">
@@ -157,7 +155,6 @@ export default function Settings() {
           </form>
         </div>
 
-        {/* Change Password */}
         <form onSubmit={savePassword} className="bg-white rounded-xl border border-gray-200/70 p-6 space-y-5">
           <div>
             <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">

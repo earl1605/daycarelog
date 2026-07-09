@@ -50,23 +50,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT,    "/api/users/*").authenticated()
 
-                // Parent-facing "mine" endpoints: open to any authenticated role. Each
-                // resolves the caller's own linked children server-side from the JWT
-                // (never from a request param), so there's no child ID to tamper with.
-                // Admin/Staff calling these just get an empty list back (no guardian rows).
                 .requestMatchers(HttpMethod.GET, "/api/children/mine").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/attendance/mine").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/health-records/mine").authenticated()
 
-                // Guardian contact/portal-account management is Admin/Staff only.
                 .requestMatchers("/api/children/*/guardians", "/api/children/*/guardians/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/api/guardians", "/api/guardians/**").hasAnyRole("ADMIN", "STAFF")
 
-                // Everything else under children/attendance/health-records - writes and
-                // the "all records"/"any child by ID" views - is Admin/Staff only. Parent
-                // access is limited to the /mine endpoints above by construction. (RLS was
-                // deliberately skipped: the backend talks to Postgres over direct JDBC, so
-                // this filter chain is the actual enforcement boundary, not the DB.)
                 .requestMatchers(HttpMethod.POST,   "/api/children", "/api/children/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers(HttpMethod.PUT,    "/api/children/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers(HttpMethod.DELETE, "/api/children/**").hasAnyRole("ADMIN", "STAFF")

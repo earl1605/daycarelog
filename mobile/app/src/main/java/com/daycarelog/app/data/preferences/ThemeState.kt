@@ -6,9 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.first
 
-// In-memory, Compose-observable theme flag (mirrors TokenProvider's plain-object
-// pattern, but backed by mutableStateOf so DaycareLogTheme recomposes immediately
-// on toggle) with DataStore persistence so it survives app restarts.
 object ThemeState {
     var isDarkMode by mutableStateOf(false)
         private set

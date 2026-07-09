@@ -38,8 +38,6 @@ public class VerificationService {
         this.jwtUtil = jwtUtil;
     }
 
-    // Called right after a User row is created wherever verification is required
-    // (public STAFF self-registration, Admin/Staff-created PARENT accounts).
     public void issueVerification(User user) {
         String rawToken = generateUrlSafeToken();
         String rawCode = generateSixDigitCode();
@@ -62,10 +60,6 @@ public class VerificationService {
         emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), rawToken, rawCode);
     }
 
-    // noRollbackFor: verifyByCode deliberately saves a wrong-attempt count and then
-    // throws to signal failure to the caller - a plain @Transactional would roll
-    // that save back along with everything else, silently discarding every failed
-    // attempt and defeating the attempt limit entirely.
     @Transactional(noRollbackFor = VerificationException.class)
     public VerifyResult verifyByToken(String rawToken) {
         if (rawToken == null || rawToken.isBlank()) {
@@ -110,8 +104,6 @@ public class VerificationService {
         return completeVerification(user.getId());
     }
 
-    // Never reveals whether the email exists or is already verified - always returns
-    // normally. Rate limiting is the one observable exception (see class docs).
     public void resend(String email) {
         Optional<User> maybeUser = userRepository.findByEmail(email);
         if (maybeUser.isEmpty()) {
@@ -145,8 +137,6 @@ public class VerificationService {
         return new VerifyResult(user, freshToken);
     }
 
-    // Package-private (rather than private) so unit tests can exercise the raw
-    // generation logic directly.
     String generateUrlSafeToken() {
         byte[] bytes = new byte[32];
         secureRandom.nextBytes(bytes);

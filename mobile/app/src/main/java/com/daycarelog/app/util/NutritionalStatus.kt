@@ -5,7 +5,6 @@ import java.time.LocalDate
 
 data class NutritionalStatusResult(val label: String, val color: String)
 
-/** Background/foreground pair for a status "color" key — mirrors the web app's NutritionalStatusBadge color map. */
 fun nutritionalStatusColors(color: String): Pair<Color, Color> = when (color) {
     "green"  -> Color(0xFFDCFCE7) to Color(0xFF166534)
     "yellow" -> Color(0xFFFEF9C3) to Color(0xFF854D0E)
@@ -14,7 +13,6 @@ fun nutritionalStatusColors(color: String): Pair<Color, Color> = when (color) {
     else     -> Color(0xFFF3F4F6) to Color(0xFF4B5563)
 }
 
-/** Whole calendar months between dateOfBirth and today, ignoring day-of-month — mirrors the web app's getAgeInMonths() exactly. */
 fun getAgeInMonths(dateOfBirth: String): Long {
     val birth = LocalDate.parse(dateOfBirth)
     val now = LocalDate.now()
@@ -30,9 +28,6 @@ fun formatAge(dateOfBirth: String): String {
     else "$years yr${if (years != 1L) "s" else ""} $rem mo"
 }
 
-// DOH weight-for-age classification (simplified, 0-5 years) — WHO median weight-for-age
-// table, ported verbatim from web/src/utils/nutritionalStatus.js to keep both clients
-// classifying the same record identically.
 private val MEDIAN_MALE = doubleArrayOf(
     3.3, 4.5, 5.6, 6.4, 7.0, 7.5, 7.9, 8.3, 8.6, 8.9, 9.2, 9.4, 9.6, 10.0, 10.3, 10.6, 10.9,
     11.1, 11.4, 11.6, 11.8, 12.0, 12.2, 12.4, 12.6, 12.8, 13.0, 13.2, 13.4, 13.6, 13.8, 14.0,

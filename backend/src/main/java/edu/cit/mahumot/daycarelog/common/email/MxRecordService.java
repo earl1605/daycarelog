@@ -16,17 +16,13 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-// Confirms a domain can plausibly receive mail (has an MX record, or an A record as
-// the RFC 5321 §5.1 fallback) before accepting a registration. Uses the JDK's own
-// JNDI DNS provider (com.sun.jndi.dns, bundled with every JDK - no new dependency)
-// rather than pulling in dnsjava.
 @Component
 public class MxRecordService {
 
     private static final Logger log = LoggerFactory.getLogger(MxRecordService.class);
 
-    private static final long CACHE_TTL_MILLIS = 60L * 60 * 1000; // 1 hour
-    private static final long DNS_TIMEOUT_MILLIS = 3000; // 3 seconds
+    private static final long CACHE_TTL_MILLIS = 60L * 60 * 1000;
+    private static final long DNS_TIMEOUT_MILLIS = 3000;
 
     @FunctionalInterface
     interface DnsLookup {
@@ -42,8 +38,6 @@ public class MxRecordService {
         this(mxCheckEnabled, MxRecordService::realDnsHasMailRecords);
     }
 
-    // Package-visible so tests can inject a fake DNS lookup - avoids real network
-    // calls and makes timeout/failure fail-open behavior deterministic to test.
     MxRecordService(boolean mxCheckEnabled, DnsLookup dnsLookup) {
         this.mxCheckEnabled = mxCheckEnabled;
         this.dnsLookup = dnsLookup;
@@ -69,8 +63,6 @@ public class MxRecordService {
         try {
             valid = dnsLookup.hasMailRecords(domain);
         } catch (Exception e) {
-            // Transient DNS failures (timeout, unreachable resolver) must not block a
-            // real user from registering - fail open, but make it visible in logs.
             log.warn("DNS lookup failed for domain '{}' - allowing registration to proceed (fail-open)", domain, e);
             valid = true;
         }
@@ -83,10 +75,6 @@ public class MxRecordService {
         return lookup(domain, "MX") || lookup(domain, "A");
     }
 
-    // Returns a clean true/false for "does this record exist" - NameNotFoundException
-    // (NXDOMAIN, or domain exists with no records of this type) is treated as a
-    // confident "no", not a failure. Anything else (timeout, SERVFAIL, unreachable
-    // server) propagates so the caller can fail-open instead of rejecting outright.
     private static boolean lookup(String domain, String recordType) throws NamingException {
         Hashtable<String, String> env = new Hashtable<>();
         env.put(javax.naming.Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.dns.DnsContextFactory");

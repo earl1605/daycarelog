@@ -30,8 +30,6 @@ public class AttendanceController {
         return attendanceService.findByDate(date);
     }
 
-    // Parent-facing: all attendance records for the caller's own linked children,
-    // resolved server-side from the JWT rather than an accepted child ID.
     @GetMapping("/mine")
     public ResponseEntity<?> getMine(@RequestHeader("Authorization") String authHeader) {
         Long userId = jwtUtil.extractUserId(authHeader.substring(7));

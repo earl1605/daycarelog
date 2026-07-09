@@ -11,7 +11,7 @@ export default function VerifyEmail() {
   const navigate = useNavigate()
   const { completeVerification } = useAuth()
 
-  const [status,   setStatus]   = useState('loading') // loading | success | error
+  const [status,   setStatus]   = useState('loading')
   const [errorMsg, setErrorMsg] = useState('')
   const [user,     setUser]     = useState(null)
   const [resendEmail, setResendEmail] = useState('')
@@ -33,7 +33,6 @@ export default function VerifyEmail() {
         setStatus('error')
         setErrorMsg(e.message || 'This verification link is invalid or has expired.')
       })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
   function continueToDashboard() {

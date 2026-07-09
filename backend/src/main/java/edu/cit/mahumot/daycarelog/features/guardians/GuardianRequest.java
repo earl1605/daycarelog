@@ -7,8 +7,6 @@ public class GuardianRequest {
     private String address;
     private Boolean isPrimary;
 
-    // Optional: when true, also creates a "parent" portal User account (using
-    // email below) and links it to this guardian row via Guardian.userId.
     private Boolean createPortalAccount;
     private String email;
 

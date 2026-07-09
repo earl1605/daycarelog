@@ -2,8 +2,6 @@ package edu.cit.mahumot.daycarelog.features.guardians;
 
 import java.util.List;
 
-// One row per parent-portal-account guardian, aggregating every child that account
-// is linked to (a single Guardian.userId can span multiple Guardian rows/children).
 public class GuardianAccountResponse {
     private final Long userId;
     private final String name;

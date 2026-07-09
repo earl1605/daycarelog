@@ -26,12 +26,6 @@ public class AuthService {
         this.emailRegistrationValidator = emailRegistrationValidator;
     }
 
-    // Runs format -> disposable/reserved-domain -> MX record checks (in that order,
-    // first failure wins) before ever touching the database. Deliberately does NOT
-    // return anything revealing whether the account already existed: if it does,
-    // this silently no-ops (no new row, no verification email) and the caller gets
-    // back the exact same generic response as a brand-new registration - see
-    // AuthController, which is why this method returns void rather than AuthResponse.
     public void register(RegisterRequest req) {
         String email = emailRegistrationValidator.validate(req.getEmail());
 
@@ -39,8 +33,6 @@ public class AuthService {
             return;
         }
 
-        // Self-registration always yields STAFF. ADMIN accounts can only be created
-        // by an existing admin (UserController/UserService) or the first-admin seed runner.
         User user = User.builder()
                 .email(email)
                 .password(passwordEncoder.encode(req.getPassword()))

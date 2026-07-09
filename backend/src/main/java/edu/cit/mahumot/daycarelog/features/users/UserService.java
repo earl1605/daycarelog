@@ -10,9 +10,6 @@ import java.util.Set;
 @Service
 public class UserService {
 
-    // "parent" deliberately excluded: parent accounts are created only via
-    // GuardianService (tied to a specific child), never through this generic
-    // admin/staff creation or role-change path.
     private static final Set<String> ALLOWED_ROLES = Set.of("admin", "staff");
 
     private final UserRepository userRepository;
@@ -48,11 +45,6 @@ public class UserService {
             throw new RuntimeException("Role must be 'admin' or 'staff'");
         }
         String tempPassword = TempPasswordGenerator.generate();
-        // No .emailVerified(false) here, deliberately: an Admin creating another
-        // Staff/Admin account (and handing over the temp password directly) is
-        // already an admin-vouched-for account, unlike public self-registration or
-        // parent accounts created during enrollment - both of which do require
-        // email verification. Leaves the entity's default of true.
         User user = User.builder()
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(tempPassword))

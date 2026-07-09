@@ -37,8 +37,6 @@ object TokenDataStore {
         context.dataStore.edit { it[THEME_KEY] = theme }
     }
 
-    // Clears the session (token/user) only — the theme preference is a device/app
-    // preference, not session data, so it must survive sign-out.
     suspend fun clear(context: Context) {
         context.dataStore.edit {
             it.remove(TOKEN_KEY)

@@ -51,9 +51,6 @@ public class AttendanceService {
         return requests.stream().map(r -> upsert(r, userId)).toList();
     }
 
-    // Daycare only operates Monday-Friday; reject weekend dates at the write path.
-    // Read endpoints (findByDate/findByChild/findByDateRange) are intentionally left
-    // unrestricted so any pre-existing data remains viewable.
     private void validateWeekday(LocalDate date) {
         if (date == null) throw new RuntimeException("Date is required");
         DayOfWeek dow = date.getDayOfWeek();

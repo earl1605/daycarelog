@@ -102,7 +102,6 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Month picker row
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -146,7 +145,6 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                 }
                 else -> {
                     val r = report!!
-                    // Attendance summary card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -168,7 +166,6 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                             ReportRow("School Days", r.schoolDays.toString(), Color(0xFF2563eb), palette)
                             ReportRow("Total Present", r.presentCount.toString(), Color(0xFF16a34a), palette)
                             ReportRow("Total Absent",  r.absentCount.toString(),  Color(0xFFdc2626), palette)
-                            // Attendance rate big badge
                             Box(
                                 Modifier
                                     .fillMaxWidth()
@@ -189,7 +186,6 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                         }
                     }
 
-                    // Nutritional status card
                     if (r.nutritionalStatus.isNotEmpty()) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -211,7 +207,6 @@ fun ReportsScreen(onOpenDrawer: () -> Unit) {
                         }
                     }
 
-                    // Children list
                     if (r.children.isNotEmpty()) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),

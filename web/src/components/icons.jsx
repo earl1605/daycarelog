@@ -1,4 +1,3 @@
-// Minimal outline icon set (stroke-based, ~1.75px) used across the app shell.
 const base = {
   width: 18,
   height: 18,

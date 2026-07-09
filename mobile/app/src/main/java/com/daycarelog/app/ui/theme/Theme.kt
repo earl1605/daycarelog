@@ -6,8 +6,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import com.daycarelog.app.data.preferences.ThemeState
 
-// Fixed brand color scheme — intentionally NOT using dynamicColorScheme/dynamicLightColorScheme.
-// Brand consistency with the web app matters more than adapting to the device wallpaper.
 private val LightColorScheme = lightColorScheme(
     primary             = Green40,
     onPrimary           = White,
@@ -26,8 +24,6 @@ private val LightColorScheme = lightColorScheme(
     onError             = White,
 )
 
-// Same two-tier surface relationship as light mode (page vs. elevated card/drawer),
-// just inverted — see the comment above DarkBackground/DarkSurface in Color.kt.
 private val DarkColorScheme = darkColorScheme(
     primary             = Green40,
     onPrimary           = White,

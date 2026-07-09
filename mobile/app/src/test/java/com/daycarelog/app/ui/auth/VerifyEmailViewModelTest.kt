@@ -30,7 +30,6 @@ class VerifyEmailViewModelTest {
         TokenProvider.token = null
     }
 
-    // ── verifyByCode ─────────────────────────────────────────────────────
 
     @Test
     fun doVerifyByCode_success_returnsVerifiedAndPersistsSession() = runBlocking {
@@ -87,7 +86,6 @@ class VerifyEmailViewModelTest {
         assertNull(result.code)
     }
 
-    // ── verifyByToken ────────────────────────────────────────────────────
 
     @Test
     fun doVerifyByToken_success_returnsVerified() = runBlocking {
@@ -115,7 +113,6 @@ class VerifyEmailViewModelTest {
         assertEquals("TOKEN_EXPIRED", result.code)
     }
 
-    // ── resend ───────────────────────────────────────────────────────────
 
     @Test
     fun doResend_success_returnsResent() = runBlocking {
@@ -139,7 +136,6 @@ class VerifyEmailViewModelTest {
         assertEquals("RATE_LIMITED", result.code)
     }
 
-    // ── checkStatus ("I verified in my browser") ────────────────────────
 
     @Test
     fun doCheckStatus_withNoStoredToken_returnsErrorWithoutCallingMe() = runBlocking {
@@ -186,9 +182,6 @@ class VerifyEmailViewModelTest {
     }
 }
 
-/** Builds a real retrofit2.HttpException with a JSON error body, matching the backend's
- *  actual { "message": ..., "code": ... } error shape, so errorFrom's HttpException branch
- *  (not just its generic-Exception fallback) is genuinely exercised. */
 private fun apiError(message: String, code: String): HttpException {
     val json = """{"message":"$message","code":"$code"}"""
     val body = json.toResponseBody("application/json".toMediaType())

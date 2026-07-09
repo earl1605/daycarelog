@@ -45,8 +45,8 @@ class ParentRoleAccessControlTest {
     private static final String PARENT_EMAIL = "parent@test.daycarelog";
     private static final String PASSWORD     = "TestPass123";
 
-    private Long childAId; // linked to the parent
-    private Long childBId; // NOT linked to the parent
+    private Long childAId;
+    private Long childBId;
 
     @BeforeEach
     void setUp() {
@@ -134,7 +134,6 @@ class ParentRoleAccessControlTest {
         String token = loginAndGetToken(PARENT_EMAIL, PASSWORD);
         HttpHeaders headers = authHeaders(token);
 
-        // "list everything" endpoints must not leak other children's data to a parent
         assertThat(restTemplate.exchange(url("/api/children"), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
         assertThat(restTemplate.exchange(url("/api/attendance?date=2026-06-29"), HttpMethod.GET, new HttpEntity<>(headers), String.class)
@@ -142,8 +141,6 @@ class ParentRoleAccessControlTest {
         assertThat(restTemplate.exchange(url("/api/health-records"), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
 
-        // direct by-ID access to a child NOT linked to this parent must also be blocked,
-        // not just filtered out of "mine"
         assertThat(restTemplate.exchange(url("/api/children/" + childBId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
         assertThat(restTemplate.exchange(url("/api/attendance/child/" + childBId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
@@ -151,8 +148,6 @@ class ParentRoleAccessControlTest {
         assertThat(restTemplate.exchange(url("/api/health-records/child/" + childBId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
 
-        // even direct by-ID access to THEIR OWN linked child is blocked - parents only
-        // ever go through /mine, which never accepts a child ID as input
         assertThat(restTemplate.exchange(url("/api/children/" + childAId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
     }
@@ -184,8 +179,6 @@ class ParentRoleAccessControlTest {
 
     @Test
     void selfRegistrationCannotProduceAParentAccount() {
-        // register() hardcodes role=staff and RegisterRequest has no role field at all,
-        // but assert the end-to-end behavior in case that ever changes.
         Map<String, Object> body = Map.of(
                 "email", "wannabe-parent@test.daycarelog", "password", PASSWORD,
                 "firstName", "Wanna", "lastName", "Be", "role", "parent");
@@ -212,9 +205,6 @@ class ParentRoleAccessControlTest {
         String tempPassword = (String) res.getBody().get("tempPassword");
         assertThat(tempPassword).isNotBlank();
 
-        // A newly-created parent portal account requires email verification, same as
-        // public self-registration - it can log in, but every endpoint except the
-        // auth self-service ones is blocked until verified.
         User newParent = userRepository.findByEmail("newmom@test.daycarelog").orElseThrow();
         assertThat(newParent.getEmailVerified()).isFalse();
 
@@ -225,8 +215,6 @@ class ParentRoleAccessControlTest {
         assertThat(blocked.getStatusCode().value()).isEqualTo(403);
         assertThat(blocked.getBody()).contains("EMAIL_NOT_VERIFIED");
 
-        // Simulate clicking the verification link/entering the code, then re-login to
-        // pick up a token whose emailVerified claim reflects the now-verified account.
         newParent.setEmailVerified(true);
         userRepository.save(newParent);
         String verifiedToken = loginAndGetToken("newmom@test.daycarelog", tempPassword);
@@ -242,8 +230,6 @@ class ParentRoleAccessControlTest {
         String adminToken = loginAndGetToken(ADMIN_EMAIL, PASSWORD);
         HttpHeaders headers = authHeaders(adminToken);
 
-        // childA is already linked to PARENT_EMAIL via a "parent" role account (see setUp).
-        // Linking childB to the same email must reuse that account, not create a duplicate.
         Map<String, Object> body = Map.of(
                 "name", "Test Parent", "relationship", "Mother", "createPortalAccount", true,
                 "email", PARENT_EMAIL);
@@ -251,9 +237,8 @@ class ParentRoleAccessControlTest {
                 url("/api/children/" + childBId + "/guardians"), HttpMethod.POST,
                 new HttpEntity<>(body, headers), new ParameterizedTypeReference<>() {});
         assertThat(res.getStatusCode().is2xxSuccessful()).isTrue();
-        // reusing an existing account never mints a new temp password
         assertThat((String) res.getBody().get("tempPassword")).isEmpty();
-        assertThat(userRepository.findByEmail(PARENT_EMAIL)).hasValueSatisfying(u -> {}); // still exactly one account
+        assertThat(userRepository.findByEmail(PARENT_EMAIL)).hasValueSatisfying(u -> {});
         assertThat(userRepository.countByRole("parent")).isEqualTo(1);
 
         String parentToken = loginAndGetToken(PARENT_EMAIL, PASSWORD);
@@ -268,7 +253,6 @@ class ParentRoleAccessControlTest {
         HttpHeaders headers = authHeaders(adminToken);
         Long parentUserId = userRepository.findByEmail(PARENT_EMAIL).orElseThrow().getId();
 
-        // link the same parent (from setUp, already linked to childA) to childB too
         Map<String, Object> body = Map.of(
                 "name", "Test Parent", "relationship", "Mother", "createPortalAccount", true,
                 "email", PARENT_EMAIL);
@@ -278,7 +262,6 @@ class ParentRoleAccessControlTest {
         ResponseEntity<List> list = restTemplate.exchange(
                 url("/api/guardians"), HttpMethod.GET, new HttpEntity<>(headers), List.class);
         assertThat(list.getStatusCode().is2xxSuccessful()).isTrue();
-        // one row per PERSON, not one row per child link
         assertThat(list.getBody()).hasSize(1);
         Map<String, Object> account = (Map<String, Object>) list.getBody().get(0);
         assertThat(account.get("email")).isEqualTo(PARENT_EMAIL);
@@ -291,7 +274,6 @@ class ParentRoleAccessControlTest {
         ResponseEntity<List> afterRemove = restTemplate.exchange(
                 url("/api/guardians"), HttpMethod.GET, new HttpEntity<>(headers), List.class);
         assertThat(afterRemove.getBody()).isEmpty();
-        // the login itself must survive removal - only the child links are gone
         assertThat(userRepository.findById(parentUserId)).isPresent();
         assertThat(guardianRepository.findByUserId(parentUserId)).isEmpty();
     }

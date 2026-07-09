@@ -23,7 +23,7 @@ export default function Users() {
   const [creating,   setCreating]   = useState(false)
   const [form,       setForm]       = useState(emptyForm)
 
-  const [tempPassword, setTempPassword] = useState(null) // { name, password }
+  const [tempPassword, setTempPassword] = useState(null)
 
   useEffect(() => {
     if (!isAdmin) { setLoading(false); return }
@@ -210,7 +210,6 @@ export default function Users() {
         </div>
       )}
 
-      {/* Add staff modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <form onSubmit={handleCreate} className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-scale-in space-y-3">
@@ -248,7 +247,6 @@ export default function Users() {
         </div>
       )}
 
-      {/* One-time temp password modal */}
       {tempPassword && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-scale-in">
@@ -276,7 +274,6 @@ export default function Users() {
         </div>
       )}
 
-      {/* Confirm delete modal */}
       {confirmId && confirmTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-scale-in">

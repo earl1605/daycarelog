@@ -15,7 +15,6 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
-/** Inserts '/' at positions 2 and 4 so raw digits MMDDYYYY display as MM/DD/YYYY. */
 private object DateTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val digits = text.text
@@ -43,13 +42,11 @@ private object DateTransformation : VisualTransformation {
     }
 }
 
-/** "MMDDYYYY" → "YYYY-MM-DD" for backend submission. */
 fun digitsToIso(digits: String): String {
     if (digits.length < 8) return digits
     return "${digits.substring(4, 8)}-${digits.substring(0, 2)}-${digits.substring(2, 4)}"
 }
 
-/** "YYYY-MM-DD" → "MMDDYYYY" raw digits for the field. */
 fun isoToDigits(iso: String): String {
     val parts = iso.split("-")
     return if (parts.size == 3) "${parts[1]}${parts[2]}${parts[0]}" else ""

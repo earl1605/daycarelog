@@ -28,11 +28,6 @@ public class Guardian {
     @Column(name = "is_primary")
     private Boolean isPrimary = false;
 
-    // Nullable: a guardian row can exist as contact-only info with no portal login.
-    // When set, links this guardian to a "parent" User account (users.id) that may
-    // view this child's attendance/health records. One guardian row per (user, child)
-    // pair — a parent linked to multiple children just gets multiple rows sharing
-    // the same userId, reusing this table rather than adding a new join table.
     @Column(name = "user_id")
     private Long userId;
 

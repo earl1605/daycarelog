@@ -27,8 +27,6 @@ public class ChildController {
         return childService.findAll();
     }
 
-    // Parent-facing: resolves the caller's own linked children from the JWT rather
-    // than accepting a child ID, so there is no ID to tamper with.
     @GetMapping("/mine")
     public ResponseEntity<?> getMine(@RequestHeader("Authorization") String authHeader) {
         Long userId = jwtUtil.extractUserId(authHeader.substring(7));
