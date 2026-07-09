@@ -6,6 +6,7 @@ import com.daycarelog.app.data.model.Child
 import com.daycarelog.app.data.model.CreateGuardianResponse
 import com.daycarelog.app.data.model.CreateUserRequest
 import com.daycarelog.app.data.model.CreateUserResponse
+import com.daycarelog.app.data.model.GenericMessageResponse
 import com.daycarelog.app.data.model.Guardian
 import com.daycarelog.app.data.model.GuardianAccountResponse
 import com.daycarelog.app.data.model.GuardianRequest
@@ -13,10 +14,13 @@ import com.daycarelog.app.data.model.HealthRecord
 import com.daycarelog.app.data.model.LoginRequest
 import com.daycarelog.app.data.model.MonthlyReport
 import com.daycarelog.app.data.model.RegisterRequest
+import com.daycarelog.app.data.model.ResendVerificationRequest
 import com.daycarelog.app.data.model.ResetPasswordResponse
 import com.daycarelog.app.data.model.UpdateProfileRequest
 import com.daycarelog.app.data.model.UpdateRoleRequest
 import com.daycarelog.app.data.model.UserDto
+import com.daycarelog.app.data.model.VerifyEmailRequest
+import com.daycarelog.app.data.model.VerifyEmailResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -32,6 +36,18 @@ interface ApiService {
 
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
+
+    @POST("auth/verify-email")
+    suspend fun verifyEmail(@Body request: VerifyEmailRequest): VerifyEmailResponse
+
+    @POST("auth/resend-verification")
+    suspend fun resendVerification(@Body request: ResendVerificationRequest): GenericMessageResponse
+
+    @GET("auth/me")
+    suspend fun me(): UserDto
+
+    @POST("auth/refresh-token")
+    suspend fun refreshToken(): AuthResponse
 
     // Children
     @GET("children")

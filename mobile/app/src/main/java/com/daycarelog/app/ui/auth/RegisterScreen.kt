@@ -30,7 +30,7 @@ private val suffixes = listOf("", "Jr.", "Sr.", "II", "III", "IV", "V")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    onRegisterSuccess: () -> Unit,
+    onRegisterSuccess: (email: String) -> Unit,
     onNavigateToLogin: () -> Unit,
     authViewModel: AuthViewModel = viewModel(),
 ) {
@@ -51,7 +51,7 @@ fun RegisterScreen(
 
     LaunchedEffect(state) {
         when (state) {
-            is AuthState.Registered -> { authViewModel.resetState(); onRegisterSuccess() }
+            is AuthState.Registered -> { authViewModel.resetState(); onRegisterSuccess(email.trim()) }
             is AuthState.Error      -> { errorMsg = (state as AuthState.Error).message; authViewModel.resetState() }
             else -> {}
         }

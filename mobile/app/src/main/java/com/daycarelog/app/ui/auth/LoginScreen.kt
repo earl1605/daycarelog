@@ -58,7 +58,7 @@ private val Green900Text = Color(0xFF14532d)
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (com.daycarelog.app.data.model.UserDto) -> Unit,
     onNavigateToRegister: () -> Unit,
     successMessage: String? = null,
     vm: AuthViewModel = viewModel(),
@@ -73,7 +73,7 @@ fun LoginScreen(
 
     LaunchedEffect(state) {
         when (val s = state) {
-            is AuthState.Success -> { vm.resetState(); onLoginSuccess() }
+            is AuthState.Success -> { vm.resetState(); onLoginSuccess(s.user) }
             is AuthState.Error   -> { errorMsg = s.message; vm.resetState() }
             else -> {}
         }
