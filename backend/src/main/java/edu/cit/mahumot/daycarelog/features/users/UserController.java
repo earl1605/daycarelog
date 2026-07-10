@@ -25,9 +25,10 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody CreateUserRequest req) {
+    public ResponseEntity<?> createUser(@RequestBody CreateUserRequest req, @RequestHeader("Authorization") String authHeader) {
         try {
-            UserService.CreatedUser created = userService.createUser(req);
+            String requesterRole = jwtUtil.extractRole(authHeader.substring(7));
+            UserService.CreatedUser created = userService.createUser(req, requesterRole);
             return ResponseEntity.ok(Map.of("user", created.user(), "tempPassword", created.tempPassword()));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
@@ -35,9 +36,10 @@ public class UserController {
     }
 
     @PutMapping("/{id}/role")
-    public ResponseEntity<?> updateRole(@PathVariable Long id, @RequestBody UserRoleRequest req) {
+    public ResponseEntity<?> updateRole(@PathVariable Long id, @RequestBody UserRoleRequest req, @RequestHeader("Authorization") String authHeader) {
         try {
-            return ResponseEntity.ok(userService.updateRole(id, req.getRole()));
+            String requesterRole = jwtUtil.extractRole(authHeader.substring(7));
+            return ResponseEntity.ok(userService.updateRole(id, req.getRole(), requesterRole));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

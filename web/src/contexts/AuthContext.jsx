@@ -9,8 +9,9 @@ export function AuthProvider({ children }) {
   })
   const [loading, setLoading] = useState(false)
 
-  const isAdmin  = user?.role === 'admin'
-  const isStaff  = user?.role === 'admin' || user?.role === 'staff'
+  const isSuperAdmin = user?.role === 'super_admin'
+  const isAdmin  = isSuperAdmin || user?.role === 'admin'
+  const isStaff  = isAdmin || user?.role === 'staff'
   const isParent = user?.role === 'parent'
   const isEmailVerified = user?.emailVerified !== false
 
@@ -58,7 +59,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user, loading, signIn, signUp, signOut, refreshUser, completeVerification,
-      isAdmin, isStaff, isParent, isEmailVerified,
+      isAdmin, isSuperAdmin, isStaff, isParent, isEmailVerified,
     }}>
       {children}
     </AuthContext.Provider>
