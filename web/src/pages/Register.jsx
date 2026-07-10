@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import { validateEmailFormat, getEmailTypoSuggestion } from '../utils/emailValidation'
+import usePageTitle from '../hooks/usePageTitle'
 import toast from 'react-hot-toast'
 
 function EyeIcon({ open }) {
@@ -21,6 +22,7 @@ function EyeIcon({ open }) {
 const inputClass = "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
 
 export default function Register() {
+  usePageTitle('Register')
   const { signUp }     = useAuth()
   const navigate       = useNavigate()
   const [firstName,   setFirstName]   = useState('')

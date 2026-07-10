@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import usePageTitle from '../hooks/usePageTitle'
 import toast from 'react-hot-toast'
 
 export default function Login() {
+  usePageTitle('Login')
   const { signIn }    = useAuth()
   const navigate      = useNavigate()
   const [email,    setEmail]    = useState('')
