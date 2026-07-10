@@ -147,7 +147,7 @@ fun MainScreen(onSignOut: () -> Unit) {
         val json = TokenDataStore.getUser(ctx).first()
         if (json != null) user = Gson().fromJson(json, UserDto::class.java)
     }
-    val isAdmin = user?.role == "admin" || user?.role == "super_admin"
+    val isAdmin = user?.role == "admin"
     val isParent = user?.role == "parent"
 
     var redirectedForParent by remember { mutableStateOf(false) }

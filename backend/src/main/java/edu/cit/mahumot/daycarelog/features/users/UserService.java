@@ -10,8 +10,7 @@ import java.util.Set;
 @Service
 public class UserService {
 
-    private static final Set<String> ALLOWED_ROLES = Set.of("super_admin", "admin", "staff");
-    private static final Set<String> ADMIN_TIER_ROLES = Set.of("super_admin", "admin");
+    private static final Set<String> ALLOWED_ROLES = Set.of("admin", "staff");
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -25,23 +24,16 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User updateRole(Long id, String role, String requesterRole) {
+    public User updateRole(Long id, String role) {
         if (role == null || !ALLOWED_ROLES.contains(role.toLowerCase().trim())) {
-            throw new RuntimeException("Role must be 'super_admin', 'admin', or 'staff'");
+            throw new RuntimeException("Role must be 'admin' or 'staff'");
         }
-        String normalizedRole = role.toLowerCase().trim();
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        if ("super_admin".equals(user.getRole())) {
-            throw new RuntimeException("Super administrator accounts cannot be reassigned");
-        }
-        if (("admin".equals(user.getRole()) || ADMIN_TIER_ROLES.contains(normalizedRole)) && !"super_admin".equals(requesterRole)) {
-            throw new RuntimeException("Only a super administrator can promote or demote admin accounts");
-        }
-        user.setRole(normalizedRole);
+        user.setRole(role.toLowerCase().trim());
         return userRepository.save(user);
     }
 
-    public CreatedUser createUser(CreateUserRequest req, String requesterRole) {
+    public CreatedUser createUser(CreateUserRequest req) {
         if (req.getEmail() == null || req.getEmail().isBlank()) {
             throw new RuntimeException("Email is required");
         }
@@ -50,10 +42,7 @@ public class UserService {
         }
         String role = req.getRole() == null ? "staff" : req.getRole().toLowerCase().trim();
         if (!ALLOWED_ROLES.contains(role)) {
-            throw new RuntimeException("Role must be 'super_admin', 'admin', or 'staff'");
-        }
-        if (ADMIN_TIER_ROLES.contains(role) && !"super_admin".equals(requesterRole)) {
-            throw new RuntimeException("Only a super administrator can create admin accounts");
+            throw new RuntimeException("Role must be 'admin' or 'staff'");
         }
         String tempPassword = TempPasswordGenerator.generate();
         User user = User.builder()
@@ -72,9 +61,6 @@ public class UserService {
     public User deactivateUser(Long targetId, Long requesterId) {
         if (targetId.equals(requesterId)) throw new RuntimeException("You cannot deactivate your own account");
         User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("User not found"));
-        if ("super_admin".equals(target.getRole())) {
-            throw new RuntimeException("Super administrator accounts cannot be deactivated");
-        }
         if ("admin".equals(target.getRole()) && userRepository.countByRoleAndIsActiveTrue("admin") <= 1) {
             throw new RuntimeException("Cannot deactivate the only active admin account");
         }
@@ -123,9 +109,6 @@ public class UserService {
     public void deleteUser(Long targetId, Long requesterId) {
         if (targetId.equals(requesterId)) throw new RuntimeException("You cannot delete your own account");
         User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("User not found"));
-        if ("super_admin".equals(target.getRole())) {
-            throw new RuntimeException("Super administrator accounts cannot be deleted");
-        }
         if ("admin".equals(target.getRole()) && userRepository.countByRole("admin") <= 1) {
             throw new RuntimeException("Cannot delete the only admin account");
         }

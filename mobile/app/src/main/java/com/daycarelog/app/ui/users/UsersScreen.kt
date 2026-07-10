@@ -65,10 +65,7 @@ private val Red500   = Color(0xFFef4444)
 private val Amber600  = Color(0xFFd97706)
 private val Blue600  = Color(0xFF2563eb)
 
-private val roleLabels = mapOf("super_admin" to "Super Admin", "admin" to "Admin", "staff" to "Staff")
-private fun roleLabel(r: String) = roleLabels[r] ?: r.replaceFirstChar { it.uppercase() }
-private fun assignableRoles(isSuperAdmin: Boolean) =
-    if (isSuperAdmin) listOf("super_admin", "admin", "staff") else listOf("staff")
+private val roles = listOf("admin", "staff")
 
 @Composable
 fun UsersScreen(onBack: () -> Unit) {
@@ -106,9 +103,7 @@ fun UsersScreen(onBack: () -> Unit) {
         refresh()
     }
 
-    val isSuperAdmin = currentUser?.role == "super_admin"
-    val isAdmin = isSuperAdmin || currentUser?.role == "admin"
-    val roles = assignableRoles(isSuperAdmin)
+    val isAdmin = currentUser?.role == "admin"
 
     Column(modifier = Modifier.fillMaxSize().background(palette.pageBg)) {
         Box(
@@ -116,7 +111,7 @@ fun UsersScreen(onBack: () -> Unit) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = onBack) { Text("← Back", color = Color.White) }
-                Text("Manage Users", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
+                Text("Manage Staff", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
             }
         }
 
@@ -158,8 +153,6 @@ fun UsersScreen(onBack: () -> Unit) {
                             UserRow(
                                 user = u,
                                 isSelf = u.id == currentUser?.id,
-                                viewerIsSuperAdmin = isSuperAdmin,
-                                roleOptions = roles,
                                 busy = busyId == u.id,
                                 palette = palette,
                                 onChangeRole = { newRole ->
@@ -215,7 +208,6 @@ fun UsersScreen(onBack: () -> Unit) {
 
     if (showCreateDialog) {
         CreateStaffDialog(
-            roleOptions = roles,
             onDismiss = { showCreateDialog = false },
             onCreated = { name, tempPassword ->
                 showCreateDialog = false
@@ -258,8 +250,6 @@ fun UsersScreen(onBack: () -> Unit) {
 private fun UserRow(
     user: UserDto,
     isSelf: Boolean,
-    viewerIsSuperAdmin: Boolean,
-    roleOptions: List<String>,
     busy: Boolean,
     palette: ScreenPalette,
     onChangeRole: (String) -> Unit,
@@ -267,9 +257,6 @@ private fun UserRow(
     onResetPassword: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val isProtected = user.role == "super_admin"
-    val roleLocked = isSelf || isProtected || (user.role == "admin" && !viewerIsSuperAdmin)
-    val displayRoles = if (roleOptions.contains(user.role)) roleOptions else listOf(user.role) + roleOptions
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -299,7 +286,7 @@ private fun UserRow(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                displayRoles.forEach { r ->
+                roles.forEach { r ->
                     val selected = user.role == r
                     Surface(
                         shape = RoundedCornerShape(10.dp),
@@ -307,13 +294,13 @@ private fun UserRow(
                         modifier = Modifier.weight(1f),
                     ) {
                         TextButton(
-                            onClick = { if (!roleLocked && !busy && !selected) onChangeRole(r) },
-                            enabled = !roleLocked && !busy,
+                            onClick = { if (!isSelf && !busy && !selected) onChangeRole(r) },
+                            enabled = !isSelf && !busy,
                             contentPadding = PaddingValues(vertical = 4.dp),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(
-                                roleLabel(r),
+                                r.replaceFirstChar { it.uppercase() },
                                 fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                                 color = if (selected) Green700 else palette.mutedColor,
                             )
@@ -326,7 +313,7 @@ private fun UserRow(
                 TextButton(onClick = onResetPassword, enabled = !busy, contentPadding = PaddingValues(0.dp)) {
                     Text("🔑 Reset", color = Blue600, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
-                if (!isSelf && !isProtected) {
+                if (!isSelf) {
                     TextButton(onClick = onToggleActive, enabled = !busy, contentPadding = PaddingValues(0.dp)) {
                         Text(
                             if (user.isActive) "⏸ Deactivate" else "▶ Reactivate",
@@ -349,7 +336,6 @@ private fun UserRow(
 
 @Composable
 private fun CreateStaffDialog(
-    roleOptions: List<String>,
     onDismiss: () -> Unit,
     onCreated: (name: String, tempPassword: String) -> Unit,
     onError: (String) -> Unit,
@@ -385,7 +371,7 @@ private fun CreateStaffDialog(
 
                 Text("Role", fontSize = 12.sp, color = palette.textColor, fontWeight = FontWeight.Medium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    roleOptions.forEach { r ->
+                    roles.forEach { r ->
                         val selected = role == r
                         Surface(
                             shape = RoundedCornerShape(10.dp),
@@ -393,7 +379,7 @@ private fun CreateStaffDialog(
                             modifier = Modifier.weight(1f),
                         ) {
                             TextButton(onClick = { role = r }, contentPadding = PaddingValues(vertical = 6.dp), modifier = Modifier.fillMaxWidth()) {
-                                Text(roleLabel(r), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (selected) Green700 else palette.mutedColor)
+                                Text(r.replaceFirstChar { it.uppercase() }, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (selected) Green700 else palette.mutedColor)
                             }
                         }
                     }

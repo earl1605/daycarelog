@@ -130,7 +130,7 @@ export default function Sidebar({ open, onClose }) {
             )}
             <div className="flex-1 min-w-0">
               <p className="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate">{displayName}</p>
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 capitalize">{(user?.role ?? 'staff').replace('_', ' ')}</p>
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 capitalize">{user?.role ?? 'staff'}</p>
             </div>
           </div>
           <ThemeToggle />

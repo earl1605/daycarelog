@@ -5,13 +5,12 @@ import { PlusIcon, KeyIcon, PauseIcon, PlayIcon, TrashIcon, AlertTriangleIcon, C
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
-const ROLE_LABELS = { super_admin: 'Super Admin', admin: 'Admin', staff: 'Staff' }
+const ROLES = ['admin', 'staff']
 
 const emptyForm = { email: '', firstName: '', lastName: '', middleName: '', suffix: '', role: 'staff' }
 
 export default function Users() {
-  const { isAdmin, isSuperAdmin, user } = useAuth()
-  const ROLES = isSuperAdmin ? ['super_admin', 'admin', 'staff'] : ['staff']
+  const { isAdmin, user } = useAuth()
   const [users,      setUsers]      = useState([])
   const [loading,    setLoading]    = useState(true)
   const [saving,     setSaving]     = useState(null)
@@ -140,8 +139,6 @@ export default function Users() {
             <tbody className="divide-y divide-gray-100">
               {users.map(u => {
                 const isSelf = u.id === user?.id
-                const isProtected = u.role === 'super_admin'
-                const roleLocked = isSelf || isProtected || (u.role === 'admin' && !isSuperAdmin)
                 return (
                   <tr key={u.id} className="hover:bg-gray-50/60 transition-colors duration-150">
                     <td className="px-4 py-3 font-medium text-gray-900">
@@ -152,11 +149,11 @@ export default function Users() {
                     <td className="px-4 py-3">
                       <select
                         value={u.role}
-                        disabled={roleLocked || saving === u.id}
+                        disabled={isSelf || saving === u.id}
                         onChange={e => changeRole(u.id, e.target.value)}
                         className="border border-gray-200 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 disabled:opacity-50"
                       >
-                        {(ROLES.includes(u.role) ? ROLES : [u.role, ...ROLES]).map(r => <option key={r} value={r}>{ROLE_LABELS[r] ?? r}</option>)}
+                        {ROLES.map(r => <option key={r}>{r}</option>)}
                       </select>
                     </td>
                     <td className="px-4 py-3">
@@ -177,7 +174,7 @@ export default function Users() {
                             : <KeyIcon width={13} height={13} />}
                           Reset
                         </button>
-                        {!isSelf && !isProtected && (
+                        {!isSelf && (
                           <button
                             onClick={() => toggleActive(u)}
                             disabled={togglingId === u.id}
@@ -191,7 +188,7 @@ export default function Users() {
                             {u.isActive ? 'Deactivate' : 'Reactivate'}
                           </button>
                         )}
-                        {!isSelf && !isProtected && (
+                        {!isSelf && (
                           <button
                             onClick={() => setConfirmId(u.id)}
                             disabled={deleting === u.id}
@@ -234,7 +231,7 @@ export default function Users() {
               placeholder="Email address" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
             <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400">
-              {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r] ?? r}</option>)}
+              {ROLES.map(r => <option key={r}>{r}</option>)}
             </select>
             <div className="flex gap-3 pt-1">
               <button type="button" onClick={() => { setShowCreate(false); setForm(emptyForm) }}

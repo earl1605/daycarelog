@@ -79,7 +79,7 @@ export default function Settings() {
 
   const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
   const btnClass = "bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
-  const roleColors = { super_admin: 'bg-fuchsia-50 text-fuchsia-700', admin: 'bg-violet-50 text-violet-700', staff: 'bg-blue-50 text-blue-700', parent: 'bg-amber-50 text-amber-700' }
+  const roleColors = { admin: 'bg-violet-50 text-violet-700', staff: 'bg-blue-50 text-blue-700', parent: 'bg-amber-50 text-amber-700' }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -106,7 +106,7 @@ export default function Settings() {
               <p className="font-semibold text-gray-900 truncate">{[firstName, middleName, lastName, suffix].filter(Boolean).join(' ') || 'User'}</p>
               <p className="text-sm text-gray-500 truncate">{user?.email}</p>
               <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${roleColors[user?.role] ?? 'bg-gray-100 text-gray-600'}`}>
-                {(user?.role ?? '—').replace('_', ' ')}
+                {user?.role ?? '—'}
               </span>
             </div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />

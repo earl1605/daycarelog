@@ -23,9 +23,6 @@ public class AdminSeedRunner implements CommandLineRunner {
     @Value("${app.admin-seed.password:}")
     private String seedPassword;
 
-    @Value("${app.super-admin-seed.email:}")
-    private String superAdminEmail;
-
     public AdminSeedRunner(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -33,11 +30,6 @@ public class AdminSeedRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        seedFirstAdmin();
-        promoteSuperAdmin();
-    }
-
-    private void seedFirstAdmin() {
         String email = seedEmail == null ? "" : seedEmail.trim();
         String password = seedPassword == null ? "" : seedPassword.trim();
 
@@ -65,20 +57,5 @@ public class AdminSeedRunner implements CommandLineRunner {
                 .build();
         userRepository.save(admin);
         log.info("Seeded initial admin account: {}", email);
-    }
-
-    private void promoteSuperAdmin() {
-        String email = superAdminEmail == null ? "" : superAdminEmail.trim();
-        if (userRepository.countByRole("super_admin") > 0) {
-            return;
-        }
-        if (email.isBlank()) {
-            return;
-        }
-        userRepository.findByEmail(email).ifPresentOrElse(user -> {
-            user.setRole("super_admin");
-            userRepository.save(user);
-            log.info("Promoted {} to super_admin.", email);
-        }, () -> log.warn("SUPER_ADMIN_EMAIL ({}) does not match any existing account — skipping promotion.", email));
     }
 }
