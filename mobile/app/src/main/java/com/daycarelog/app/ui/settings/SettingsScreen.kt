@@ -345,7 +345,7 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Account Details", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = palette.textColor)
                     SettingRow("Email", user?.email ?: "—", palette)
-                    SettingRow("Role",  user?.role?.replaceFirstChar { it.uppercase() } ?: "—", palette)
+                    SettingRow("Role",  user?.role?.let { capitalizeWords(it.replace("_", " ")) } ?: "—", palette)
 
                     Spacer(Modifier.height(2.dp))
 
@@ -401,7 +401,7 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                 }
             }
 
-            if (user?.role == "admin") {
+            if (user?.role == "admin" || user?.role == "super_admin") {
                 Card(
                     modifier = Modifier.fillMaxWidth().clickable(onClick = onManageStaff),
                     shape = RoundedCornerShape(16.dp),
@@ -413,7 +413,7 @@ fun SettingsScreen(onSignOut: () -> Unit, onBack: () -> Unit, onManageStaff: () 
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text("👥", fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
-                        Text("Manage Staff", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = palette.textColor, modifier = Modifier.weight(1f))
+                        Text("Manage Users", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = palette.textColor, modifier = Modifier.weight(1f))
                         Text("›", fontSize = 18.sp, color = palette.mutedColor)
                     }
                 }
