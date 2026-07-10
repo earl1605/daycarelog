@@ -64,6 +64,8 @@ export default function Attendance() {
 
   const present = Object.values(records).filter(r => r.status === 'present').length
   const absent  = Object.values(records).filter(r => r.status === 'absent').length
+  const late     = Object.values(records).filter(r => r.status === 'late').length
+  const excused  = Object.values(records).filter(r => r.status === 'excused').length
 
   return (
     <div className="space-y-6">
@@ -74,7 +76,7 @@ export default function Attendance() {
       </div>
 
       <div className="flex gap-4 flex-wrap">
-        {[['Present', present, 'text-green-600'], ['Absent', absent, 'text-red-500'], ['Total', children.length, 'text-gray-700']].map(([l,v,c]) => (
+        {[['Present', present, 'text-green-600'], ['Absent', absent, 'text-red-500'], ['Late', late, 'text-yellow-600'], ['Excused', excused, 'text-blue-600'], ['Total', children.length, 'text-gray-700']].map(([l,v,c]) => (
           <div key={l} className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 px-5 py-3 flex items-center gap-3">
             <p className={`text-2xl font-bold ${c}`}>{v}</p>
             <p className="text-sm text-gray-500">{l}</p>
