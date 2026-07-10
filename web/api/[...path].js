@@ -1,6 +1,6 @@
 const RAILWAY = 'https://daycarelog-production.up.railway.app'
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   try {
     const target = RAILWAY + req.url
 
@@ -27,4 +27,4 @@ module.exports = async function handler(req, res) {
   }
 }
 
-module.exports.config = { api: { bodyParser: false } }
+export const config = { api: { bodyParser: false } }
