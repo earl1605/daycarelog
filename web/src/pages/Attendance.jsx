@@ -75,7 +75,7 @@ export default function Attendance() {
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
       </div>
 
-      <div className="flex gap-4 flex-wrap">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[['Present', present, 'text-green-600'], ['Absent', absent, 'text-red-500'], ['Late', late, 'text-yellow-600'], ['Excused', excused, 'text-blue-600'], ['Total', children.length, 'text-gray-700']].map(([l,v,c]) => (
           <div key={l} className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 px-5 py-3 flex items-center gap-3">
             <p className={`text-2xl font-bold ${c}`}>{v}</p>
