@@ -63,6 +63,7 @@ export default function ChildDetail() {
 
   const latestHealth = health[0]
   const status = latestHealth ? classifyNutritionalStatus(latestHealth.weightKg, child.dateOfBirth, child.sex) : null
+  const totalExpectedDoses = schedule.reduce((sum, v) => sum + v.expectedDoses, 0)
 
   const tabs = [
     { key: TAB.OVERVIEW, label: 'Overview' },
@@ -131,6 +132,17 @@ export default function ChildDetail() {
               <p className="font-medium text-gray-900 capitalize">{value}</p>
             </div>
           ))}
+          {totalExpectedDoses > 0 && (
+            <div>
+              <p className="text-gray-400">Immunizations</p>
+              <p className="font-medium text-gray-900">
+                {immunizations.length} / {totalExpectedDoses} doses
+                {immunizations.length >= totalExpectedDoses
+                  ? <span className="ml-2 text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Complete</span>
+                  : <span className="ml-2 text-xs font-medium text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">In progress</span>}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
