@@ -132,15 +132,21 @@ export default function ChildDetail() {
               <p className="font-medium text-gray-900 capitalize">{value}</p>
             </div>
           ))}
-          {totalExpectedDoses > 0 && (
-            <div>
-              <p className="text-gray-400">Immunizations</p>
-              <p className="font-medium text-gray-900">
-                {immunizations.length} / {totalExpectedDoses} doses
-                {immunizations.length >= totalExpectedDoses
-                  ? <span className="ml-2 text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Complete</span>
-                  : <span className="ml-2 text-xs font-medium text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">In progress</span>}
-              </p>
+          {schedule.length > 0 && (
+            <div className="col-span-2">
+              <p className="text-gray-400 mb-2">Immunizations ({immunizations.length} / {totalExpectedDoses} doses)</p>
+              <div className="flex flex-wrap gap-2">
+                {schedule.map(v => {
+                  const given = immunizations.filter(i => i.vaccineName === v.name).length
+                  const complete = given >= v.expectedDoses
+                  return (
+                    <span key={v.name}
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${complete ? 'bg-green-100 text-green-800' : given > 0 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {v.name} {given}/{v.expectedDoses}
+                    </span>
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>
