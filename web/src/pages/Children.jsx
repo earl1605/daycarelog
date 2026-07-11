@@ -4,6 +4,8 @@ import { api } from '../lib/api'
 import { toLocalDateString } from '../utils/date'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import { PlusIcon, UsersIcon } from '../components/icons'
+import Pagination from '../components/Pagination'
+import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
 
 const emptyForm = { guardianUserId: '', firstName: '', lastName: '', dateOfBirth: '', sex: '', enrollmentStatus: 'active' }
@@ -67,6 +69,7 @@ export default function Children() {
   }
 
   const filtered = children.filter(c => `${c.firstName} ${c.lastName}`.toLowerCase().includes(search.toLowerCase()))
+  const { page, setPage, totalPages, paged } = usePagination(filtered)
 
   return (
     <div className="space-y-6">
@@ -156,7 +159,7 @@ export default function Children() {
                       <p className="font-medium text-gray-500">No children enrolled yet.</p>
                     </td>
                   </tr>
-                ) : filtered.map(c => (
+                ) : paged.map(c => (
                   <tr key={c.id} className="hover:bg-gray-50/60 transition-colors duration-150">
                     <td className="px-4 py-3 font-medium text-gray-900">{c.firstName} {c.lastName}</td>
                     <td className="px-4 py-3 text-gray-600">{new Date(c.dateOfBirth + 'T00:00:00').toLocaleDateString('en-PH')}</td>
@@ -183,6 +186,7 @@ export default function Children() {
                 ))}
               </tbody>
             </table>
+            <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
     </div>

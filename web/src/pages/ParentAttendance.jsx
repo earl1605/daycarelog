@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
+import Pagination from '../components/Pagination'
+import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
 
 const STATUS_COLORS = { present: 'bg-green-100 text-green-700', absent: 'bg-red-100 text-red-700', late: 'bg-yellow-100 text-yellow-700', excused: 'bg-blue-100 text-blue-700' }
@@ -24,6 +26,7 @@ export default function ParentAttendance() {
 
   const childMap = Object.fromEntries(children.map(c => [c.id, c]))
   const filtered = childFilter === 'all' ? records : records.filter(r => r.childId === Number(childFilter))
+  const { page, setPage, totalPages, paged } = usePagination(filtered)
 
   return (
     <div className="space-y-6">
@@ -55,7 +58,7 @@ export default function ParentAttendance() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map(r => (
+              {paged.map(r => (
                 <tr key={r.id} className="hover:bg-gray-50/60 transition-colors duration-150">
                   <td className="px-4 py-3 font-medium text-gray-900">
                     {childMap[r.childId] ? `${childMap[r.childId].firstName} ${childMap[r.childId].lastName}` : '—'}
@@ -70,6 +73,7 @@ export default function ParentAttendance() {
               ))}
             </tbody>
           </table>
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
     </div>

@@ -3,6 +3,8 @@ import { api } from '../lib/api'
 import { classifyNutritionalStatus } from '../utils/nutritionalStatus'
 import NutritionalStatusBadge from '../components/NutritionalStatusBadge'
 import { HeartIcon } from '../components/icons'
+import Pagination from '../components/Pagination'
+import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
 
 export default function ParentHealthRecords() {
@@ -25,6 +27,7 @@ export default function ParentHealthRecords() {
 
   const childMap = Object.fromEntries(children.map(c => [c.id, c]))
   const filtered = childFilter === 'all' ? records : records.filter(r => r.childId === Number(childFilter))
+  const { page, setPage, totalPages, paged } = usePagination(filtered)
 
   return (
     <div className="space-y-6">
@@ -63,7 +66,7 @@ export default function ParentHealthRecords() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filtered.map(r => {
+                {paged.map(r => {
                   const child = childMap[r.childId]
                   const status = child ? classifyNutritionalStatus(r.weightKg, child.dateOfBirth, child.sex) : null
                   return (
@@ -80,6 +83,7 @@ export default function ParentHealthRecords() {
               </tbody>
             </table>
           )}
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
     </div>

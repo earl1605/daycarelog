@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { PlusIcon, KeyIcon, PauseIcon, PlayIcon, TrashIcon, AlertTriangleIcon, CopyIcon } from '../components/icons'
+import Pagination from '../components/Pagination'
+import { usePagination } from '../utils/usePagination'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
@@ -105,6 +107,7 @@ export default function Users() {
 
   if (!isAdmin) return <div className="text-center py-20 text-gray-400">Admin access required.</div>
 
+  const { page, setPage, totalPages, paged } = usePagination(users)
   const confirmTarget = users.find(u => u.id === confirmId)
 
   return (
@@ -137,7 +140,7 @@ export default function Users() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {users.map(u => {
+              {paged.map(u => {
                 const isSelf = u.id === user?.id
                 return (
                   <tr key={u.id} className="hover:bg-gray-50/60 transition-colors duration-150">
@@ -207,6 +210,7 @@ export default function Users() {
               })}
             </tbody>
           </table>
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
 

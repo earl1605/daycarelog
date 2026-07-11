@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { PlusIcon, KeyIcon, CopyIcon, TrashIcon, AlertTriangleIcon, UsersIcon } from '../components/icons'
+import Pagination from '../components/Pagination'
+import { usePagination } from '../utils/usePagination'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import { validateEmailFormat, getEmailTypoSuggestion } from '../utils/emailValidation'
 import toast from 'react-hot-toast'
@@ -112,6 +114,7 @@ export default function Guardians() {
   }
 
   const filtered = accounts.filter(a => a.name?.toLowerCase().includes(search.toLowerCase()))
+  const { page, setPage, totalPages, paged } = usePagination(filtered)
   const confirmTarget = accounts.find(a => a.userId === confirmUserId)
 
   return (
@@ -221,7 +224,7 @@ export default function Guardians() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filtered.map(a => (
+                {paged.map(a => (
                   <tr key={a.userId} className="hover:bg-gray-50/60 transition-colors duration-150">
                     <td className="px-4 py-3 font-medium text-gray-900">{a.name}</td>
                     <td className="px-4 py-3 text-gray-500">{a.email}</td>
@@ -257,6 +260,7 @@ export default function Guardians() {
               </tbody>
             </table>
           )}
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
 

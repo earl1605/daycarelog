@@ -4,6 +4,8 @@ import { api } from '../lib/api'
 import { classifyNutritionalStatus } from '../utils/nutritionalStatus'
 import NutritionalStatusBadge from '../components/NutritionalStatusBadge'
 import { PlusIcon, HeartIcon } from '../components/icons'
+import Pagination from '../components/Pagination'
+import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
 
 export default function HealthRecords() {
@@ -37,6 +39,7 @@ export default function HealthRecords() {
     const child = children[r.childId]
     return child && `${child.firstName} ${child.lastName}`.toLowerCase().includes(search.toLowerCase())
   })
+  const { page, setPage, totalPages, paged } = usePagination(filtered)
 
   return (
     <div className="space-y-6">
@@ -79,7 +82,7 @@ export default function HealthRecords() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filtered.map(r => {
+                {paged.map(r => {
                   const child = children[r.childId]
                   const status = child ? classifyNutritionalStatus(r.weightKg, child.dateOfBirth, child.sex) : null
                   const dosesGiven = child ? immunizationSummary(child.id) : 0
@@ -105,6 +108,7 @@ export default function HealthRecords() {
               </tbody>
             </table>
           )}
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
     </div>
