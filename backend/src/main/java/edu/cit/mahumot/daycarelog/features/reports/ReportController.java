@@ -34,7 +34,7 @@ public class ReportController {
 
         List<Child>        children = childRepository.findByEnrollmentStatus("active");
         List<Attendance>   att      = attendanceRepository.findByDateBetween(start, end);
-        List<HealthRecord> health   = healthRecordRepository.findByMeasurementDateBetween(start, end);
+        List<HealthRecord> health   = healthRecordRepository.findByMeasurementDateBetweenAndDeletedAtIsNull(start, end);
 
         int total   = children.size();
         int present = (int) att.stream().filter(a -> "present".equals(a.getStatus())).count();
@@ -47,14 +47,14 @@ public class ReportController {
                 (a, b) -> a.getMeasurementDate().isAfter(b.getMeasurementDate()) ? a : b));
 
         Map<String, Integer> statusCounts = new LinkedHashMap<>();
-        statusCounts.put("Normal", 0);
-        statusCounts.put("Underweight", 0);
-        statusCounts.put("Severely Underweight", 0);
-        statusCounts.put("Overweight", 0);
-        statusCounts.put("Unknown", 0);
+        statusCounts.put("NORMAL", 0);
+        statusCounts.put("UNDERWEIGHT", 0);
+        statusCounts.put("SEVERELY_UNDERWEIGHT", 0);
+        statusCounts.put("OVERWEIGHT", 0);
+        statusCounts.put("UNKNOWN", 0);
         children.forEach(c -> {
             HealthRecord r = latestHealth.get(c.getId());
-            String s = (r != null && r.getNutritionalStatus() != null) ? r.getNutritionalStatus() : "Unknown";
+            String s = (r != null && r.getNutritionalStatus() != null) ? r.getNutritionalStatus() : "UNKNOWN";
             statusCounts.merge(s, 1, Integer::sum);
         });
 

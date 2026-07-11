@@ -3,6 +3,9 @@ import { api } from '../lib/api'
 import { toLocalDateString } from '../utils/date'
 import toast from 'react-hot-toast'
 
+const STATUS_LABELS = { NORMAL: 'Normal', UNDERWEIGHT: 'Underweight', SEVERELY_UNDERWEIGHT: 'Severely Underweight', OVERWEIGHT: 'Overweight', UNKNOWN: 'Unknown' }
+const STATUS_COLORS = { NORMAL: 'bg-green-400', UNDERWEIGHT: 'bg-orange-400', SEVERELY_UNDERWEIGHT: 'bg-red-400', OVERWEIGHT: 'bg-yellow-400', UNKNOWN: 'bg-gray-300' }
+
 export default function Reports() {
   const [data,    setData]    = useState(null)
   const [month,   setMonth]   = useState(toLocalDateString().slice(0, 7))
@@ -55,11 +58,12 @@ export default function Reports() {
           <div className="bg-white rounded-xl border border-gray-200/70 p-6">
             <h2 className="text-[17px] font-bold text-gray-900 mb-4">Nutritional Status</h2>
             <div className="space-y-3">
-              {Object.entries(data.nutritionalStatus ?? {}).map(([label, count]) => {
+              {Object.entries(data.nutritionalStatus ?? {}).map(([code, count]) => {
                 const pct = data.total > 0 ? Math.round((count / data.total) * 100) : 0
-                const barColor = label === 'Normal' ? 'bg-green-400' : label === 'Overweight' ? 'bg-yellow-400' : label === 'Underweight' ? 'bg-orange-400' : label === 'Severely Underweight' ? 'bg-red-400' : 'bg-gray-300'
+                const label = STATUS_LABELS[code] ?? code
+                const barColor = STATUS_COLORS[code] ?? 'bg-gray-300'
                 return (
-                  <div key={label}>
+                  <div key={code}>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-gray-600">{label}</span>
                       <span className="font-semibold">{count} <span className="text-gray-400 font-normal">({pct}%)</span></span>

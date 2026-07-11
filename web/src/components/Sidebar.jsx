@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import ThemeToggle from './ThemeToggle'
 import {
   HomeIcon, UsersIcon, ClipboardIcon, HeartIcon,
-  BarChartIcon, SettingsIcon, ChevronDownIcon, LogOutIcon,
+  BarChartIcon, SettingsIcon, ChevronDownIcon, LogOutIcon, TrashIcon,
 } from './icons'
 
 const groups = [
@@ -45,7 +45,10 @@ const parentGroups = [
   },
 ]
 
-const adminItem = { to: '/users', icon: UsersIcon, label: 'Users' }
+const adminItems = [
+  { to: '/users',        icon: UsersIcon, label: 'Users' },
+  { to: '/recycle-bin',  icon: TrashIcon, label: 'Recycle Bin' },
+]
 
 export default function Sidebar({ open, onClose }) {
   const { user, signOut, isAdmin, isParent } = useAuth()
@@ -114,7 +117,7 @@ export default function Sidebar({ open, onClose }) {
               <div className="h-px bg-gray-200/70 dark:bg-gray-700 mb-5 -mt-2.5 mx-1" />
               <p className="px-3 pb-1.5 text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Admin</p>
               <div className="space-y-0.5">
-                {renderItem(adminItem)}
+                {adminItems.map(renderItem)}
               </div>
             </div>
           )}

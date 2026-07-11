@@ -57,7 +57,32 @@ public class ImmunizationController {
     public ResponseEntity<?> delete(@PathVariable Long id) {
         try {
             immunizationService.delete(id);
-            return ResponseEntity.ok(Map.of("message", "Deleted"));
+            return ResponseEntity.ok(Map.of("message", "Moved to Recycle Bin"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/trash")
+    public List<Immunization> getTrash() {
+        return immunizationService.findTrashed();
+    }
+
+    @PutMapping("/{id}/restore")
+    public ResponseEntity<?> restore(@PathVariable Long id) {
+        try {
+            immunizationService.restore(id);
+            return ResponseEntity.ok(Map.of("message", "Restored"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<?> permanentlyDelete(@PathVariable Long id) {
+        try {
+            immunizationService.permanentlyDelete(id);
+            return ResponseEntity.ok(Map.of("message", "Permanently deleted"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

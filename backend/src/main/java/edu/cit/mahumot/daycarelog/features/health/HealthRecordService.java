@@ -5,6 +5,7 @@ import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -19,16 +20,16 @@ public class HealthRecordService {
     }
 
     public List<HealthRecord> findAll() {
-        return healthRecordRepository.findAllByOrderByMeasurementDateDesc();
+        return healthRecordRepository.findByDeletedAtIsNullOrderByMeasurementDateDesc();
     }
 
     public List<HealthRecord> findByChild(Long childId) {
-        return healthRecordRepository.findByChildIdOrderByMeasurementDateDesc(childId);
+        return healthRecordRepository.findByChildIdAndDeletedAtIsNullOrderByMeasurementDateDesc(childId);
     }
 
     public List<HealthRecord> findByChildIds(List<Long> childIds) {
         if (childIds.isEmpty()) return List.of();
-        return healthRecordRepository.findByChildIdInOrderByMeasurementDateDesc(childIds);
+        return healthRecordRepository.findByChildIdInAndDeletedAtIsNullOrderByMeasurementDateDesc(childIds);
     }
 
     public HealthRecord create(HealthRecordRequest req, Long userId) {
@@ -51,6 +52,27 @@ public class HealthRecordService {
     }
 
     public void delete(Long id) {
+        HealthRecord record = healthRecordRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Health record not found"));
+        if (record.getDeletedAt() != null) {
+            throw new RuntimeException("Health record already deleted");
+        }
+        record.setDeletedAt(LocalDateTime.now());
+        healthRecordRepository.save(record);
+    }
+
+    public List<HealthRecord> findTrashed() {
+        return healthRecordRepository.findByDeletedAtIsNotNullOrderByDeletedAtDesc();
+    }
+
+    public void restore(Long id) {
+        HealthRecord record = healthRecordRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Health record not found"));
+        record.setDeletedAt(null);
+        healthRecordRepository.save(record);
+    }
+
+    public void permanentlyDelete(Long id) {
         if (!healthRecordRepository.existsById(id)) {
             throw new RuntimeException("Health record not found");
         }

@@ -6,8 +6,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+// No DB-level unique constraint on (child_id, vaccine_name, dose_number) here: soft-deleted
+// rows keep occupying that combination, which would block re-adding a dose after it's
+// trashed. Uniqueness among *active* records is enforced in ImmunizationService.create()
+// instead (see the partial unique index note in V4__soft_delete_health_and_immunizations.sql
+// for the DB-level equivalent, which is deleted_at-aware).
 @Entity
-@Table(name = "immunizations", uniqueConstraints = @UniqueConstraint(columnNames = {"child_id", "vaccine_name", "dose_number"}))
+@Table(name = "immunizations")
 public class Immunization {
 
     @Id
@@ -35,6 +40,9 @@ public class Immunization {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     public Immunization() {}
 
     public Long getId() { return id; }
@@ -60,6 +68,9 @@ public class Immunization {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 
     public static Builder builder() { return new Builder(); }
 

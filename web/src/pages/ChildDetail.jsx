@@ -43,20 +43,20 @@ export default function ChildDetail() {
   }, [id])
 
   async function handleDeleteImmunization(immId) {
-    if (!window.confirm('Delete this immunization record?')) return
+    if (!window.confirm('Move this immunization record to the Recycle Bin?')) return
     try {
       await api.immunizations.delete(immId)
       setImmunizations(prev => prev.filter(r => r.id !== immId))
-      toast.success('Immunization record deleted')
+      toast.success('Moved to Recycle Bin')
     } catch (e) { toast.error(e.message) }
   }
 
   async function handleDeleteHealthRecord(recordId) {
-    if (!window.confirm('Delete this health record?')) return
+    if (!window.confirm('Move this health record to the Recycle Bin?')) return
     try {
       await api.health.delete(recordId)
       setHealth(prev => prev.filter(r => r.id !== recordId))
-      toast.success('Health record deleted')
+      toast.success('Moved to Recycle Bin')
     } catch (e) { toast.error(e.message) }
   }
 

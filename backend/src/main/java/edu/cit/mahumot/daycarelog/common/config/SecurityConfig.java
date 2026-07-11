@@ -56,6 +56,17 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/immunizations/mine").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/immunizations/schedule").authenticated()
 
+                // Recycle Bin: admin-only, and must be declared before the broader ADMIN+STAFF
+                // rules below -- /permanent in particular would otherwise be caught by the
+                // wildcard DELETE "/api/health-records/**" / "/api/immunizations/**" rules,
+                // since Spring Security's authorizeHttpRequests uses first-match-wins ordering.
+                .requestMatchers(HttpMethod.GET,    "/api/health-records/trash").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT,    "/api/health-records/*/restore").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/health-records/*/permanent").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET,    "/api/immunizations/trash").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT,    "/api/immunizations/*/restore").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/immunizations/*/permanent").hasRole("ADMIN")
+
                 .requestMatchers("/api/children/*/guardians", "/api/children/*/guardians/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/api/guardians", "/api/guardians/**").hasAnyRole("ADMIN", "STAFF")
 
