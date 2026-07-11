@@ -7,22 +7,31 @@ import { PlusIcon, HeartIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
 export default function HealthRecords() {
-  const [records,  setRecords]  = useState([])
-  const [children, setChildren] = useState({})
-  const [loading,  setLoading]  = useState(true)
-  const [search,   setSearch]   = useState('')
+  const [records,       setRecords]       = useState([])
+  const [children,      setChildren]      = useState({})
+  const [immunizations, setImmunizations] = useState([])
+  const [schedule,      setSchedule]      = useState([])
+  const [loading,       setLoading]       = useState(true)
+  const [search,        setSearch]        = useState('')
 
   useEffect(() => {
     async function load() {
       try {
-        const [kids, recs] = await Promise.all([api.children.list(), api.health.list()])
+        const [kids, recs, imms, sched] = await Promise.all([
+          api.children.list(), api.health.list(), api.immunizations.list(), api.immunizations.schedule(),
+        ])
         const map = {}; kids.forEach(k => { map[k.id] = k })
-        setChildren(map); setRecords(recs)
+        setChildren(map); setRecords(recs); setImmunizations(imms); setSchedule(sched)
       } catch { toast.error('Failed to load') }
       setLoading(false)
     }
     load()
   }, [])
+
+  const totalExpectedDoses = schedule.reduce((sum, v) => sum + v.expectedDoses, 0)
+  function immunizationSummary(childId) {
+    return immunizations.filter(i => i.childId === childId).length
+  }
 
   const filtered = records.filter(r => {
     const child = children[r.childId]
@@ -56,7 +65,7 @@ export default function HealthRecords() {
               <p className="font-medium text-gray-500">No health records found</p>
             </div>
           ) : (
-            <table className="w-full text-sm min-w-[560px]">
+            <table className="w-full text-sm min-w-[820px]">
               <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium">Child</th>
@@ -64,6 +73,8 @@ export default function HealthRecords() {
                   <th className="text-left px-4 py-3 font-medium">Weight</th>
                   <th className="text-left px-4 py-3 font-medium">Height</th>
                   <th className="text-left px-4 py-3 font-medium">Status</th>
+                  <th className="text-left px-4 py-3 font-medium">Blood Type</th>
+                  <th className="text-left px-4 py-3 font-medium">Immunizations</th>
                   <th className="text-left px-4 py-3 font-medium">Remarks</th>
                 </tr>
               </thead>
@@ -71,6 +82,7 @@ export default function HealthRecords() {
                 {filtered.map(r => {
                   const child = children[r.childId]
                   const status = child ? classifyNutritionalStatus(r.weightKg, child.dateOfBirth, child.sex) : null
+                  const dosesGiven = child ? immunizationSummary(child.id) : 0
                   return (
                     <tr key={r.id} className="hover:bg-gray-50/60 transition-colors duration-150">
                       <td className="px-4 py-3 font-medium text-gray-900">{child ? `${child.firstName} ${child.lastName}` : '—'}</td>
@@ -78,6 +90,14 @@ export default function HealthRecords() {
                       <td className="px-4 py-3 text-gray-600">{r.weightKg ? `${r.weightKg} kg` : '—'}</td>
                       <td className="px-4 py-3 text-gray-600">{r.heightCm ? `${r.heightCm} cm` : '—'}</td>
                       <td className="px-4 py-3">{status ? <NutritionalStatusBadge status={status} /> : '—'}</td>
+                      <td className="px-4 py-3 text-gray-600">{child?.bloodType || '—'}</td>
+                      <td className="px-4 py-3">
+                        {totalExpectedDoses === 0 ? '—' : (
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${dosesGiven >= totalExpectedDoses ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-700'}`}>
+                            {dosesGiven} / {totalExpectedDoses}
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-gray-400">{r.remarks || '—'}</td>
                     </tr>
                   )
