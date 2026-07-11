@@ -1,33 +1,42 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
+import { classifyNutritionalStatus } from '../utils/nutritionalStatus'
 import StatCard from '../components/StatCard'
 import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, BarChartIcon, PlusIcon } from '../components/icons'
 import toast from 'react-hot-toast'
+
+const STATUS_HEX = { Normal: '#4ade80', Underweight: '#fb923c', 'Severely Underweight': '#f87171', Overweight: '#facc15', Unknown: '#d1d5db' }
 
 export default function Dashboard() {
   const { user } = useAuth()
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const [children,   setChildren]   = useState([])
-  const [chartData,  setChartData]  = useState([])
-  const [todayAtt,   setTodayAtt]   = useState([])
-  const [loading,    setLoading]    = useState(true)
+  const [children,     setChildren]     = useState([])
+  const [chartData,    setChartData]    = useState([])
+  const [todayAtt,     setTodayAtt]     = useState([])
+  const [healthRecords, setHealthRecords] = useState([])
+  const [immunizationCoverage, setImmunizationCoverage] = useState([])
+  const [loading,      setLoading]      = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
         const today = toLocalDateString()
-        const [kids, att] = await Promise.all([
+        const [kids, att, health, report] = await Promise.all([
           api.children.list(),
           api.attendance.getByDate(today),
+          api.health.list(),
+          api.reports.monthly(today.slice(0, 7)),
         ])
         setChildren(kids)
         setTodayAtt(att)
+        setHealthRecords(health)
+        setImmunizationCoverage(report.immunizationCoverage ?? [])
 
         const now = new Date()
         const mondayOffset = now.getDay() === 0 ? 6 : now.getDay() - 1
@@ -55,7 +64,29 @@ export default function Dashboard() {
   const active       = children.filter(c => c.enrollmentStatus === 'active').length
   const presentToday = todayAtt.filter(a => a.status === 'present').length
 
+  const activeChildren = children.filter(c => c.enrollmentStatus === 'active')
+  const latestHealthByChild = {}
+  ;[...healthRecords].sort((a, b) => a.measurementDate.localeCompare(b.measurementDate))
+    .forEach(r => { latestHealthByChild[r.childId] = r })
+  const nutritionalCounts = {}
+  activeChildren.forEach(c => {
+    const r = latestHealthByChild[c.id]
+    const status = r ? classifyNutritionalStatus(r.weightKg, c.dateOfBirth, c.sex) : null
+    const label = status?.label ?? 'Unknown'
+    nutritionalCounts[label] = (nutritionalCounts[label] ?? 0) + 1
+  })
+  const nutritionalPieData = Object.entries(nutritionalCounts).map(([name, value]) => ({ name, value }))
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
+
+  const tooltipStyle = {
+    borderRadius: '10px',
+    border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
+    boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+    fontSize: '13px',
+    backgroundColor: isDark ? '#1f2937' : '#fff',
+    color: isDark ? '#f9fafb' : '#111827',
+  }
 
   return (
     <div className="space-y-8">
@@ -87,21 +118,57 @@ export default function Dashboard() {
             <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
             <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
-            <Tooltip
-              cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }}
-              contentStyle={{
-                borderRadius: '10px',
-                border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
-                boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-                fontSize: '13px',
-                backgroundColor: isDark ? '#1f2937' : '#fff',
-                color: isDark ? '#f9fafb' : '#111827',
-              }}
-            />
+            <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
             <Bar dataKey="present" name="Present" fill="#16a34a" radius={[4,4,0,0]} />
             <Bar dataKey="absent"  name="Absent"  fill={isDark ? '#4b5563' : '#E5E7EB'} radius={[4,4,0,0]} />
           </BarChart>
         </ResponsiveContainer>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200/70 p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-[17px] font-bold text-gray-900">Nutritional Status</h2>
+            <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
+          </div>
+          {nutritionalPieData.length === 0 ? (
+            <p className="text-gray-400 text-sm">No health records yet.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie data={nutritionalPieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={48} outerRadius={75} paddingAngle={2}>
+                  {nutritionalPieData.map(d => <Cell key={d.name} fill={STATUS_HEX[d.name] ?? '#d1d5db'} />)}
+                </Pie>
+                <Tooltip contentStyle={tooltipStyle} />
+                <Legend verticalAlign="bottom" height={32} wrapperStyle={{ fontSize: '11px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200/70 p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-[17px] font-bold text-gray-900">Immunization Coverage</h2>
+            <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
+          </div>
+          {immunizationCoverage.length === 0 ? (
+            <p className="text-gray-400 text-sm">No vaccine schedule data.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={immunizationCoverage} barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
+                <XAxis dataKey="vaccine" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip
+                  cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }}
+                  contentStyle={tooltipStyle}
+                  formatter={(value, _name, props) => [`${value} / ${props.payload.total}`, 'Covered']}
+                />
+                <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
       </div>
 
       <div>
