@@ -34,6 +34,15 @@ public class Child {
     @Column(name = "enrollment_status")
     private String enrollmentStatus = "active";
 
+    @Column(columnDefinition = "TEXT")
+    private String allergies;
+
+    @Column(name = "medical_conditions", columnDefinition = "TEXT")
+    private String medicalConditions;
+
+    @Column(name = "blood_type", length = 5)
+    private String bloodType;
+
     @Column(name = "created_by")
     private Long createdBy;
 
@@ -67,6 +76,15 @@ public class Child {
     public String getEnrollmentStatus() { return enrollmentStatus; }
     public void setEnrollmentStatus(String enrollmentStatus) { this.enrollmentStatus = enrollmentStatus; }
 
+    public String getAllergies() { return allergies; }
+    public void setAllergies(String allergies) { this.allergies = allergies; }
+
+    public String getMedicalConditions() { return medicalConditions; }
+    public void setMedicalConditions(String medicalConditions) { this.medicalConditions = medicalConditions; }
+
+    public String getBloodType() { return bloodType; }
+    public void setBloodType(String bloodType) { this.bloodType = bloodType; }
+
     public Long getCreatedBy() { return createdBy; }
     public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
 
@@ -83,6 +101,9 @@ public class Child {
         private String address;
         private LocalDate enrollmentDate;
         private String enrollmentStatus = "active";
+        private String allergies;
+        private String medicalConditions;
+        private String bloodType;
         private Long createdBy;
 
         public Builder firstName(String v) { this.firstName = v; return this; }
@@ -92,6 +113,9 @@ public class Child {
         public Builder address(String v) { this.address = v; return this; }
         public Builder enrollmentDate(LocalDate v) { this.enrollmentDate = v; return this; }
         public Builder enrollmentStatus(String v) { this.enrollmentStatus = v; return this; }
+        public Builder allergies(String v) { this.allergies = v; return this; }
+        public Builder medicalConditions(String v) { this.medicalConditions = v; return this; }
+        public Builder bloodType(String v) { this.bloodType = v; return this; }
         public Builder createdBy(Long v) { this.createdBy = v; return this; }
 
         public Child build() {
@@ -103,6 +127,9 @@ public class Child {
             c.address = this.address;
             c.enrollmentDate = this.enrollmentDate;
             c.enrollmentStatus = this.enrollmentStatus;
+            c.allergies = this.allergies;
+            c.medicalConditions = this.medicalConditions;
+            c.bloodType = this.bloodType;
             c.createdBy = this.createdBy;
             return c;
         }

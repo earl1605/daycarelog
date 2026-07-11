@@ -34,6 +34,7 @@ const parentGroups = [
       { to: '/parent/dashboard',  icon: HomeIcon,      label: 'Dashboard' },
       { to: '/parent/attendance', icon: ClipboardIcon, label: 'Attendance' },
       { to: '/parent/health',     icon: HeartIcon,     label: 'Health Records' },
+      { to: '/parent/immunizations', icon: ClipboardIcon, label: 'Immunizations' },
     ],
   },
   {

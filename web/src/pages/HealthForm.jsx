@@ -34,7 +34,6 @@ export default function HealthForm() {
         childId: Number(form.childId),
         weightKg: form.weightKg ? parseFloat(form.weightKg) : null,
         heightCm: form.heightCm ? parseFloat(form.heightCm) : null,
-        nutritionalStatus: preview?.label ?? null,
       })
       toast.success('Health record saved')
       navigate('/health')
@@ -73,7 +72,7 @@ export default function HealthForm() {
             <input type="number" step="0.1" value={form.heightCm} onChange={set('heightCm')} placeholder="90.0" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
           </div>
         </div>
-        {preview && <div className={`text-sm px-4 py-2.5 rounded-xl font-medium ${colorMap[preview.color]}`}>Nutritional Status: {preview.label}</div>}
+        {preview && <div className={`text-sm px-4 py-2.5 rounded-xl font-medium ${colorMap[preview.color]}`}>Estimated Nutritional Status: {preview.label}</div>}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Remarks</label>
           <textarea value={form.remarks} onChange={set('remarks')} rows={3} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" placeholder="Optional notes…" />

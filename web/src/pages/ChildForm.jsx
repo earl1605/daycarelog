@@ -6,7 +6,9 @@ import { toLocalDateString } from '../utils/date'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import toast from 'react-hot-toast'
 
-const empty = { firstName: '', lastName: '', dateOfBirth: '', sex: '', address: '', enrollmentDate: toLocalDateString(), enrollmentStatus: 'active' }
+const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+
+const empty = { firstName: '', lastName: '', dateOfBirth: '', sex: '', address: '', enrollmentDate: toLocalDateString(), enrollmentStatus: 'active', allergies: '', medicalConditions: '', bloodType: '' }
 
 export default function ChildForm() {
   const { id }   = useParams()
@@ -81,6 +83,26 @@ export default function ChildForm() {
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Blood Type</label>
+            <select value={form.bloodType} onChange={set('bloodType')} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+              <option value="">— Unknown —</option>
+              {BLOOD_TYPES.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Allergies</label>
+            <textarea value={form.allergies} onChange={set('allergies')} rows={3} placeholder="e.g. Peanuts, penicillin…"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Medical Conditions</label>
+            <textarea value={form.medicalConditions} onChange={set('medicalConditions')} rows={3} placeholder="e.g. Asthma…"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
           </div>
         </div>
         <div className="flex gap-3 pt-2">

@@ -8,6 +8,8 @@ import edu.cit.mahumot.daycarelog.features.attendance.Attendance;
 import edu.cit.mahumot.daycarelog.features.attendance.AttendanceRepository;
 import edu.cit.mahumot.daycarelog.features.health.HealthRecord;
 import edu.cit.mahumot.daycarelog.features.health.HealthRecordRepository;
+import edu.cit.mahumot.daycarelog.features.immunizations.Immunization;
+import edu.cit.mahumot.daycarelog.features.immunizations.ImmunizationRepository;
 import edu.cit.mahumot.daycarelog.features.guardians.Guardian;
 import edu.cit.mahumot.daycarelog.features.guardians.GuardianRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +40,7 @@ class ParentRoleAccessControlTest {
     @Autowired private ChildRepository childRepository;
     @Autowired private AttendanceRepository attendanceRepository;
     @Autowired private HealthRecordRepository healthRecordRepository;
+    @Autowired private ImmunizationRepository immunizationRepository;
     @Autowired private GuardianRepository guardianRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
@@ -52,6 +55,7 @@ class ParentRoleAccessControlTest {
     void setUp() {
         guardianRepository.deleteAll();
         healthRecordRepository.deleteAll();
+        immunizationRepository.deleteAll();
         attendanceRepository.deleteAll();
         childRepository.deleteAll();
         userRepository.deleteAll();
@@ -86,6 +90,9 @@ class ParentRoleAccessControlTest {
 
         healthRecordRepository.save(HealthRecord.builder().childId(childAId).measurementDate(LocalDate.of(2026, 6, 1)).weightKg(new BigDecimal("11.5")).build());
         healthRecordRepository.save(HealthRecord.builder().childId(childBId).measurementDate(LocalDate.of(2026, 6, 1)).weightKg(new BigDecimal("12.0")).build());
+
+        immunizationRepository.save(Immunization.builder().childId(childAId).vaccineName("BCG").doseNumber(1).dateGiven(LocalDate.of(2026, 2, 1)).build());
+        immunizationRepository.save(Immunization.builder().childId(childBId).vaccineName("BCG").doseNumber(1).dateGiven(LocalDate.of(2026, 2, 1)).build());
     }
 
     private String url(String path) {
@@ -127,6 +134,11 @@ class ParentRoleAccessControlTest {
                 url("/api/health-records/mine"), HttpMethod.GET, new HttpEntity<>(headers), List.class);
         assertThat(health.getBody()).hasSize(1);
         assertThat((Integer) ((Map) health.getBody().get(0)).get("childId")).isEqualTo(childAId.intValue());
+
+        ResponseEntity<List> immunizations = restTemplate.exchange(
+                url("/api/immunizations/mine"), HttpMethod.GET, new HttpEntity<>(headers), List.class);
+        assertThat(immunizations.getBody()).hasSize(1);
+        assertThat((Integer) ((Map) immunizations.getBody().get(0)).get("childId")).isEqualTo(childAId.intValue());
     }
 
     @Test
@@ -140,6 +152,8 @@ class ParentRoleAccessControlTest {
                 .getStatusCode().value()).isEqualTo(403);
         assertThat(restTemplate.exchange(url("/api/health-records"), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
+        assertThat(restTemplate.exchange(url("/api/immunizations"), HttpMethod.GET, new HttpEntity<>(headers), String.class)
+                .getStatusCode().value()).isEqualTo(403);
 
         assertThat(restTemplate.exchange(url("/api/children/" + childBId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
@@ -147,8 +161,12 @@ class ParentRoleAccessControlTest {
                 .getStatusCode().value()).isEqualTo(403);
         assertThat(restTemplate.exchange(url("/api/health-records/child/" + childBId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
+        assertThat(restTemplate.exchange(url("/api/immunizations/child/" + childBId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
+                .getStatusCode().value()).isEqualTo(403);
 
         assertThat(restTemplate.exchange(url("/api/children/" + childAId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
+                .getStatusCode().value()).isEqualTo(403);
+        assertThat(restTemplate.exchange(url("/api/immunizations/child/" + childAId), HttpMethod.GET, new HttpEntity<>(headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
     }
 
@@ -168,6 +186,10 @@ class ParentRoleAccessControlTest {
 
         Map<String, Object> healthRecord = Map.of("childId", childAId, "measurementDate", "2026-06-30", "weightKg", 12);
         assertThat(restTemplate.exchange(url("/api/health-records"), HttpMethod.POST, new HttpEntity<>(healthRecord, headers), String.class)
+                .getStatusCode().value()).isEqualTo(403);
+
+        Map<String, Object> immunization = Map.of("childId", childAId, "vaccineName", "BCG", "doseNumber", 1, "dateGiven", "2026-06-30");
+        assertThat(restTemplate.exchange(url("/api/immunizations"), HttpMethod.POST, new HttpEntity<>(immunization, headers), String.class)
                 .getStatusCode().value()).isEqualTo(403);
 
         Map<String, Object> guardian = Map.of("name", "New Guardian");

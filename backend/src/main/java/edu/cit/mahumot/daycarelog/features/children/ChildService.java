@@ -35,6 +35,9 @@ public class ChildService {
                 .address(req.getAddress())
                 .enrollmentDate(req.getEnrollmentDate())
                 .enrollmentStatus(req.getEnrollmentStatus() != null ? req.getEnrollmentStatus() : "active")
+                .allergies(req.getAllergies())
+                .medicalConditions(req.getMedicalConditions())
+                .bloodType(req.getBloodType())
                 .createdBy(userId)
                 .build();
         return childRepository.save(child);
@@ -49,6 +52,9 @@ public class ChildService {
         child.setAddress(req.getAddress());
         child.setEnrollmentDate(req.getEnrollmentDate());
         if (req.getEnrollmentStatus() != null) child.setEnrollmentStatus(req.getEnrollmentStatus());
+        child.setAllergies(req.getAllergies());
+        child.setMedicalConditions(req.getMedicalConditions());
+        child.setBloodType(req.getBloodType());
         return childRepository.save(child);
     }
 

@@ -53,6 +53,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/children/mine").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/attendance/mine").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/health-records/mine").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/immunizations/mine").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/immunizations/schedule").authenticated()
 
                 .requestMatchers("/api/children/*/guardians", "/api/children/*/guardians/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/api/guardians", "/api/guardians/**").hasAnyRole("ADMIN", "STAFF")
@@ -68,6 +70,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,   "/api/health-records", "/api/health-records/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers(HttpMethod.DELETE, "/api/health-records/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers(HttpMethod.GET,    "/api/health-records", "/api/health-records/child/**").hasAnyRole("ADMIN", "STAFF")
+
+                .requestMatchers(HttpMethod.POST,   "/api/immunizations", "/api/immunizations/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers(HttpMethod.DELETE, "/api/immunizations/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers(HttpMethod.GET,    "/api/immunizations", "/api/immunizations/child/**").hasAnyRole("ADMIN", "STAFF")
 
                 .anyRequest().authenticated()
             )

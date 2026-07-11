@@ -70,6 +70,14 @@ export const api = {
     mine:       ()         => request('/health-records/mine'),
     create:     data       => request('/health-records', { method: 'POST', body: JSON.stringify(data) }),
   },
+  immunizations: {
+    schedule:   ()         => request('/immunizations/schedule'),
+    list:       ()         => request('/immunizations'),
+    getByChild: childId    => request(`/immunizations/child/${childId}`),
+    mine:       ()         => request('/immunizations/mine'),
+    create:     data       => request('/immunizations', { method: 'POST', body: JSON.stringify(data) }),
+    delete:     id         => request(`/immunizations/${id}`, { method: 'DELETE' }),
+  },
   guardians: {
     list:          childId          => request(`/children/${childId}/guardians`),
     add:           (childId, data)  => request(`/children/${childId}/guardians`, { method: 'POST', body: JSON.stringify(data) }),

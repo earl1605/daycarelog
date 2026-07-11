@@ -3,9 +3,21 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import { formatAge, classifyNutritionalStatus } from '../utils/nutritionalStatus'
 import NutritionalStatusBadge from '../components/NutritionalStatusBadge'
+import ImmunizationChecklist from '../components/ImmunizationChecklist'
+import GrowthChart from '../components/GrowthChart'
+import { AlertTriangleIcon, TrashIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
-const TAB = { OVERVIEW: 'overview', HEALTH: 'health', ATTENDANCE: 'attendance' }
+const TAB = { OVERVIEW: 'overview', HEALTH: 'health', IMMUNIZATIONS: 'immunizations', ATTENDANCE: 'attendance' }
+
+// Server computes nutritional_status as NORMAL/UNDERWEIGHT/SEVERELY_UNDERWEIGHT/OVERWEIGHT
+// (see HealthRecordService) -- map to the {label, color} shape NutritionalStatusBadge expects.
+const STATUS_DISPLAY = {
+  NORMAL:               { label: 'Normal',               color: 'green'  },
+  UNDERWEIGHT:          { label: 'Underweight',           color: 'orange' },
+  SEVERELY_UNDERWEIGHT: { label: 'Severely Underweight',  color: 'red'    },
+  OVERWEIGHT:           { label: 'Overweight',             color: 'yellow' },
+}
 
 export default function ChildDetail() {
   const { id }    = useParams()
@@ -13,6 +25,8 @@ export default function ChildDetail() {
   const [child,   setChild]   = useState(null)
   const [health,  setHealth]  = useState([])
   const [att,     setAtt]     = useState([])
+  const [immunizations, setImmunizations] = useState([])
+  const [schedule,       setSchedule]     = useState([])
   const [tab,     setTab]     = useState(TAB.OVERVIEW)
   const [loading, setLoading] = useState(true)
 
@@ -21,10 +35,21 @@ export default function ChildDetail() {
       api.children.get(id),
       api.health.getByChild(id),
       api.attendance.getByChild(id),
-    ]).then(([c, h, a]) => { setChild(c); setHealth(h); setAtt(a) })
+      api.immunizations.getByChild(id),
+      api.immunizations.schedule(),
+    ]).then(([c, h, a, im, sch]) => { setChild(c); setHealth(h); setAtt(a); setImmunizations(im); setSchedule(sch) })
       .catch(() => toast.error('Failed to load'))
       .finally(() => setLoading(false))
   }, [id])
+
+  async function handleDeleteImmunization(immId) {
+    if (!window.confirm('Delete this immunization record?')) return
+    try {
+      await api.immunizations.delete(immId)
+      setImmunizations(prev => prev.filter(r => r.id !== immId))
+      toast.success('Immunization record deleted')
+    } catch (e) { toast.error(e.message) }
+  }
 
   async function handleDelete() {
     if (!window.confirm('Delete this child and all their records?')) return
@@ -42,6 +67,7 @@ export default function ChildDetail() {
   const tabs = [
     { key: TAB.OVERVIEW, label: 'Overview' },
     { key: TAB.HEALTH,   label: `Health (${health.length})` },
+    { key: TAB.IMMUNIZATIONS, label: `Immunizations (${immunizations.length})` },
     { key: TAB.ATTENDANCE, label: `Attendance (${att.length})` },
   ]
 
@@ -67,6 +93,16 @@ export default function ChildDetail() {
         </div>
       </div>
 
+      {child.allergies && (
+        <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 rounded-xl px-4 py-3">
+          <AlertTriangleIcon className="shrink-0 mt-0.5 text-red-600" />
+          <div>
+            <p className="font-semibold text-sm">Allergies</p>
+            <p className="text-sm">{child.allergies}</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
         {tabs.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
@@ -85,6 +121,8 @@ export default function ChildDetail() {
             ['Enrollment Date', child.enrollmentDate ? new Date(child.enrollmentDate + 'T00:00:00').toLocaleDateString('en-PH') : '—'],
             ['Status',        child.enrollmentStatus],
             ['Address',       child.address || '—'],
+            ['Blood Type',    child.bloodType || '—'],
+            ['Medical Conditions', child.medicalConditions || '—'],
             ['Latest Weight', latestHealth ? `${latestHealth.weightKg} kg` : '—'],
             ['Latest Height', latestHealth ? `${latestHealth.heightCm} cm` : '—'],
           ].map(([label, value]) => (
@@ -102,6 +140,12 @@ export default function ChildDetail() {
             <h2 className="font-semibold text-gray-900">Health Records</h2>
             <Link to={`/health/new?child=${id}`} className="text-sm bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700">+ Add</Link>
           </div>
+
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h3 className="text-sm font-medium text-gray-500 mb-3">Growth Over Time</h3>
+            <GrowthChart records={health} />
+          </div>
+
           {health.length === 0 ? <p className="text-gray-400 text-sm">No records yet.</p> : health.map(r => (
             <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4 flex gap-4 text-sm">
               <div className="flex-1">
@@ -109,9 +153,38 @@ export default function ChildDetail() {
                 <p className="text-gray-500">Weight: {r.weightKg}kg · Height: {r.heightCm}cm</p>
                 {r.remarks && <p className="text-gray-400 text-xs mt-1">{r.remarks}</p>}
               </div>
-              {r.nutritionalStatus && <span className="self-start bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">{r.nutritionalStatus}</span>}
+              {r.nutritionalStatus && <NutritionalStatusBadge status={STATUS_DISPLAY[r.nutritionalStatus]} />}
             </div>
           ))}
+        </div>
+      )}
+
+      {tab === TAB.IMMUNIZATIONS && (
+        <div className="space-y-5">
+          <div className="flex justify-between items-center">
+            <h2 className="font-semibold text-gray-900">Immunizations</h2>
+            <Link to={`/immunizations/new?child=${id}`} className="text-sm bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700">+ Add</Link>
+          </div>
+
+          <ImmunizationChecklist schedule={schedule} records={immunizations} />
+
+          {immunizations.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-500">Records</h3>
+              {immunizations.map(r => (
+                <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4 flex gap-4 text-sm items-start">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">{r.vaccineName} · Dose {r.doseNumber}</p>
+                    <p className="text-gray-500">{new Date(r.dateGiven + 'T00:00:00').toLocaleDateString('en-PH')}{r.administeredBy ? ` · ${r.administeredBy}` : ''}</p>
+                    {r.notes && <p className="text-gray-400 text-xs mt-1">{r.notes}</p>}
+                  </div>
+                  <button onClick={() => handleDeleteImmunization(r.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                    <TrashIcon width={16} height={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
