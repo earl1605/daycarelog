@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { classifyNutritionalStatus } from '../utils/nutritionalStatus'
 import NutritionalStatusBadge from '../components/NutritionalStatusBadge'
-import { PlusIcon, HeartIcon } from '../components/icons'
+import { PlusIcon, HeartIcon, TrashIcon } from '../components/icons'
 import Pagination from '../components/Pagination'
 import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
@@ -33,6 +33,15 @@ export default function HealthRecords() {
   const totalExpectedDoses = schedule.reduce((sum, v) => sum + v.expectedDoses, 0)
   function immunizationSummary(childId) {
     return immunizations.filter(i => i.childId === childId).length
+  }
+
+  async function handleDelete(recordId) {
+    if (!window.confirm('Delete this health record?')) return
+    try {
+      await api.health.delete(recordId)
+      setRecords(prev => prev.filter(r => r.id !== recordId))
+      toast.success('Health record deleted')
+    } catch (e) { toast.error(e.message) }
   }
 
   const filtered = records.filter(r => {
@@ -68,7 +77,7 @@ export default function HealthRecords() {
               <p className="font-medium text-gray-500">No health records found</p>
             </div>
           ) : (
-            <table className="w-full text-sm min-w-[820px]">
+            <table className="w-full text-sm min-w-[900px]">
               <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium">Child</th>
@@ -79,6 +88,7 @@ export default function HealthRecords() {
                   <th className="text-left px-4 py-3 font-medium">Blood Type</th>
                   <th className="text-left px-4 py-3 font-medium">Immunizations</th>
                   <th className="text-left px-4 py-3 font-medium">Remarks</th>
+                  <th className="text-left px-4 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -102,6 +112,11 @@ export default function HealthRecords() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-gray-400">{r.remarks || '—'}</td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => handleDelete(r.id)} className="text-gray-300 hover:text-red-500 transition-colors" title="Delete">
+                          <TrashIcon width={16} height={16} />
+                        </button>
+                      </td>
                     </tr>
                   )
                 })}

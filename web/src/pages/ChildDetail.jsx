@@ -51,6 +51,15 @@ export default function ChildDetail() {
     } catch (e) { toast.error(e.message) }
   }
 
+  async function handleDeleteHealthRecord(recordId) {
+    if (!window.confirm('Delete this health record?')) return
+    try {
+      await api.health.delete(recordId)
+      setHealth(prev => prev.filter(r => r.id !== recordId))
+      toast.success('Health record deleted')
+    } catch (e) { toast.error(e.message) }
+  }
+
   async function handleDelete() {
     if (!window.confirm('Delete this child and all their records?')) return
     await api.children.delete(id)
@@ -165,13 +174,16 @@ export default function ChildDetail() {
           </div>
 
           {health.length === 0 ? <p className="text-gray-400 text-sm">No records yet.</p> : health.map(r => (
-            <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4 flex gap-4 text-sm">
+            <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4 flex gap-4 text-sm items-start">
               <div className="flex-1">
                 <p className="font-medium text-gray-900">{new Date(r.measurementDate + 'T00:00:00').toLocaleDateString('en-PH')}</p>
                 <p className="text-gray-500">Weight: {r.weightKg}kg · Height: {r.heightCm}cm</p>
                 {r.remarks && <p className="text-gray-400 text-xs mt-1">{r.remarks}</p>}
               </div>
               {r.nutritionalStatus && <NutritionalStatusBadge status={STATUS_DISPLAY[r.nutritionalStatus]} />}
+              <button onClick={() => handleDeleteHealthRecord(r.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                <TrashIcon width={16} height={16} />
+              </button>
             </div>
           ))}
         </div>

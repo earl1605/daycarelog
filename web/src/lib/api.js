@@ -69,6 +69,7 @@ export const api = {
     getByChild: childId    => request(`/health-records/child/${childId}`),
     mine:       ()         => request('/health-records/mine'),
     create:     data       => request('/health-records', { method: 'POST', body: JSON.stringify(data) }),
+    delete:     id         => request(`/health-records/${id}`, { method: 'DELETE' }),
   },
   immunizations: {
     schedule:   ()         => request('/immunizations/schedule'),
