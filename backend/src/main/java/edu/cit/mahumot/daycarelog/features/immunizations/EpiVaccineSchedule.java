@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 // DOH Expanded Program on Immunization (EPI) schedule for children 0-5.
-final class EpiVaccineSchedule {
+public final class EpiVaccineSchedule {
 
-    static final List<EpiVaccine> ALL = List.of(
+    public static final List<EpiVaccine> ALL = List.of(
         new EpiVaccine("BCG", 1),
         new EpiVaccine("Hepatitis B", 1),
         new EpiVaccine("Pentavalent", 3),

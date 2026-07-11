@@ -6,10 +6,15 @@ import edu.cit.mahumot.daycarelog.features.health.HealthRecord;
 import edu.cit.mahumot.daycarelog.features.attendance.AttendanceRepository;
 import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
 import edu.cit.mahumot.daycarelog.features.health.HealthRecordRepository;
+import edu.cit.mahumot.daycarelog.features.immunizations.EpiVaccine;
+import edu.cit.mahumot.daycarelog.features.immunizations.EpiVaccineSchedule;
+import edu.cit.mahumot.daycarelog.features.immunizations.Immunization;
+import edu.cit.mahumot.daycarelog.features.immunizations.ImmunizationRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -18,13 +23,16 @@ public class ReportController {
     private final ChildRepository childRepository;
     private final AttendanceRepository attendanceRepository;
     private final HealthRecordRepository healthRecordRepository;
+    private final ImmunizationRepository immunizationRepository;
 
     public ReportController(ChildRepository childRepository,
                             AttendanceRepository attendanceRepository,
-                            HealthRecordRepository healthRecordRepository) {
+                            HealthRecordRepository healthRecordRepository,
+                            ImmunizationRepository immunizationRepository) {
         this.childRepository = childRepository;
         this.attendanceRepository = attendanceRepository;
         this.healthRecordRepository = healthRecordRepository;
+        this.immunizationRepository = immunizationRepository;
     }
 
     @GetMapping("/monthly")
@@ -58,14 +66,31 @@ public class ReportController {
             statusCounts.merge(s, 1, Integer::sum);
         });
 
+        List<Immunization> allImmunizations = immunizationRepository.findByDeletedAtIsNullOrderByDateGivenDesc();
+        Map<Long, List<Immunization>> immunizationsByChild = allImmunizations.stream()
+                .collect(Collectors.groupingBy(Immunization::getChildId));
+        List<Map<String, Object>> immunizationCoverage = EpiVaccineSchedule.ALL.stream().map(v -> {
+            long covered = children.stream().filter(c -> immunizationsByChild
+                    .getOrDefault(c.getId(), List.of()).stream()
+                    .filter(i -> i.getVaccineName().equals(v.getName())).count() >= v.getExpectedDoses())
+                    .count();
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("vaccine", v.getName());
+            row.put("covered", covered);
+            row.put("total", total);
+            return row;
+        }).toList();
+
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("total",             total);
-        result.put("presentCount",      present);
-        result.put("absentCount",       absent);
-        result.put("schoolDays",        days);
-        result.put("attendanceRate",    rate);
-        result.put("nutritionalStatus", statusCounts);
-        result.put("children",          children);
+        result.put("total",                 total);
+        result.put("presentCount",          present);
+        result.put("absentCount",           absent);
+        result.put("schoolDays",            days);
+        result.put("attendanceRate",        rate);
+        result.put("nutritionalStatus",     statusCounts);
+        result.put("children",              children);
+        result.put("healthRecords",         health);
+        result.put("immunizationCoverage",  immunizationCoverage);
         return result;
     }
 }
