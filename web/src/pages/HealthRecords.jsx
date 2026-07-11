@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { classifyNutritionalStatus } from '../utils/nutritionalStatus'
 import NutritionalStatusBadge from '../components/NutritionalStatusBadge'
-import { PlusIcon, HeartIcon, TrashIcon } from '../components/icons'
+import { HeartIcon, TrashIcon } from '../components/icons'
 import Pagination from '../components/Pagination'
 import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
@@ -52,14 +51,9 @@ export default function HealthRecords() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div>
         <h1 className="text-[22px] font-bold text-gray-900">Health Records</h1>
-        <Link
-          to="/health/new"
-          className="inline-flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-150"
-        >
-          <PlusIcon width={16} height={16} /> Add Record
-        </Link>
+        <p className="text-gray-500 text-sm mt-1">Weight and height are recorded from a child's own profile (Children → Edit).</p>
       </div>
 
       <input type="text" placeholder="Search by child name…" value={search} onChange={e => setSearch(e.target.value)}

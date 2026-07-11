@@ -165,7 +165,7 @@ export default function ChildDetail() {
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <h2 className="font-semibold text-gray-900">Health Records</h2>
-            <Link to={`/health/new?child=${id}`} className="text-sm bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700">+ Add</Link>
+            <Link to={`/children/${id}/edit`} className="text-sm bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700">+ Add Measurement</Link>
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">

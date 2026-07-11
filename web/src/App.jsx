@@ -16,7 +16,6 @@ import ChildForm          from './pages/ChildForm'
 import ChildDetail        from './pages/ChildDetail'
 import Attendance         from './pages/Attendance'
 import HealthRecords      from './pages/HealthRecords'
-import HealthForm         from './pages/HealthForm'
 import ImmunizationForm   from './pages/ImmunizationForm'
 import Reports            from './pages/Reports'
 import Users              from './pages/Users'
@@ -47,7 +46,6 @@ export default function App() {
               <Route path="/children/:id/edit" element={<ChildForm />} />
               <Route path="/attendance"        element={<Attendance />} />
               <Route path="/health"            element={<HealthRecords />} />
-              <Route path="/health/new"        element={<HealthForm />} />
               <Route path="/immunizations/new" element={<ImmunizationForm />} />
               <Route path="/guardians"         element={<Guardians />} />
               <Route path="/reports"           element={<Reports />} />
