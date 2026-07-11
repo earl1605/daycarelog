@@ -29,9 +29,14 @@ export default function HealthRecords() {
     load()
   }, [])
 
-  const totalExpectedDoses = schedule.reduce((sum, v) => sum + v.expectedDoses, 0)
-  function immunizationSummary(childId) {
-    return immunizations.filter(i => i.childId === childId).length
+  function immunizationChips(childId) {
+    const givenByVaccine = {}
+    immunizations.filter(i => i.childId === childId).forEach(i => {
+      givenByVaccine[i.vaccineName] = (givenByVaccine[i.vaccineName] || 0) + 1
+    })
+    return schedule
+      .filter(v => givenByVaccine[v.name])
+      .map(v => ({ name: v.name, given: givenByVaccine[v.name], expected: v.expectedDoses }))
   }
 
   async function handleDelete(recordId) {
@@ -71,7 +76,7 @@ export default function HealthRecords() {
               <p className="font-medium text-gray-500">No health records found</p>
             </div>
           ) : (
-            <table className="w-full text-sm min-w-[900px]">
+            <table className="w-full text-sm min-w-[1050px]">
               <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium">Child</th>
@@ -89,7 +94,7 @@ export default function HealthRecords() {
                 {paged.map(r => {
                   const child = children[r.childId]
                   const status = child ? classifyNutritionalStatus(r.weightKg, child.dateOfBirth, child.sex) : null
-                  const dosesGiven = child ? immunizationSummary(child.id) : 0
+                  const chips = child ? immunizationChips(child.id) : []
                   return (
                     <tr key={r.id} className="hover:bg-gray-50/60 transition-colors duration-150">
                       <td className="px-4 py-3 font-medium text-gray-900">{child ? `${child.firstName} ${child.lastName}` : '—'}</td>
@@ -99,10 +104,15 @@ export default function HealthRecords() {
                       <td className="px-4 py-3">{status ? <NutritionalStatusBadge status={status} /> : '—'}</td>
                       <td className="px-4 py-3 text-gray-600">{child?.bloodType || '—'}</td>
                       <td className="px-4 py-3">
-                        {totalExpectedDoses === 0 ? '—' : (
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${dosesGiven >= totalExpectedDoses ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-700'}`}>
-                            {dosesGiven} / {totalExpectedDoses}
-                          </span>
+                        {chips.length === 0 ? '—' : (
+                          <div className="flex flex-wrap gap-1">
+                            {chips.map(c => (
+                              <span key={c.name}
+                                className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.given >= c.expected ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-700'}`}>
+                                {c.name} {c.given}/{c.expected}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </td>
                       <td className="px-4 py-3 text-gray-400">{r.remarks || '—'}</td>
