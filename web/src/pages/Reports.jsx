@@ -91,7 +91,7 @@ export default function Reports() {
                   <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
-                  <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]}>
+                  <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]} maxBarSize={64}>
                     {statusChartData.map(d => <Cell key={d.code} fill={STATUS_HEX[d.code] ?? '#d1d5db'} />)}
                     <LabelList dataKey="value" position="top" style={{ fontSize: 12, fontWeight: 600, fill: isDark ? '#f9fafb' : '#111827' }} />
                   </Bar>
@@ -116,7 +116,7 @@ export default function Reports() {
                     contentStyle={tooltipStyle}
                     formatter={(value, _name, props) => [`${value} / ${props.payload.total}`, 'Covered']}
                   />
-                  <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={64} />
                 </BarChart>
               </ResponsiveContainer>
             )}

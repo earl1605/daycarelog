@@ -121,8 +121,8 @@ export default function Dashboard() {
             <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
             <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
-            <Bar dataKey="present" name="Present" fill="#16a34a" radius={[4,4,0,0]} />
-            <Bar dataKey="absent"  name="Absent"  fill={isDark ? '#4b5563' : '#E5E7EB'} radius={[4,4,0,0]} />
+            <Bar dataKey="present" name="Present" fill="#16a34a" radius={[4,4,0,0]} maxBarSize={40} />
+            <Bar dataKey="absent"  name="Absent"  fill={isDark ? '#4b5563' : '#E5E7EB'} radius={[4,4,0,0]} maxBarSize={40} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -141,7 +141,7 @@ export default function Dashboard() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
               <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
-              <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]} maxBarSize={56}>
                 {nutritionalChartData.map(d => <Cell key={d.name} fill={STATUS_HEX[d.name] ?? '#d1d5db'} />)}
                 <LabelList dataKey="value" position="top" style={{ fontSize: 12, fontWeight: 600, fill: isDark ? '#f9fafb' : '#111827' }} />
               </Bar>
@@ -168,7 +168,7 @@ export default function Dashboard() {
                 contentStyle={tooltipStyle}
                 formatter={(value, _name, props) => [`${value} / ${props.payload.total}`, 'Covered']}
               />
-              <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={56} />
             </BarChart>
           </ResponsiveContainer>
         )}
