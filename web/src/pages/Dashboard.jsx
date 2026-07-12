@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList, ResponsiveContainer } from 'recharts'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
@@ -19,7 +19,7 @@ export default function Dashboard() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [children,     setChildren]     = useState([])
-  const [chartData,    setChartData]    = useState([])
+  const [trendData,    setTrendData]    = useState([])
   const [todayAtt,     setTodayAtt]     = useState([])
   const [healthRecords, setHealthRecords] = useState([])
   const [immunizationCoverage, setImmunizationCoverage] = useState([])
@@ -40,21 +40,21 @@ export default function Dashboard() {
         setHealthRecords(health)
         setImmunizationCoverage(report.immunizationCoverage ?? [])
 
+        const activeCount = kids.filter(c => c.enrollmentStatus === 'active').length
         const now = new Date()
-        const mondayOffset = now.getDay() === 0 ? 6 : now.getDay() - 1
-        const monday = new Date(now)
-        monday.setDate(now.getDate() - mondayOffset)
-        const days = Array.from({ length: 5 }, (_, i) => {
-          const d = new Date(monday); d.setDate(monday.getDate() + i)
-          return toLocalDateString(d)
-        })
-        const start = days[0], end = days[4]
-        const weekAtt = await api.attendance.getRange(start, end)
-        setChartData(days.map(date => ({
-          date: new Date(date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'short' }),
-          present: weekAtt.filter(a => a.date === date && a.status === 'present').length,
-          absent:  weekAtt.filter(a => a.date === date && a.status === 'absent').length,
-        })))
+        const weekdays = []
+        for (let i = 0; weekdays.length < 10 && i < 30; i++) {
+          const d = new Date(now); d.setDate(now.getDate() - i)
+          if (d.getDay() !== 0 && d.getDay() !== 6) weekdays.unshift(toLocalDateString(d))
+        }
+        const trendAtt = await api.attendance.getRange(weekdays[0], weekdays[weekdays.length - 1])
+        setTrendData(weekdays.map(date => {
+          const present = trendAtt.filter(a => a.date === date && a.status === 'present').length
+          return {
+            date: new Date(date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }),
+            rate: activeCount > 0 ? Math.round((present / activeCount) * 100) : 0,
+          }
+        }))
       } catch (e) {
         toast.error('Failed to load dashboard')
       }
@@ -91,7 +91,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div>
         <h1 className="text-[22px] font-bold text-gray-900">
           Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},{' '}
@@ -102,7 +102,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={UsersIcon}     label="Active Children"  value={active}          color="primary" />
         <StatCard icon={CheckIcon}     label="Present Today"    value={presentToday}    color="blue"    />
         <StatCard icon={ClipboardIcon} label="Total Enrolled"   value={children.length} color="violet"  />
@@ -110,73 +110,72 @@ export default function Dashboard() {
           value={active > 0 ? `${Math.round((presentToday / active) * 100)}%` : '—'} color="amber" />
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200/70 p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[17px] font-bold text-gray-900">Weekly Attendance</h2>
+      <div className="bg-white rounded-xl border border-gray-200/70 p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[15px] font-bold text-gray-900">Attendance Rate Trend (Last 2 Weeks)</h2>
           <Link to="/attendance" className="text-primary-700 text-sm font-medium hover:underline">View all →</Link>
         </div>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={chartData} barCategoryGap="30%" barGap={4}>
+        <ResponsiveContainer width="100%" height={160}>
+          <LineChart data={trendData}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
-            <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
-            <Bar dataKey="present" name="Present" fill="#16a34a" radius={[4,4,0,0]} maxBarSize={40} />
-            <Bar dataKey="absent"  name="Absent"  fill={isDark ? '#4b5563' : '#E5E7EB'} radius={[4,4,0,0]} maxBarSize={40} />
-          </BarChart>
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} domain={[0, 100]} unit="%" width={40} />
+            <Tooltip contentStyle={tooltipStyle} formatter={value => [`${value}%`, 'Attendance Rate']} />
+            <Line type="monotone" dataKey="rate" name="Attendance Rate" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} />
+          </LineChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200/70 p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[17px] font-bold text-gray-900">Nutritional Status</h2>
+      <div className="bg-white rounded-xl border border-gray-200/70 p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[15px] font-bold text-gray-900">Nutritional Status</h2>
           <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
         </div>
         {active === 0 ? (
           <p className="text-gray-400 text-sm">No active children yet.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={170}>
             <BarChart data={nutritionalChartData} barCategoryGap="25%">
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} width={24} />
               <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
-              <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]} maxBarSize={56}>
+              <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]} maxBarSize={48}>
                 {nutritionalChartData.map(d => <Cell key={d.name} fill={STATUS_HEX[d.name] ?? '#d1d5db'} />)}
-                <LabelList dataKey="value" position="top" style={{ fontSize: 12, fontWeight: 600, fill: isDark ? '#f9fafb' : '#111827' }} />
+                <LabelList dataKey="value" position="top" style={{ fontSize: 11, fontWeight: 600, fill: isDark ? '#f9fafb' : '#111827' }} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200/70 p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[17px] font-bold text-gray-900">Immunization Coverage</h2>
+      <div className="bg-white rounded-xl border border-gray-200/70 p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[15px] font-bold text-gray-900">Immunization Coverage</h2>
           <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
         </div>
         {immunizationCoverage.length === 0 ? (
           <p className="text-gray-400 text-sm">No vaccine schedule data.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={170}>
             <BarChart data={immunizationCoverage} barCategoryGap="25%">
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
-              <XAxis dataKey="vaccine" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <XAxis dataKey="vaccine" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} width={24} />
               <Tooltip
                 cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }}
                 contentStyle={tooltipStyle}
                 formatter={(value, _name, props) => [`${value} / ${props.payload.total}`, 'Covered']}
               />
-              <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={56} />
+              <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={48} />
             </BarChart>
           </ResponsiveContainer>
         )}
       </div>
 
       <div>
-        <h2 className="text-[17px] font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <h2 className="text-[15px] font-bold text-gray-900 mb-3">Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
             { to: '/children',     icon: PlusIcon,      label: 'Add Child' },
             { to: '/attendance',   icon: ClipboardIcon, label: 'Take Attendance' },
@@ -185,12 +184,12 @@ export default function Dashboard() {
             <Link
               key={a.to}
               to={a.to}
-              className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 p-4 h-28 flex flex-col items-center justify-center gap-2.5 text-center transition-colors duration-150 hover:bg-gray-100/80 hover:border-gray-300"
+              className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 p-3 h-20 flex flex-col items-center justify-center gap-1.5 text-center transition-colors duration-150 hover:bg-gray-100/80 hover:border-gray-300"
             >
-              <span className="w-9 h-9 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-                <a.icon width={18} height={18} />
+              <span className="w-7 h-7 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+                <a.icon width={15} height={15} />
               </span>
-              <span className="text-[13px] font-medium text-gray-700">{a.label}</span>
+              <span className="text-[12px] font-medium text-gray-700">{a.label}</span>
             </Link>
           ))}
         </div>
