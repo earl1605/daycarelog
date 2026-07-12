@@ -4,6 +4,8 @@ import { api } from '../lib/api'
 import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
 import { computeNutritionalTrend, computeImmunizationDetail } from '../utils/healthTrends'
+import { formatAge } from '../utils/nutritionalStatus'
+import { AlertTriangleIcon } from '../components/icons'
 import Pagination from '../components/Pagination'
 import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
@@ -22,6 +24,7 @@ export default function Reports() {
   const [loading, setLoading] = useState(true)
   const [nutritionalTrend,   setNutritionalTrend]   = useState([])
   const [immunizationDetail, setImmunizationDetail] = useState({ buckets: [], perVaccine: [] })
+  const [allChildren, setAllChildren] = useState([])
 
   useEffect(() => {
     setLoading(true)
@@ -32,6 +35,7 @@ export default function Reports() {
   useEffect(() => {
     Promise.all([api.children.list(), api.health.list(), api.immunizations.list(), api.immunizations.schedule()])
       .then(([children, health, immunizations, schedule]) => {
+        setAllChildren(children)
         const activeChildren = children.filter(c => c.enrollmentStatus === 'active')
         setNutritionalTrend(computeNutritionalTrend(activeChildren, health))
         setImmunizationDetail(computeImmunizationDetail(activeChildren, immunizations, schedule))
@@ -51,7 +55,7 @@ export default function Reports() {
     toast.success('Report downloaded')
   }
 
-  const childMap = Object.fromEntries((data?.children ?? []).map(c => [c.id, c]))
+  const childMap = Object.fromEntries(allChildren.map(c => [c.id, c]))
   const healthRecords = data?.healthRecords ?? []
   const { page, setPage, totalPages, paged } = usePagination(healthRecords)
 
@@ -150,14 +154,18 @@ export default function Reports() {
             {healthRecords.length === 0 ? (
               <p className="text-gray-400 text-sm px-5 pb-5">No health records logged in {month}.</p>
             ) : (
-              <table className="w-full text-sm min-w-[640px]">
+              <table className="w-full text-sm min-w-[1100px]">
                 <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                   <tr>
                     <th className="text-left px-4 py-2.5 font-medium">Child</th>
+                    <th className="text-left px-4 py-2.5 font-medium">Age</th>
+                    <th className="text-left px-4 py-2.5 font-medium">Sex</th>
                     <th className="text-left px-4 py-2.5 font-medium">Date</th>
                     <th className="text-left px-4 py-2.5 font-medium">Weight</th>
                     <th className="text-left px-4 py-2.5 font-medium">Height</th>
                     <th className="text-left px-4 py-2.5 font-medium">Status</th>
+                    <th className="text-left px-4 py-2.5 font-medium">Blood Type</th>
+                    <th className="text-left px-4 py-2.5 font-medium">Allergies</th>
                     <th className="text-left px-4 py-2.5 font-medium">Remarks</th>
                   </tr>
                 </thead>
@@ -167,6 +175,8 @@ export default function Reports() {
                     return (
                       <tr key={r.id} className="hover:bg-gray-50/60 transition-colors duration-150">
                         <td className="px-4 py-2.5 font-medium text-gray-900">{child ? `${child.firstName} ${child.lastName}` : '—'}</td>
+                        <td className="px-4 py-2.5 text-gray-600">{child ? formatAge(child.dateOfBirth) : '—'}</td>
+                        <td className="px-4 py-2.5 text-gray-600">{child?.sex || '—'}</td>
                         <td className="px-4 py-2.5 text-gray-600">{new Date(r.measurementDate + 'T00:00:00').toLocaleDateString('en-PH')}</td>
                         <td className="px-4 py-2.5 text-gray-600">{r.weightKg ? `${r.weightKg} kg` : '—'}</td>
                         <td className="px-4 py-2.5 text-gray-600">{r.heightCm ? `${r.heightCm} cm` : '—'}</td>
@@ -176,6 +186,14 @@ export default function Reports() {
                               {STATUS_LABELS[r.nutritionalStatus] ?? r.nutritionalStatus}
                             </span>
                           ) : '—'}
+                        </td>
+                        <td className="px-4 py-2.5 text-gray-600">{child?.bloodType || '—'}</td>
+                        <td className="px-4 py-2.5">
+                          {child?.allergies ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 px-2 py-0.5 rounded-full" title={child.allergies}>
+                              <AlertTriangleIcon width={12} height={12} /> Yes
+                            </span>
+                          ) : <span className="text-gray-400 text-xs">None</span>}
                         </td>
                         <td className="px-4 py-2.5 text-gray-400">{r.remarks || '—'}</td>
                       </tr>
