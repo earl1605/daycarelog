@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList, ResponsiveContainer } from 'recharts'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
@@ -10,7 +10,9 @@ import StatCard from '../components/StatCard'
 import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, BarChartIcon, PlusIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
-const STATUS_HEX = { Normal: '#4ade80', Underweight: '#fb923c', 'Severely Underweight': '#f87171', Overweight: '#facc15', Unknown: '#d1d5db' }
+// Status-severity colors (good/warning/serious/critical), not arbitrary categorical hues --
+// Unknown isn't a severity, so it gets neutral muted ink instead of a status role.
+const STATUS_HEX = { Normal: '#0ca30c', Underweight: '#ec835a', 'Severely Underweight': '#d03b3b', Overweight: '#fab219', Unknown: '#898781' }
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -68,14 +70,14 @@ export default function Dashboard() {
   const latestHealthByChild = {}
   ;[...healthRecords].sort((a, b) => a.measurementDate.localeCompare(b.measurementDate))
     .forEach(r => { latestHealthByChild[r.childId] = r })
-  const nutritionalCounts = {}
+  const nutritionalCounts = { Normal: 0, Underweight: 0, 'Severely Underweight': 0, Overweight: 0, Unknown: 0 }
   activeChildren.forEach(c => {
     const r = latestHealthByChild[c.id]
     const status = r ? classifyNutritionalStatus(r.weightKg, c.dateOfBirth, c.sex) : null
     const label = status?.label ?? 'Unknown'
     nutritionalCounts[label] = (nutritionalCounts[label] ?? 0) + 1
   })
-  const nutritionalPieData = Object.entries(nutritionalCounts).map(([name, value]) => ({ name, value }))
+  const nutritionalChartData = Object.entries(nutritionalCounts).map(([name, value]) => ({ name, value }))
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
 
@@ -125,50 +127,51 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200/70 p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-[17px] font-bold text-gray-900">Nutritional Status</h2>
-            <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
-          </div>
-          {nutritionalPieData.length === 0 ? (
-            <p className="text-gray-400 text-sm">No health records yet.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={nutritionalPieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={48} outerRadius={75} paddingAngle={2}>
-                  {nutritionalPieData.map(d => <Cell key={d.name} fill={STATUS_HEX[d.name] ?? '#d1d5db'} />)}
-                </Pie>
-                <Tooltip contentStyle={tooltipStyle} />
-                <Legend verticalAlign="bottom" height={32} wrapperStyle={{ fontSize: '11px' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
+      <div className="bg-white rounded-xl border border-gray-200/70 p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-[17px] font-bold text-gray-900">Nutritional Status</h2>
+          <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
         </div>
+        {active === 0 ? (
+          <p className="text-gray-400 text-sm">No active children yet.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={nutritionalChartData} barCategoryGap="25%">
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
+              <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]}>
+                {nutritionalChartData.map(d => <Cell key={d.name} fill={STATUS_HEX[d.name] ?? '#d1d5db'} />)}
+                <LabelList dataKey="value" position="top" style={{ fontSize: 12, fontWeight: 600, fill: isDark ? '#f9fafb' : '#111827' }} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
 
-        <div className="bg-white rounded-xl border border-gray-200/70 p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-[17px] font-bold text-gray-900">Immunization Coverage</h2>
-            <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
-          </div>
-          {immunizationCoverage.length === 0 ? (
-            <p className="text-gray-400 text-sm">No vaccine schedule data.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={immunizationCoverage} barCategoryGap="30%">
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
-                <XAxis dataKey="vaccine" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip
-                  cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }}
-                  contentStyle={tooltipStyle}
-                  formatter={(value, _name, props) => [`${value} / ${props.payload.total}`, 'Covered']}
-                />
-                <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+      <div className="bg-white rounded-xl border border-gray-200/70 p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-[17px] font-bold text-gray-900">Immunization Coverage</h2>
+          <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
         </div>
+        {immunizationCoverage.length === 0 ? (
+          <p className="text-gray-400 text-sm">No vaccine schedule data.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={immunizationCoverage} barCategoryGap="25%">
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
+              <XAxis dataKey="vaccine" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip
+                cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }}
+                contentStyle={tooltipStyle}
+                formatter={(value, _name, props) => [`${value} / ${props.payload.total}`, 'Covered']}
+              />
+              <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       <div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { PieChart, Pie, Cell, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
+import { Cell, LabelList, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
 import { api } from '../lib/api'
 import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
@@ -8,8 +8,9 @@ import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
 
 const STATUS_LABELS = { NORMAL: 'Normal', UNDERWEIGHT: 'Underweight', SEVERELY_UNDERWEIGHT: 'Severely Underweight', OVERWEIGHT: 'Overweight', UNKNOWN: 'Unknown' }
-const STATUS_COLORS = { NORMAL: 'bg-green-400', UNDERWEIGHT: 'bg-orange-400', SEVERELY_UNDERWEIGHT: 'bg-red-400', OVERWEIGHT: 'bg-yellow-400', UNKNOWN: 'bg-gray-300' }
-const STATUS_HEX    = { NORMAL: '#4ade80', UNDERWEIGHT: '#fb923c', SEVERELY_UNDERWEIGHT: '#f87171', OVERWEIGHT: '#facc15', UNKNOWN: '#d1d5db' }
+// Status-severity colors (good/warning/serious/critical), not arbitrary categorical hues --
+// Unknown isn't a severity, so it gets neutral muted ink instead of a status role.
+const STATUS_HEX    = { NORMAL: '#0ca30c', UNDERWEIGHT: '#ec835a', SEVERELY_UNDERWEIGHT: '#d03b3b', OVERWEIGHT: '#fab219', UNKNOWN: '#898781' }
 const STATUS_BADGE   = { NORMAL: 'bg-green-100 text-green-800', UNDERWEIGHT: 'bg-orange-100 text-orange-800', SEVERELY_UNDERWEIGHT: 'bg-red-100 text-red-800', OVERWEIGHT: 'bg-yellow-100 text-yellow-800', UNKNOWN: 'bg-gray-100 text-gray-600' }
 
 export default function Reports() {
@@ -40,8 +41,7 @@ export default function Reports() {
   const healthRecords = data?.healthRecords ?? []
   const { page, setPage, totalPages, paged } = usePagination(healthRecords)
 
-  const pieData = Object.entries(data?.nutritionalStatus ?? {})
-    .filter(([, count]) => count > 0)
+  const statusChartData = Object.entries(data?.nutritionalStatus ?? {})
     .map(([code, count]) => ({ code, name: STATUS_LABELS[code] ?? code, value: count }))
 
   const tooltipStyle = {
@@ -68,35 +68,36 @@ export default function Reports() {
         <div className="flex items-center justify-center h-48"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
       ) : data && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl border border-gray-200/70 p-6">
-              <h2 className="text-[17px] font-bold text-gray-900 mb-4">Attendance Summary</h2>
-              <div className="space-y-3 text-sm">
-                {[['Active Children', data.total], ['School Days', data.schoolDays], ['Total Present', data.presentCount], ['Total Absent', data.absentCount], ['Attendance Rate', `${data.attendanceRate}%`]].map(([l, v]) => (
-                  <div key={l} className="flex justify-between items-center">
-                    <span className="text-gray-500">{l}</span>
-                    <span className="font-semibold text-gray-900">{v}</span>
-                  </div>
-                ))}
-              </div>
+          <div className="bg-white rounded-xl border border-gray-200/70 p-6">
+            <h2 className="text-[17px] font-bold text-gray-900 mb-4">Attendance Summary</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm">
+              {[['Active Children', data.total], ['School Days', data.schoolDays], ['Total Present', data.presentCount], ['Total Absent', data.absentCount], ['Attendance Rate', `${data.attendanceRate}%`]].map(([l, v]) => (
+                <div key={l}>
+                  <p className="text-gray-400">{l}</p>
+                  <p className="font-semibold text-gray-900 text-lg">{v}</p>
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div className="bg-white rounded-xl border border-gray-200/70 p-6">
-              <h2 className="text-[17px] font-bold text-gray-900 mb-4">Nutritional Status</h2>
-              {pieData.length === 0 ? (
-                <p className="text-gray-400 text-sm">No health records yet.</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={220}>
-                  <PieChart>
-                    <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={2}>
-                      {pieData.map(d => <Cell key={d.code} fill={STATUS_HEX[d.code] ?? '#d1d5db'} />)}
-                    </Pie>
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
+          <div className="bg-white rounded-xl border border-gray-200/70 p-6">
+            <h2 className="text-[17px] font-bold text-gray-900 mb-4">Nutritional Status</h2>
+            {data.total === 0 ? (
+              <p className="text-gray-400 text-sm">No active children yet.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={statusChartData} barCategoryGap="25%">
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
+                  <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]}>
+                    {statusChartData.map(d => <Cell key={d.code} fill={STATUS_HEX[d.code] ?? '#d1d5db'} />)}
+                    <LabelList dataKey="value" position="top" style={{ fontSize: 12, fontWeight: 600, fill: isDark ? '#f9fafb' : '#111827' }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200/70 p-6">
