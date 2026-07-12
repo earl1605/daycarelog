@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
@@ -10,50 +10,89 @@ import StatCard from '../components/StatCard'
 import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, BarChartIcon, PlusIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
-// Status-severity colors (good/warning/serious/critical), not arbitrary categorical hues --
-// Unknown isn't a severity, so it gets neutral muted ink instead of a status role.
-const STATUS_HEX = { Normal: '#0ca30c', Underweight: '#ec835a', 'Severely Underweight': '#d03b3b', Overweight: '#fab219', Unknown: '#898781' }
+// Status-severity colors (good/warning/serious/critical), not arbitrary categorical hues.
+const STATUS_HEX = { Normal: '#0ca30c', Underweight: '#ec835a', 'Severely Underweight': '#d03b3b', Overweight: '#fab219' }
+const TREND_MONTHS = 6
 
 export default function Dashboard() {
   const { user } = useAuth()
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [children,     setChildren]     = useState([])
-  const [trendData,    setTrendData]    = useState([])
+  const [chartData,    setChartData]    = useState([])
   const [todayAtt,     setTodayAtt]     = useState([])
-  const [healthRecords, setHealthRecords] = useState([])
-  const [immunizationCoverage, setImmunizationCoverage] = useState([])
+  const [nutritionalTrend,   setNutritionalTrend]   = useState([])
+  const [immunizationTrend,  setImmunizationTrend]  = useState([])
   const [loading,      setLoading]      = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
         const today = toLocalDateString()
-        const [kids, att, health, report] = await Promise.all([
+        const [kids, att, health, immunizations, schedule] = await Promise.all([
           api.children.list(),
           api.attendance.getByDate(today),
           api.health.list(),
-          api.reports.monthly(today.slice(0, 7)),
+          api.immunizations.list(),
+          api.immunizations.schedule(),
         ])
         setChildren(kids)
         setTodayAtt(att)
-        setHealthRecords(health)
-        setImmunizationCoverage(report.immunizationCoverage ?? [])
 
-        const activeCount = kids.filter(c => c.enrollmentStatus === 'active').length
+        const activeKids = kids.filter(c => c.enrollmentStatus === 'active')
+
         const now = new Date()
-        const weekdays = []
-        for (let i = 0; weekdays.length < 10 && i < 30; i++) {
-          const d = new Date(now); d.setDate(now.getDate() - i)
-          if (d.getDay() !== 0 && d.getDay() !== 6) weekdays.unshift(toLocalDateString(d))
-        }
-        const trendAtt = await api.attendance.getRange(weekdays[0], weekdays[weekdays.length - 1])
-        setTrendData(weekdays.map(date => {
-          const present = trendAtt.filter(a => a.date === date && a.status === 'present').length
+        const mondayOffset = now.getDay() === 0 ? 6 : now.getDay() - 1
+        const monday = new Date(now)
+        monday.setDate(now.getDate() - mondayOffset)
+        const days = Array.from({ length: 5 }, (_, i) => {
+          const d = new Date(monday); d.setDate(monday.getDate() + i)
+          return toLocalDateString(d)
+        })
+        const weekAtt = await api.attendance.getRange(days[0], days[4])
+        setChartData(days.map(date => ({
+          date: new Date(date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'short' }),
+          present: weekAtt.filter(a => a.date === date && a.status === 'present').length,
+          absent:  weekAtt.filter(a => a.date === date && a.status === 'absent').length,
+        })))
+
+        // Last TREND_MONTHS calendar months (oldest first), each represented by its last day.
+        const monthEnds = Array.from({ length: TREND_MONTHS }, (_, i) =>
+          new Date(now.getFullYear(), now.getMonth() - (TREND_MONTHS - 1 - i) + 1, 0))
+
+        setNutritionalTrend(monthEnds.map(monthEnd => {
+          const cutoff = toLocalDateString(monthEnd)
+          const counts = { Normal: 0, Underweight: 0, 'Severely Underweight': 0, Overweight: 0 }
+          let classified = 0
+          activeKids.forEach(c => {
+            const upToCutoff = health.filter(r => r.childId === c.id && r.measurementDate <= cutoff)
+            if (upToCutoff.length === 0) return
+            const latest = upToCutoff.reduce((a, b) => (a.measurementDate > b.measurementDate ? a : b))
+            const status = classifyNutritionalStatus(latest.weightKg, c.dateOfBirth, c.sex)
+            if (status?.label in counts) { counts[status.label]++; classified++ }
+          })
+          const pct = key => (classified > 0 ? Math.round((counts[key] / classified) * 100) : 0)
           return {
-            date: new Date(date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }),
-            rate: activeCount > 0 ? Math.round((present / activeCount) * 100) : 0,
+            month: monthEnd.toLocaleDateString('en-PH', { month: 'short' }),
+            Normal: pct('Normal'), Underweight: pct('Underweight'),
+            'Severely Underweight': pct('Severely Underweight'), Overweight: pct('Overweight'),
           }
+        }))
+
+        setImmunizationTrend(monthEnds.map(monthEnd => {
+          const cutoff = toLocalDateString(monthEnd)
+          const perVaccineCoverage = schedule.map(v => {
+            if (activeKids.length === 0) return 0
+            const covered = activeKids.filter(c => {
+              const doses = immunizations.filter(im => im.childId === c.id && im.vaccineName === v.name && im.dateGiven <= cutoff).length
+              return doses >= v.expectedDoses
+            }).length
+            return covered / activeKids.length
+          })
+          const avg = perVaccineCoverage.length > 0
+            ? Math.round((perVaccineCoverage.reduce((a, b) => a + b, 0) / perVaccineCoverage.length) * 100)
+            : 0
+          return { month: monthEnd.toLocaleDateString('en-PH', { month: 'short' }), coverage: avg }
         }))
       } catch (e) {
         toast.error('Failed to load dashboard')
@@ -65,19 +104,6 @@ export default function Dashboard() {
 
   const active       = children.filter(c => c.enrollmentStatus === 'active').length
   const presentToday = todayAtt.filter(a => a.status === 'present').length
-
-  const activeChildren = children.filter(c => c.enrollmentStatus === 'active')
-  const latestHealthByChild = {}
-  ;[...healthRecords].sort((a, b) => a.measurementDate.localeCompare(b.measurementDate))
-    .forEach(r => { latestHealthByChild[r.childId] = r })
-  const nutritionalCounts = { Normal: 0, Underweight: 0, 'Severely Underweight': 0, Overweight: 0, Unknown: 0 }
-  activeChildren.forEach(c => {
-    const r = latestHealthByChild[c.id]
-    const status = r ? classifyNutritionalStatus(r.weightKg, c.dateOfBirth, c.sex) : null
-    const label = status?.label ?? 'Unknown'
-    nutritionalCounts[label] = (nutritionalCounts[label] ?? 0) + 1
-  })
-  const nutritionalChartData = Object.entries(nutritionalCounts).map(([name, value]) => ({ name, value }))
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
 
@@ -112,65 +138,59 @@ export default function Dashboard() {
 
       <div className="bg-white rounded-xl border border-gray-200/70 p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[15px] font-bold text-gray-900">Attendance Rate Trend (Last 2 Weeks)</h2>
+          <h2 className="text-[15px] font-bold text-gray-900">Weekly Attendance</h2>
           <Link to="/attendance" className="text-primary-700 text-sm font-medium hover:underline">View all →</Link>
         </div>
-        <ResponsiveContainer width="100%" height={160}>
-          <LineChart data={trendData}>
+        <ResponsiveContainer width="100%" height={170}>
+          <BarChart data={chartData} barCategoryGap="30%" barGap={4}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} domain={[0, 100]} unit="%" width={40} />
-            <Tooltip contentStyle={tooltipStyle} formatter={value => [`${value}%`, 'Attendance Rate']} />
-            <Line type="monotone" dataKey="rate" name="Attendance Rate" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} />
-          </LineChart>
+            <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} width={24} />
+            <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
+            <Bar dataKey="present" name="Present" fill="#16a34a" radius={[4,4,0,0]} maxBarSize={40} />
+            <Bar dataKey="absent"  name="Absent"  fill={isDark ? '#4b5563' : '#E5E7EB'} radius={[4,4,0,0]} maxBarSize={40} />
+          </BarChart>
         </ResponsiveContainer>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200/70 p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[15px] font-bold text-gray-900">Nutritional Status</h2>
+          <h2 className="text-[15px] font-bold text-gray-900">Nutritional Status Trend</h2>
           <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
         </div>
         {active === 0 ? (
           <p className="text-gray-400 text-sm">No active children yet.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={170}>
-            <BarChart data={nutritionalChartData} barCategoryGap="25%">
+          <ResponsiveContainer width="100%" height={190}>
+            <LineChart data={nutritionalTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} width={24} />
-              <Tooltip cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }} contentStyle={tooltipStyle} />
-              <Bar dataKey="value" name="Children" radius={[4, 4, 0, 0]} maxBarSize={48}>
-                {nutritionalChartData.map(d => <Cell key={d.name} fill={STATUS_HEX[d.name] ?? '#d1d5db'} />)}
-                <LabelList dataKey="value" position="top" style={{ fontSize: 11, fontWeight: 600, fill: isDark ? '#f9fafb' : '#111827' }} />
-              </Bar>
-            </BarChart>
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} domain={[0, 100]} unit="%" width={36} />
+              <Tooltip contentStyle={tooltipStyle} formatter={value => `${value}%`} />
+              <Legend wrapperStyle={{ fontSize: '11px' }} />
+              {Object.entries(STATUS_HEX).map(([key, color]) => (
+                <Line key={key} type="monotone" dataKey={key} stroke={color} strokeWidth={2} dot={{ r: 3 }} />
+              ))}
+            </LineChart>
           </ResponsiveContainer>
         )}
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200/70 p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[15px] font-bold text-gray-900">Immunization Coverage</h2>
+          <h2 className="text-[15px] font-bold text-gray-900">Immunization Coverage Trend</h2>
           <Link to="/reports" className="text-primary-700 text-sm font-medium hover:underline">View report →</Link>
         </div>
-        {immunizationCoverage.length === 0 ? (
-          <p className="text-gray-400 text-sm">No vaccine schedule data.</p>
-        ) : (
-          <ResponsiveContainer width="100%" height={170}>
-            <BarChart data={immunizationCoverage} barCategoryGap="25%">
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
-              <XAxis dataKey="vaccine" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} width={24} />
-              <Tooltip
-                cursor={{ fill: isDark ? '#374151' : '#F7F7F5' }}
-                contentStyle={tooltipStyle}
-                formatter={(value, _name, props) => [`${value} / ${props.payload.total}`, 'Covered']}
-              />
-              <Bar dataKey="covered" name="Covered" fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={48} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
+        <p className="text-xs text-gray-400 -mt-2 mb-3">Average share of active children fully dosed, across all EPI vaccines.</p>
+        <ResponsiveContainer width="100%" height={160}>
+          <LineChart data={immunizationTrend}>
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} domain={[0, 100]} unit="%" width={36} />
+            <Tooltip contentStyle={tooltipStyle} formatter={value => [`${value}%`, 'Avg. Coverage']} />
+            <Line type="monotone" dataKey="coverage" name="Avg. Coverage" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
 
       <div>
