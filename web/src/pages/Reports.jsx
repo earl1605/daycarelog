@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
 import { computeNutritionalTrend, computeImmunizationDetail } from '../utils/healthTrends'
-import { formatAge } from '../utils/nutritionalStatus'
+import { formatAge, classifyNutritionalStatus } from '../utils/nutritionalStatus'
 import { AlertTriangleIcon } from '../components/icons'
 import Pagination from '../components/Pagination'
 import { usePagination } from '../utils/usePagination'
@@ -25,6 +25,7 @@ export default function Reports() {
   const [nutritionalTrend,   setNutritionalTrend]   = useState([])
   const [immunizationDetail, setImmunizationDetail] = useState({ buckets: [], perVaccine: [] })
   const [allChildren, setAllChildren] = useState([])
+  const [allHealthRecords, setAllHealthRecords] = useState([])
 
   useEffect(() => {
     setLoading(true)
@@ -36,6 +37,7 @@ export default function Reports() {
     Promise.all([api.children.list(), api.health.list(), api.immunizations.list(), api.immunizations.schedule()])
       .then(([children, health, immunizations, schedule]) => {
         setAllChildren(children)
+        setAllHealthRecords(health)
         const activeChildren = children.filter(c => c.enrollmentStatus === 'active')
         setNutritionalTrend(computeNutritionalTrend(activeChildren, health))
         setImmunizationDetail(computeImmunizationDetail(activeChildren, immunizations, schedule))
@@ -43,10 +45,20 @@ export default function Reports() {
       .catch(() => toast.error('Failed to load trend data'))
   }, [])
 
+  function latestNutritionalStatusLabel(childId, dateOfBirth, sex) {
+    const records = allHealthRecords.filter(r => r.childId === childId)
+    if (records.length === 0) return 'Unknown'
+    const latest = records.reduce((a, b) => (a.measurementDate > b.measurementDate ? a : b))
+    return classifyNutritionalStatus(latest.weightKg, dateOfBirth, sex)?.label ?? 'Unknown'
+  }
+
   function downloadCSV() {
     if (!data) return
     const rows = [['Name', 'Sex', 'Date of Birth', 'Nutritional Status']]
-    ;(data.children ?? []).forEach(c => rows.push([`${c.firstName} ${c.lastName}`, c.sex, c.dateOfBirth, '—']))
+    ;(data.children ?? []).forEach(c => rows.push([
+      `${c.firstName} ${c.lastName}`, c.sex, c.dateOfBirth,
+      latestNutritionalStatusLabel(c.id, c.dateOfBirth, c.sex),
+    ]))
     const csv  = rows.map(r => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
     const url  = URL.createObjectURL(blob)

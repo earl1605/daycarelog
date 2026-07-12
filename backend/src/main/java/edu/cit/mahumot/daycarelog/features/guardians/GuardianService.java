@@ -1,5 +1,6 @@
 package edu.cit.mahumot.daycarelog.features.guardians;
 
+import edu.cit.mahumot.daycarelog.common.email.EmailFormatValidator;
 import edu.cit.mahumot.daycarelog.common.email.EmailRegistrationValidator;
 import edu.cit.mahumot.daycarelog.features.guardians.GuardianAccountResponse.ChildSummary;
 import edu.cit.mahumot.daycarelog.features.users.User;
@@ -25,17 +26,20 @@ public class GuardianService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationService verificationService;
     private final EmailRegistrationValidator emailRegistrationValidator;
+    private final EmailFormatValidator emailFormatValidator;
 
     public GuardianService(GuardianRepository guardianRepository, UserRepository userRepository,
                             ChildRepository childRepository, PasswordEncoder passwordEncoder,
                             VerificationService verificationService,
-                            EmailRegistrationValidator emailRegistrationValidator) {
+                            EmailRegistrationValidator emailRegistrationValidator,
+                            EmailFormatValidator emailFormatValidator) {
         this.guardianRepository = guardianRepository;
         this.userRepository = userRepository;
         this.childRepository = childRepository;
         this.passwordEncoder = passwordEncoder;
         this.verificationService = verificationService;
         this.emailRegistrationValidator = emailRegistrationValidator;
+        this.emailFormatValidator = emailFormatValidator;
     }
 
     public List<Guardian> findByChild(Long childId) {
@@ -68,16 +72,23 @@ public class GuardianService {
             if (req.getEmail() == null || req.getEmail().isBlank()) {
                 throw new RuntimeException("Email is required to create a parent portal account");
             }
-            String email = emailRegistrationValidator.validate(req.getEmail());
-            guardian.setEmail(email);
-            Optional<User> existing = userRepository.findByEmail(email);
+            // Normalize (format-only) first so an existing account can be found by its
+            // canonical email without re-running the disposable/MX checks against it --
+            // those already passed when the account was first created, and re-checking
+            // them here would wrongly block re-linking an existing guardian whose email
+            // domain later stops resolving (or was a test/placeholder address).
+            String normalized = emailFormatValidator.normalizeAndValidate(req.getEmail());
+            Optional<User> existing = userRepository.findByEmail(normalized);
             User parentUser;
+            String email;
             if (existing.isPresent()) {
                 parentUser = existing.get();
                 if (!"parent".equals(parentUser.getRole())) {
                     throw new RuntimeException("Email already belongs to an existing non-parent account");
                 }
+                email = parentUser.getEmail();
             } else {
+                email = emailRegistrationValidator.validate(req.getEmail());
                 tempPassword = TempPasswordGenerator.generate();
                 parentUser = User.builder()
                         .email(email)
@@ -89,6 +100,7 @@ public class GuardianService {
                 parentUser = userRepository.save(parentUser);
                 verificationService.issueVerification(parentUser);
             }
+            guardian.setEmail(email);
             guardian.setUserId(parentUser.getId());
         }
 
