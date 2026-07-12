@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { LineChart, Line, Tooltip, Legend, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, PieChart, Pie, Cell, Tooltip, Legend, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
 import { api } from '../lib/api'
 import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
-import { computeHealthTrends } from '../utils/healthTrends'
+import { computeNutritionalTrend, computeImmunizationDetail } from '../utils/healthTrends'
 import Pagination from '../components/Pagination'
 import { usePagination } from '../utils/usePagination'
 import toast from 'react-hot-toast'
@@ -12,6 +12,7 @@ const STATUS_LABELS = { NORMAL: 'Normal', UNDERWEIGHT: 'Underweight', SEVERELY_U
 const STATUS_BADGE  = { NORMAL: 'bg-green-100 text-green-800', UNDERWEIGHT: 'bg-orange-100 text-orange-800', SEVERELY_UNDERWEIGHT: 'bg-red-100 text-red-800', OVERWEIGHT: 'bg-yellow-100 text-yellow-800', UNKNOWN: 'bg-gray-100 text-gray-600' }
 // Status-severity colors (good/warning/serious/critical), not arbitrary categorical hues.
 const STATUS_HEX    = { Normal: '#0ca30c', Underweight: '#ec835a', 'Severely Underweight': '#d03b3b', Overweight: '#fab219' }
+const IMMUNIZATION_BUCKET_HEX = { 'Fully Immunized': '#0ca30c', 'Partially Immunized': '#fab219', 'Not Started': '#d03b3b' }
 
 export default function Reports() {
   const { theme } = useTheme()
@@ -19,22 +20,21 @@ export default function Reports() {
   const [data,    setData]    = useState(null)
   const [month,   setMonth]   = useState(toLocalDateString().slice(0, 7))
   const [loading, setLoading] = useState(true)
-  const [nutritionalTrend,  setNutritionalTrend]  = useState([])
-  const [immunizationTrend, setImmunizationTrend] = useState([])
+  const [nutritionalTrend,   setNutritionalTrend]   = useState([])
+  const [immunizationDetail, setImmunizationDetail] = useState({ buckets: [], perVaccine: [] })
 
   useEffect(() => {
     setLoading(true)
     api.reports.monthly(month).then(d => { setData(d); setLoading(false) }).catch(e => { toast.error(e.message); setLoading(false) })
   }, [month])
 
-  // Independent of the selected month -- always "last 6 months from today" -- so it only needs to load once.
+  // Independent of the selected month -- always "as of today" -- so it only needs to load once.
   useEffect(() => {
     Promise.all([api.children.list(), api.health.list(), api.immunizations.list(), api.immunizations.schedule()])
       .then(([children, health, immunizations, schedule]) => {
         const activeChildren = children.filter(c => c.enrollmentStatus === 'active')
-        const { nutritionalTrend: nt, immunizationTrend: it } = computeHealthTrends(activeChildren, health, immunizations, schedule)
-        setNutritionalTrend(nt)
-        setImmunizationTrend(it)
+        setNutritionalTrend(computeNutritionalTrend(activeChildren, health))
+        setImmunizationDetail(computeImmunizationDetail(activeChildren, immunizations, schedule))
       })
       .catch(() => toast.error('Failed to load trend data'))
   }, [])
@@ -112,17 +112,34 @@ export default function Reports() {
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200/70 p-5">
-            <h2 className="text-[15px] font-bold text-gray-900 mb-3">Immunization Coverage Trend</h2>
-            <p className="text-xs text-gray-400 -mt-2 mb-3">Average share of active children fully dosed, across all EPI vaccines.</p>
-            <ResponsiveContainer width="100%" height={170}>
-              <LineChart data={immunizationTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#F0F0EE'} vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} domain={[0, 100]} unit="%" width={36} />
-                <Tooltip contentStyle={tooltipStyle} formatter={value => [`${value}%`, 'Avg. Coverage']} />
-                <Line type="monotone" dataKey="coverage" name="Avg. Coverage" stroke="#16a34a" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
+            <h2 className="text-[15px] font-bold text-gray-900 mb-3">Immunization Coverage</h2>
+            {data.total === 0 ? (
+              <p className="text-gray-400 text-sm">No active children yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-center">
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={immunizationDetail.buckets} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={58} outerRadius={90} paddingAngle={2}>
+                      {immunizationDetail.buckets.map(b => <Cell key={b.name} fill={IMMUNIZATION_BUCKET_HEX[b.name]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">By vaccine</p>
+                  {immunizationDetail.perVaccine.map(v => {
+                    const pct = v.total > 0 ? Math.round((v.covered / v.total) * 100) : 0
+                    return (
+                      <div key={v.vaccine} className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">{v.vaccine}</span>
+                        <span className="font-medium text-gray-900">{v.covered}/{v.total} <span className="text-gray-400 font-normal">({pct}%)</span></span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200/70 overflow-x-auto">

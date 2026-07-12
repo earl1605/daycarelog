@@ -1,16 +1,16 @@
 import { classifyNutritionalStatus } from './nutritionalStatus'
 import { toLocalDateString } from './date'
 
-// Walks each active child's health-record/immunization history and re-derives their
+// Walks each active child's health-record history and re-derives their nutritional
 // status as of each of the last `monthsCount` month-ends, so Dashboard and Reports can
 // share one trend computation instead of drifting apart. Uses TODAY's active-children
 // set retroactively for past months too, since enrollment status isn't tracked historically.
-export function computeHealthTrends(activeChildren, healthRecords, immunizations, schedule, monthsCount = 6) {
+export function computeNutritionalTrend(activeChildren, healthRecords, monthsCount = 6) {
   const now = new Date()
   const monthEnds = Array.from({ length: monthsCount }, (_, i) =>
     new Date(now.getFullYear(), now.getMonth() - (monthsCount - 1 - i) + 1, 0))
 
-  const nutritionalTrend = monthEnds.map(monthEnd => {
+  return monthEnds.map(monthEnd => {
     const cutoff = toLocalDateString(monthEnd)
     const counts = { Normal: 0, Underweight: 0, 'Severely Underweight': 0, Overweight: 0 }
     let classified = 0
@@ -28,22 +28,35 @@ export function computeHealthTrends(activeChildren, healthRecords, immunizations
       'Severely Underweight': pct('Severely Underweight'), Overweight: pct('Overweight'),
     }
   })
+}
 
-  const immunizationTrend = monthEnds.map(monthEnd => {
-    const cutoff = toLocalDateString(monthEnd)
-    const perVaccineCoverage = schedule.map(v => {
-      if (activeChildren.length === 0) return 0
-      const covered = activeChildren.filter(c => {
-        const doses = immunizations.filter(im => im.childId === c.id && im.vaccineName === v.name && im.dateGiven <= cutoff).length
-        return doses >= v.expectedDoses
-      }).length
-      return covered / activeChildren.length
-    })
-    const avg = perVaccineCoverage.length > 0
-      ? Math.round((perVaccineCoverage.reduce((a, b) => a + b, 0) / perVaccineCoverage.length) * 100)
-      : 0
-    return { month: monthEnd.toLocaleDateString('en-PH', { month: 'short' }), coverage: avg }
+// Current-snapshot immunization detail: each active child bucketed into exactly one of
+// Fully/Partially/Not Started Immunized (a valid part-to-whole split, unlike per-vaccine
+// counts which double-count a child across every vaccine they've had), plus the granular
+// per-vaccine coverage counts for the detail list underneath the donut.
+export function computeImmunizationDetail(activeChildren, immunizations, schedule) {
+  const totalExpectedDoses = schedule.reduce((sum, v) => sum + v.expectedDoses, 0)
+
+  const buckets = { 'Fully Immunized': 0, 'Partially Immunized': 0, 'Not Started': 0 }
+  activeChildren.forEach(c => {
+    const givenDoses = schedule.reduce((sum, v) => {
+      const doses = immunizations.filter(im => im.childId === c.id && im.vaccineName === v.name).length
+      return sum + Math.min(doses, v.expectedDoses)
+    }, 0)
+    if (givenDoses === 0) buckets['Not Started']++
+    else if (givenDoses >= totalExpectedDoses) buckets['Fully Immunized']++
+    else buckets['Partially Immunized']++
   })
 
-  return { nutritionalTrend, immunizationTrend }
+  const perVaccine = schedule.map(v => {
+    const covered = activeChildren.filter(c =>
+      immunizations.filter(im => im.childId === c.id && im.vaccineName === v.name).length >= v.expectedDoses
+    ).length
+    return { vaccine: v.name, covered, total: activeChildren.length }
+  })
+
+  return {
+    buckets: Object.entries(buckets).map(([name, value]) => ({ name, value })),
+    perVaccine,
+  }
 }
