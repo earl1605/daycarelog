@@ -5,14 +5,13 @@ import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
-import { classifyNutritionalStatus } from '../utils/nutritionalStatus'
+import { computeHealthTrends } from '../utils/healthTrends'
 import StatCard from '../components/StatCard'
 import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, BarChartIcon, PlusIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
 // Status-severity colors (good/warning/serious/critical), not arbitrary categorical hues.
 const STATUS_HEX = { Normal: '#0ca30c', Underweight: '#ec835a', 'Severely Underweight': '#d03b3b', Overweight: '#fab219' }
-const TREND_MONTHS = 6
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -56,44 +55,9 @@ export default function Dashboard() {
           absent:  weekAtt.filter(a => a.date === date && a.status === 'absent').length,
         })))
 
-        // Last TREND_MONTHS calendar months (oldest first), each represented by its last day.
-        const monthEnds = Array.from({ length: TREND_MONTHS }, (_, i) =>
-          new Date(now.getFullYear(), now.getMonth() - (TREND_MONTHS - 1 - i) + 1, 0))
-
-        setNutritionalTrend(monthEnds.map(monthEnd => {
-          const cutoff = toLocalDateString(monthEnd)
-          const counts = { Normal: 0, Underweight: 0, 'Severely Underweight': 0, Overweight: 0 }
-          let classified = 0
-          activeKids.forEach(c => {
-            const upToCutoff = health.filter(r => r.childId === c.id && r.measurementDate <= cutoff)
-            if (upToCutoff.length === 0) return
-            const latest = upToCutoff.reduce((a, b) => (a.measurementDate > b.measurementDate ? a : b))
-            const status = classifyNutritionalStatus(latest.weightKg, c.dateOfBirth, c.sex)
-            if (status?.label in counts) { counts[status.label]++; classified++ }
-          })
-          const pct = key => (classified > 0 ? Math.round((counts[key] / classified) * 100) : 0)
-          return {
-            month: monthEnd.toLocaleDateString('en-PH', { month: 'short' }),
-            Normal: pct('Normal'), Underweight: pct('Underweight'),
-            'Severely Underweight': pct('Severely Underweight'), Overweight: pct('Overweight'),
-          }
-        }))
-
-        setImmunizationTrend(monthEnds.map(monthEnd => {
-          const cutoff = toLocalDateString(monthEnd)
-          const perVaccineCoverage = schedule.map(v => {
-            if (activeKids.length === 0) return 0
-            const covered = activeKids.filter(c => {
-              const doses = immunizations.filter(im => im.childId === c.id && im.vaccineName === v.name && im.dateGiven <= cutoff).length
-              return doses >= v.expectedDoses
-            }).length
-            return covered / activeKids.length
-          })
-          const avg = perVaccineCoverage.length > 0
-            ? Math.round((perVaccineCoverage.reduce((a, b) => a + b, 0) / perVaccineCoverage.length) * 100)
-            : 0
-          return { month: monthEnd.toLocaleDateString('en-PH', { month: 'short' }), coverage: avg }
-        }))
+        const { nutritionalTrend: nt, immunizationTrend: it } = computeHealthTrends(activeKids, health, immunizations, schedule)
+        setNutritionalTrend(nt)
+        setImmunizationTrend(it)
       } catch (e) {
         toast.error('Failed to load dashboard')
       }
