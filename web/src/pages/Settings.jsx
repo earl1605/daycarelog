@@ -77,21 +77,22 @@ export default function Settings() {
     setSaving(false)
   }
 
-  const inputClass = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  const btnClass = "bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
+  const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+  const labelClass = "block text-xs font-medium text-gray-700 mb-1"
+  const btnClass = "bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
   const roleColors = { admin: 'bg-violet-50 text-violet-700', staff: 'bg-blue-50 text-blue-700', parent: 'bg-amber-50 text-amber-700' }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-5">
       <div>
         <h1 className="text-[22px] font-bold text-gray-900">Settings</h1>
         <p className="text-gray-500 text-sm mt-1">Manage your profile, photo, and account security.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
 
         <div className="bg-white rounded-xl border border-gray-200/70 overflow-hidden">
-          <div className="p-6 flex items-center gap-4 bg-[#FAFAFA] border-b border-gray-200/70">
+          <div className="p-5 flex items-center gap-4 bg-[#FAFAFA] border-b border-gray-200/70">
             <button type="button" onClick={() => fileRef.current.click()}
               className="relative group w-16 h-16 rounded-full overflow-hidden ring-4 ring-white shadow-sm shrink-0">
               {preview
@@ -112,7 +113,7 @@ export default function Settings() {
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
           </div>
 
-          <form onSubmit={saveName} className="p-6 space-y-5">
+          <form onSubmit={saveName} className="p-5 space-y-4">
             <div>
               <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
                 <UsersIcon width={16} height={16} className="text-primary-600" /> Personal Information
@@ -122,19 +123,19 @@ export default function Settings() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name <span className="text-red-400">*</span></label>
+                <label className={labelClass}>First Name <span className="text-red-400">*</span></label>
                 <input type="text" value={firstName} onChange={handleCapitalizedNameInput(setFirstName)} className={inputClass} placeholder="Juan" autoCapitalize="words" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name <span className="text-red-400">*</span></label>
+                <label className={labelClass}>Last Name <span className="text-red-400">*</span></label>
                 <input type="text" value={lastName} onChange={handleCapitalizedNameInput(setLastName)} className={inputClass} placeholder="dela Cruz" autoCapitalize="words" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle Name</label>
+                <label className={labelClass}>Middle Name</label>
                 <input type="text" value={middleName} onChange={handleCapitalizedNameInput(setMiddleName)} className={inputClass} placeholder="Santos" autoCapitalize="words" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Suffix</label>
+                <label className={labelClass}>Suffix</label>
                 <select value={suffix} onChange={e => setSuffix(e.target.value)} className={`${inputClass} bg-white`}>
                   <option value="">— None —</option>
                   <option value="Jr.">Jr.</option>
@@ -155,7 +156,7 @@ export default function Settings() {
           </form>
         </div>
 
-        <form onSubmit={savePassword} className="bg-white rounded-xl border border-gray-200/70 p-6 space-y-5">
+        <form onSubmit={savePassword} className="bg-white rounded-xl border border-gray-200/70 p-5 space-y-4">
           <div>
             <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
               <KeyIcon width={16} height={16} className="text-primary-600" /> Change Password
@@ -165,7 +166,7 @@ export default function Settings() {
 
           {[['Current Password', curPass, setCurPass, 'curPass'], ['New Password', newPass, setNewPass, 'newPass'], ['Confirm New Password', confirm, setConfirm, 'confirm']].map(([label, val, setter, key]) => (
             <div key={label}>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+              <label className={labelClass}>{label}</label>
               <div className="relative">
                 <input
                   type={showPass[key] ? 'text' : 'password'}

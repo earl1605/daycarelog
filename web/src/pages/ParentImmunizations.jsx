@@ -27,7 +27,7 @@ export default function ParentImmunizations() {
   const childRecords = records.filter(r => r.childId === Number(selectedChild))
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-[22px] font-bold text-gray-900">Immunizations</h1>
         {children.length > 1 && (

@@ -70,7 +70,7 @@ export default function RecycleBin() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
         <h1 className="text-[22px] font-bold text-gray-900">Recycle Bin</h1>
         <p className="text-gray-500 text-sm mt-1">Deleted health records and immunizations land here before they're gone for good.</p>
@@ -100,39 +100,39 @@ export default function RecycleBin() {
             <table className="w-full text-sm min-w-[640px]">
               <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium">Child</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Child</th>
                   {tab === TAB.HEALTH ? (
                     <>
-                      <th className="text-left px-4 py-3 font-medium">Date</th>
-                      <th className="text-left px-4 py-3 font-medium">Weight / Height</th>
+                      <th className="text-left px-4 py-2.5 font-medium">Date</th>
+                      <th className="text-left px-4 py-2.5 font-medium">Weight / Height</th>
                     </>
                   ) : (
                     <>
-                      <th className="text-left px-4 py-3 font-medium">Vaccine</th>
-                      <th className="text-left px-4 py-3 font-medium">Dose</th>
+                      <th className="text-left px-4 py-2.5 font-medium">Vaccine</th>
+                      <th className="text-left px-4 py-2.5 font-medium">Dose</th>
                     </>
                   )}
-                  <th className="text-left px-4 py-3 font-medium">Deleted</th>
-                  <th className="text-left px-4 py-3 font-medium">Actions</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Deleted</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {paged.map(r => (
                   <tr key={r.id} className="hover:bg-gray-50/60 transition-colors duration-150">
-                    <td className="px-4 py-3 font-medium text-gray-900">{childName(r.childId)}</td>
+                    <td className="px-4 py-2.5 font-medium text-gray-900">{childName(r.childId)}</td>
                     {tab === TAB.HEALTH ? (
                       <>
-                        <td className="px-4 py-3 text-gray-600">{new Date(r.measurementDate + 'T00:00:00').toLocaleDateString('en-PH')}</td>
-                        <td className="px-4 py-3 text-gray-600">{r.weightKg ? `${r.weightKg}kg` : '—'} / {r.heightCm ? `${r.heightCm}cm` : '—'}</td>
+                        <td className="px-4 py-2.5 text-gray-600">{new Date(r.measurementDate + 'T00:00:00').toLocaleDateString('en-PH')}</td>
+                        <td className="px-4 py-2.5 text-gray-600">{r.weightKg ? `${r.weightKg}kg` : '—'} / {r.heightCm ? `${r.heightCm}cm` : '—'}</td>
                       </>
                     ) : (
                       <>
-                        <td className="px-4 py-3 text-gray-600">{r.vaccineName}</td>
-                        <td className="px-4 py-3 text-gray-600">Dose {r.doseNumber}</td>
+                        <td className="px-4 py-2.5 text-gray-600">{r.vaccineName}</td>
+                        <td className="px-4 py-2.5 text-gray-600">Dose {r.doseNumber}</td>
                       </>
                     )}
-                    <td className="px-4 py-3 text-gray-400">{new Date(r.deletedAt).toLocaleString('en-PH')}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5 text-gray-400">{new Date(r.deletedAt).toLocaleString('en-PH')}</td>
+                    <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-1.5">
                         <button
                           onClick={() => handleRestore(tab, r.id)}

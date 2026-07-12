@@ -68,16 +68,16 @@ export default function Attendance() {
   const excused  = Object.values(records).filter(r => r.status === 'excused').length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-[22px] font-bold text-gray-900">Attendance</h1>
         <input type="date" value={date} onChange={handleDateChange}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400" />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[['Present', present, 'text-green-600'], ['Absent', absent, 'text-red-500'], ['Late', late, 'text-yellow-600'], ['Excused', excused, 'text-blue-600'], ['Total', children.length, 'text-gray-700']].map(([l,v,c]) => (
-          <div key={l} className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 px-5 py-3 flex items-center gap-3">
+          <div key={l} className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 px-4 py-3 flex items-center gap-3">
             <p className={`text-2xl font-bold ${c}`}>{v}</p>
             <p className="text-sm text-gray-500">{l}</p>
           </div>
@@ -87,16 +87,16 @@ export default function Attendance() {
       {loading ? (
         <div className="flex items-center justify-center h-48"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200/70 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-xl border border-gray-200/70 overflow-x-auto">
+          <table className="w-full text-sm min-w-[420px]">
             <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
-              <tr><th className="text-left px-4 py-3 font-medium">Name</th><th className="text-left px-4 py-3 font-medium">Status</th></tr>
+              <tr><th className="text-left px-4 py-2.5 font-medium">Name</th><th className="text-left px-4 py-2.5 font-medium">Status</th></tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {children.map(c => (
                 <tr key={c.id} className="hover:bg-gray-50/60 transition-colors duration-150">
-                  <td className="px-4 py-3 font-medium text-gray-900">{c.firstName} {c.lastName}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2.5 font-medium text-gray-900">{c.firstName} {c.lastName}</td>
+                  <td className="px-4 py-2.5">
                     <div className="flex gap-2 flex-wrap">
                       {STATUS_OPTS.map(s => (
                         <button key={s} onClick={() => setStatus(c.id, s)}

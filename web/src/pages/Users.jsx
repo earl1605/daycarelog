@@ -111,7 +111,7 @@ export default function Users() {
   const confirmTarget = users.find(u => u.id === confirmId)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-[22px] font-bold text-gray-900">Users</h1>
         <button
@@ -131,12 +131,12 @@ export default function Users() {
           <table className="w-full text-sm">
             <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
               <tr>
-                <th className="text-left px-4 py-3 font-medium">Name</th>
-                <th className="text-left px-4 py-3 font-medium hidden sm:table-cell">Email</th>
-                <th className="text-left px-4 py-3 font-medium">Role</th>
-                <th className="text-left px-4 py-3 font-medium">Status</th>
-                <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Joined</th>
-                <th className="text-left px-4 py-3 font-medium">Actions</th>
+                <th className="text-left px-4 py-2.5 font-medium">Name</th>
+                <th className="text-left px-4 py-2.5 font-medium hidden sm:table-cell">Email</th>
+                <th className="text-left px-4 py-2.5 font-medium">Role</th>
+                <th className="text-left px-4 py-2.5 font-medium">Status</th>
+                <th className="text-left px-4 py-2.5 font-medium hidden md:table-cell">Joined</th>
+                <th className="text-left px-4 py-2.5 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -144,12 +144,12 @@ export default function Users() {
                 const isSelf = u.id === user?.id
                 return (
                   <tr key={u.id} className="hover:bg-gray-50/60 transition-colors duration-150">
-                    <td className="px-4 py-3 font-medium text-gray-900">
+                    <td className="px-4 py-2.5 font-medium text-gray-900">
                       {u.fullName || u.email.split('@')[0]}
                       {isSelf && <span className="ml-2 text-xs text-primary-700 font-normal">(you)</span>}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{u.email}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5 text-gray-500 hidden sm:table-cell">{u.email}</td>
+                    <td className="px-4 py-2.5">
                       <select
                         value={u.role}
                         disabled={isSelf || saving === u.id}
@@ -159,13 +159,13 @@ export default function Users() {
                         {ROLES.map(r => <option key={r}>{r}</option>)}
                       </select>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
                         {u.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{new Date(u.createdAt).toLocaleDateString('en-PH')}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5 text-gray-400 hidden md:table-cell">{new Date(u.createdAt).toLocaleDateString('en-PH')}</td>
+                    <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-1.5">
                         <button
                           onClick={() => handleResetPassword(u)}

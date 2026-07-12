@@ -34,7 +34,7 @@ export default function ParentDashboard() {
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" /></div>
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div>
         <h1 className="text-[22px] font-bold text-gray-900">
           Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},{' '}
@@ -45,13 +45,13 @@ export default function ParentDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <StatCard icon={UsersIcon} label="My Children"   value={children.length} color="primary" />
         <StatCard icon={CheckIcon} label="Present Today" value={presentToday}    color="blue" />
       </div>
 
       <div>
-        <h2 className="text-[17px] font-bold text-gray-900 mb-4">My Children</h2>
+        <h2 className="text-[15px] font-bold text-gray-900 mb-3">My Children</h2>
         {children.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200/70 text-center py-16">
             <span className="inline-flex w-12 h-12 rounded-full bg-gray-100 text-gray-400 items-center justify-center mb-3">
@@ -61,12 +61,12 @@ export default function ParentDashboard() {
             <p className="text-sm text-gray-400 mt-1">Contact the daycare staff to link your child's records.</p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {children.map(c => {
               const todayAtt = attendance.find(a => a.childId === c.id && a.date === today)
               const initials = `${c.firstName?.[0] ?? ''}${c.lastName?.[0] ?? ''}`.toUpperCase()
               return (
-                <div key={c.id} className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 p-5 flex items-center gap-4">
+                <div key={c.id} className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 p-4 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-lg shrink-0">
                     {initials}
                   </div>
@@ -88,8 +88,8 @@ export default function ParentDashboard() {
       </div>
 
       <div>
-        <h2 className="text-[17px] font-bold text-gray-900 mb-4">Quick Links</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="text-[15px] font-bold text-gray-900 mb-3">Quick Links</h2>
+        <div className="grid grid-cols-2 gap-3">
           <Link to="/parent/attendance"
             className="bg-[#FAFAFA] rounded-xl border border-gray-200/70 p-4 h-24 flex flex-col items-center justify-center gap-2.5 text-center transition-colors duration-150 hover:bg-gray-100/80 hover:border-gray-300">
             <span className="w-9 h-9 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">

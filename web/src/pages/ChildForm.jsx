@@ -61,37 +61,38 @@ export default function ChildForm() {
     setLoading(false)
   }
 
+  const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+  const labelClass = "block text-xs font-medium text-gray-700 mb-1"
+
   const field = (label, key, type = 'text', opts = {}) => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-      <input type={type} value={form[key]} onChange={set(key)}
-        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" {...opts} />
+      <label className={labelClass}>{label}</label>
+      <input type={type} value={form[key]} onChange={set(key)} className={inputClass} {...opts} />
     </div>
   )
 
   const nameField = (label, key, opts = {}) => (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-      <input type="text" value={form[key]} onChange={setCapitalized(key)} autoCapitalize="words"
-        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" {...opts} />
+      <label className={labelClass}>{label}</label>
+      <input type="text" value={form[key]} onChange={setCapitalized(key)} autoCapitalize="words" className={inputClass} {...opts} />
     </div>
   )
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-5">
       <div className="flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-700">← Back</button>
-        <h1 className="text-2xl font-extrabold text-gray-900">{isEdit ? 'Edit Child' : 'Enroll New Child'}</h1>
+        <h1 className="text-[22px] font-bold text-gray-900">{isEdit ? 'Edit Child' : 'Enroll New Child'}</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200/70 p-5 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {nameField('First Name *', 'firstName', { placeholder: 'Juan' })}
           {nameField('Last Name *',  'lastName',  { placeholder: 'Dela Cruz' })}
           {field('Date of Birth *', 'dateOfBirth', 'date')}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Sex *</label>
-            <select value={form.sex} onChange={set('sex')} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+            <label className={labelClass}>Sex *</label>
+            <select value={form.sex} onChange={set('sex')} className={`${inputClass} bg-white`}>
               <option value="">Select…</option>
               <option>Male</option>
               <option>Female</option>
@@ -100,55 +101,52 @@ export default function ChildForm() {
           {nameField('Address', 'address', { placeholder: 'Barangay, City' })}
           {field('Enrollment Date', 'enrollmentDate', 'date')}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
-            <select value={form.enrollmentStatus} onChange={set('enrollmentStatus')} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+            <label className={labelClass}>Status</label>
+            <select value={form.enrollmentStatus} onChange={set('enrollmentStatus')} className={`${inputClass} bg-white`}>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Blood Type</label>
-            <select value={form.bloodType} onChange={set('bloodType')} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+            <label className={labelClass}>Blood Type</label>
+            <select value={form.bloodType} onChange={set('bloodType')} className={`${inputClass} bg-white`}>
               <option value="">— Unknown —</option>
               {BLOOD_TYPES.map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Allergies</label>
-            <textarea value={form.allergies} onChange={set('allergies')} rows={3} placeholder="e.g. Peanuts, penicillin…"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+            <label className={labelClass}>Allergies</label>
+            <textarea value={form.allergies} onChange={set('allergies')} rows={2} placeholder="e.g. Peanuts, penicillin…" className={`${inputClass} resize-none`} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Medical Conditions</label>
-            <textarea value={form.medicalConditions} onChange={set('medicalConditions')} rows={3} placeholder="e.g. Asthma…"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+            <label className={labelClass}>Medical Conditions</label>
+            <textarea value={form.medicalConditions} onChange={set('medicalConditions')} rows={2} placeholder="e.g. Asthma…" className={`${inputClass} resize-none`} />
           </div>
         </div>
 
-        <div className="border-t border-gray-100 pt-5 space-y-4">
+        <div className="border-t border-gray-100 pt-4 space-y-3">
           <div>
             <h2 className="text-sm font-semibold text-gray-900">Record a Measurement</h2>
             <p className="text-xs text-gray-400 mt-0.5">Optional — leave weight and height blank to save the rest without adding a new health record.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {field('Weight (kg)', 'weightKg', 'number', { step: '0.01', placeholder: '12.5' })}
             {field('Height (cm)', 'heightCm', 'number', { step: '0.1', placeholder: '90.0' })}
             {field('Measurement Date', 'measurementDate', 'date')}
           </div>
-          {preview && <div className={`text-sm px-4 py-2.5 rounded-xl font-medium ${colorMap[preview.color]}`}>Estimated Nutritional Status: {preview.label}</div>}
+          {preview && <div className={`text-sm px-3 py-2 rounded-lg font-medium ${colorMap[preview.color]}`}>Estimated Nutritional Status: {preview.label}</div>}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Remarks</label>
-            <textarea value={form.remarks} onChange={set('remarks')} rows={2} placeholder="Optional notes about this measurement…"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+            <label className={labelClass}>Remarks</label>
+            <textarea value={form.remarks} onChange={set('remarks')} rows={2} placeholder="Optional notes about this measurement…" className={`${inputClass} resize-none`} />
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
-          <button type="button" onClick={() => navigate(-1)} className="flex-1 border border-gray-200 text-gray-700 font-medium py-2.5 rounded-xl hover:bg-gray-50 transition-colors">Cancel</button>
-          <button type="submit" disabled={loading} className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors">
+        <div className="flex gap-3 pt-1">
+          <button type="button" onClick={() => navigate(-1)} className="flex-1 border border-gray-200 text-gray-700 text-sm font-medium py-2.5 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+          <button type="submit" disabled={loading} className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
             {loading ? 'Saving…' : isEdit ? 'Save Changes' : 'Enroll Child'}
           </button>
         </div>

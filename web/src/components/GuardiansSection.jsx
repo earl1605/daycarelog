@@ -91,10 +91,10 @@ export default function GuardiansSection({ childId }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+    <div className="bg-white rounded-xl border border-gray-200/70 p-5 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-[17px] font-bold text-gray-900">Guardians</h2>
+          <h2 className="text-[15px] font-bold text-gray-900">Guardians</h2>
           <p className="text-sm text-gray-500 mt-0.5">Contacts for this child, optionally with parent portal access.</p>
         </div>
         <button type="button" onClick={() => setShowForm(s => !s)}
@@ -130,24 +130,24 @@ export default function GuardiansSection({ childId }) {
       )}
 
       {showForm && (
-        <form onSubmit={handleAdd} className="border border-gray-200/70 rounded-xl p-4 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleAdd} className="border border-gray-200/70 rounded-lg p-4 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Name *</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
               <input type="text" value={form.name} onChange={setCapitalized('name')} placeholder="Maria Dela Cruz" autoCapitalize="words"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Relationship</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Relationship</label>
               <input type="text" value={form.relationship} onChange={setCapitalized('relationship')} placeholder="Mother" autoCapitalize="words"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Number</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Contact Number</label>
               <input type="text" value={form.contactNumber} onChange={set('contactNumber')} placeholder="09xxxxxxxxx"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
-            <label className="flex items-center gap-2 text-sm text-gray-700 pt-6">
+            <label className="flex items-center gap-2 text-sm text-gray-700 pt-5">
               <input type="checkbox" checked={form.isPrimary} onChange={set('isPrimary')} className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
               Primary guardian
             </label>
@@ -159,9 +159,9 @@ export default function GuardiansSection({ childId }) {
           </label>
           {form.createPortalAccount && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email *</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
               <input type="email" value={form.email} onChange={setEmailField} onBlur={handleEmailBlur} placeholder="parent@example.com"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
               {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
               {emailSuggestion && (
                 <button type="button" onClick={acceptEmailSuggestion}
@@ -175,9 +175,9 @@ export default function GuardiansSection({ childId }) {
 
           <div className="flex gap-3">
             <button type="button" onClick={() => { setShowForm(false); setForm(emptyForm); setEmailError(''); setEmailSuggestion('') }}
-              className="flex-1 border border-gray-200 text-gray-700 font-medium py-2.5 rounded-xl hover:bg-gray-50 transition-colors">Cancel</button>
+              className="flex-1 border border-gray-200 text-gray-700 text-sm font-medium py-2.5 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors">
+              className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
               {saving ? 'Saving…' : 'Add Guardian'}
             </button>
           </div>

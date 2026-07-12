@@ -117,46 +117,44 @@ export default function Guardians() {
   const { page, setPage, totalPages, paged } = usePagination(filtered)
   const confirmTarget = accounts.find(a => a.userId === confirmUserId)
 
+  const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+  const labelClass = "block text-xs font-medium text-gray-700 mb-1"
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <h1 className="text-[22px] font-bold text-gray-900">Guardians</h1>
 
-      <div className="bg-white rounded-xl border border-gray-200/70 p-6 space-y-5">
+      <div className="bg-white rounded-xl border border-gray-200/70 p-5 space-y-4">
         <div>
-          <h2 className="flex items-center gap-2 text-[17px] font-bold text-gray-900">
-            <PlusIcon width={18} height={18} className="text-primary-600" /> Create a Guardian Account
+          <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
+            <PlusIcon width={16} height={16} className="text-primary-600" /> Create a Guardian Account
           </h2>
           <p className="text-sm text-gray-500 mt-1">
             Creates a new Parent/Guardian login and generates a temporary password to share with them. Public self-registration can never create a Parent/Guardian account.
           </p>
         </div>
 
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleCreate} className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">First name:</label>
-              <input type="text" value={form.firstName} onChange={setCapitalized('firstName')} autoCapitalize="words"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <label className={labelClass}>First name:</label>
+              <input type="text" value={form.firstName} onChange={setCapitalized('firstName')} autoCapitalize="words" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Last name:</label>
-              <input type="text" value={form.lastName} onChange={setCapitalized('lastName')} autoCapitalize="words"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <label className={labelClass}>Last name:</label>
+              <input type="text" value={form.lastName} onChange={setCapitalized('lastName')} autoCapitalize="words" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Middle name:</label>
-              <input type="text" value={form.middleName} onChange={setCapitalized('middleName')} autoCapitalize="words"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <label className={labelClass}>Middle name:</label>
+              <input type="text" value={form.middleName} onChange={setCapitalized('middleName')} autoCapitalize="words" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Suffix:</label>
-              <input type="text" value={form.suffix} onChange={setCapitalized('suffix')} autoCapitalize="words"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <label className={labelClass}>Suffix:</label>
+              <input type="text" value={form.suffix} onChange={setCapitalized('suffix')} autoCapitalize="words" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email:</label>
-              <input type="email" value={form.email} onChange={setEmailField} onBlur={handleEmailBlur}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <label className={labelClass}>Email:</label>
+              <input type="email" value={form.email} onChange={setEmailField} onBlur={handleEmailBlur} className={inputClass} />
               {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
               {emailSuggestion && (
                 <button type="button" onClick={acceptEmailSuggestion}
@@ -166,24 +164,20 @@ export default function Guardians() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact number:</label>
-              <input type="text" value={form.contactNumber} onChange={set('contactNumber')}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <label className={labelClass}>Contact number:</label>
+              <input type="text" value={form.contactNumber} onChange={set('contactNumber')} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Address:</label>
-              <input type="text" value={form.address} onChange={setCapitalized('address')} autoCapitalize="words"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <label className={labelClass}>Address:</label>
+              <input type="text" value={form.address} onChange={setCapitalized('address')} autoCapitalize="words" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Relationship to child:</label>
-              <input type="text" value={form.relationship} onChange={setCapitalized('relationship')} placeholder="Mother, Father, Guardian…" autoCapitalize="words"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              <label className={labelClass}>Relationship to child:</label>
+              <input type="text" value={form.relationship} onChange={setCapitalized('relationship')} placeholder="Mother, Father, Guardian…" autoCapitalize="words" className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Child:</label>
-              <select value={form.childId} onChange={set('childId')}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <label className={labelClass}>Child:</label>
+              <select value={form.childId} onChange={set('childId')} className={`${inputClass} bg-white`}>
                 <option value="">Select a child…</option>
                 {children.map(c => <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>)}
               </select>
@@ -191,7 +185,7 @@ export default function Guardians() {
           </div>
 
           <button type="submit" disabled={creating}
-            className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors">
+            className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition-colors">
             {creating ? 'Creating…' : 'Create Guardian Account'}
           </button>
         </form>
@@ -215,23 +209,23 @@ export default function Guardians() {
             <table className="w-full text-sm min-w-[720px]">
               <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium">Name</th>
-                  <th className="text-left px-4 py-3 font-medium">Email</th>
-                  <th className="text-left px-4 py-3 font-medium">Contact Number</th>
-                  <th className="text-left px-4 py-3 font-medium">Address</th>
-                  <th className="text-left px-4 py-3 font-medium">Children</th>
-                  <th className="text-left px-4 py-3 font-medium">Actions</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Name</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Email</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Contact Number</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Address</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Children</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {paged.map(a => (
                   <tr key={a.userId} className="hover:bg-gray-50/60 transition-colors duration-150">
-                    <td className="px-4 py-3 font-medium text-gray-900">{a.name}</td>
-                    <td className="px-4 py-3 text-gray-500">{a.email}</td>
-                    <td className="px-4 py-3 text-gray-600">{a.contactNumber || '—'}</td>
-                    <td className="px-4 py-3 text-gray-600">{a.address || '—'}</td>
-                    <td className="px-4 py-3 text-gray-600">{a.children.map(c => `${c.firstName} ${c.lastName}`).join(', ') || '—'}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5 font-medium text-gray-900">{a.name}</td>
+                    <td className="px-4 py-2.5 text-gray-500">{a.email}</td>
+                    <td className="px-4 py-2.5 text-gray-600">{a.contactNumber || '—'}</td>
+                    <td className="px-4 py-2.5 text-gray-600">{a.address || '—'}</td>
+                    <td className="px-4 py-2.5 text-gray-600">{a.children.map(c => `${c.firstName} ${c.lastName}`).join(', ') || '—'}</td>
+                    <td className="px-4 py-2.5">
                       <div className="flex flex-wrap gap-1.5">
                         <button
                           onClick={() => handleResetPassword(a)}

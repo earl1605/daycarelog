@@ -55,7 +55,7 @@ export default function HealthRecords() {
   const { page, setPage, totalPages, paged } = usePagination(filtered)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
         <h1 className="text-[22px] font-bold text-gray-900">Health Records</h1>
         <p className="text-gray-500 text-sm mt-1">Weight and height are recorded from a child's own profile (Children → Edit).</p>
@@ -79,15 +79,15 @@ export default function HealthRecords() {
             <table className="w-full text-sm min-w-[1050px]">
               <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium">Child</th>
-                  <th className="text-left px-4 py-3 font-medium">Date</th>
-                  <th className="text-left px-4 py-3 font-medium">Weight</th>
-                  <th className="text-left px-4 py-3 font-medium">Height</th>
-                  <th className="text-left px-4 py-3 font-medium">Status</th>
-                  <th className="text-left px-4 py-3 font-medium">Blood Type</th>
-                  <th className="text-left px-4 py-3 font-medium">Immunizations</th>
-                  <th className="text-left px-4 py-3 font-medium">Remarks</th>
-                  <th className="text-left px-4 py-3 font-medium">Actions</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Child</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Date</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Weight</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Height</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Status</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Blood Type</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Immunizations</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Remarks</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -97,13 +97,13 @@ export default function HealthRecords() {
                   const chips = child ? immunizationChips(child.id) : []
                   return (
                     <tr key={r.id} className="hover:bg-gray-50/60 transition-colors duration-150">
-                      <td className="px-4 py-3 font-medium text-gray-900">{child ? `${child.firstName} ${child.lastName}` : '—'}</td>
-                      <td className="px-4 py-3 text-gray-600">{new Date(r.measurementDate + 'T00:00:00').toLocaleDateString('en-PH')}</td>
-                      <td className="px-4 py-3 text-gray-600">{r.weightKg ? `${r.weightKg} kg` : '—'}</td>
-                      <td className="px-4 py-3 text-gray-600">{r.heightCm ? `${r.heightCm} cm` : '—'}</td>
-                      <td className="px-4 py-3">{status ? <NutritionalStatusBadge status={status} /> : '—'}</td>
-                      <td className="px-4 py-3 text-gray-600">{child?.bloodType || '—'}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-2.5 font-medium text-gray-900">{child ? `${child.firstName} ${child.lastName}` : '—'}</td>
+                      <td className="px-4 py-2.5 text-gray-600">{new Date(r.measurementDate + 'T00:00:00').toLocaleDateString('en-PH')}</td>
+                      <td className="px-4 py-2.5 text-gray-600">{r.weightKg ? `${r.weightKg} kg` : '—'}</td>
+                      <td className="px-4 py-2.5 text-gray-600">{r.heightCm ? `${r.heightCm} cm` : '—'}</td>
+                      <td className="px-4 py-2.5">{status ? <NutritionalStatusBadge status={status} /> : '—'}</td>
+                      <td className="px-4 py-2.5 text-gray-600">{child?.bloodType || '—'}</td>
+                      <td className="px-4 py-2.5">
                         {chips.length === 0 ? '—' : (
                           <div className="flex flex-wrap gap-1">
                             {chips.map(c => (
@@ -115,8 +115,8 @@ export default function HealthRecords() {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-400">{r.remarks || '—'}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-2.5 text-gray-400">{r.remarks || '—'}</td>
+                      <td className="px-4 py-2.5">
                         <button onClick={() => handleDelete(r.id)} className="text-gray-300 hover:text-red-500 transition-colors" title="Delete">
                           <TrashIcon width={16} height={16} />
                         </button>

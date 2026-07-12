@@ -29,7 +29,7 @@ export default function ParentAttendance() {
   const { page, setPage, totalPages, paged } = usePagination(filtered)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-[22px] font-bold text-gray-900">Attendance</h1>
         {children.length > 1 && (
@@ -52,19 +52,19 @@ export default function ParentAttendance() {
           <table className="w-full text-sm min-w-[460px]">
             <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
               <tr>
-                <th className="text-left px-4 py-3 font-medium">Child</th>
-                <th className="text-left px-4 py-3 font-medium">Date</th>
-                <th className="text-left px-4 py-3 font-medium">Status</th>
+                <th className="text-left px-4 py-2.5 font-medium">Child</th>
+                <th className="text-left px-4 py-2.5 font-medium">Date</th>
+                <th className="text-left px-4 py-2.5 font-medium">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {paged.map(r => (
                 <tr key={r.id} className="hover:bg-gray-50/60 transition-colors duration-150">
-                  <td className="px-4 py-3 font-medium text-gray-900">
+                  <td className="px-4 py-2.5 font-medium text-gray-900">
                     {childMap[r.childId] ? `${childMap[r.childId].firstName} ${childMap[r.childId].lastName}` : '—'}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{new Date(r.date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2.5 text-gray-600">{new Date(r.date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                  <td className="px-4 py-2.5">
                     <span className={`px-3 py-1 rounded-lg text-xs font-medium capitalize ${STATUS_COLORS[r.status] ?? 'bg-gray-100 text-gray-500'}`}>
                       {r.status}
                     </span>

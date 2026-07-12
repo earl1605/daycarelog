@@ -82,7 +82,7 @@ export default function ChildDetail() {
   ]
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-5">
       <div className="flex items-start gap-4">
         <button onClick={() => navigate(-1)} className="mt-1 text-gray-400 hover:text-gray-700">← Back</button>
         <div className="flex-1">
@@ -91,7 +91,7 @@ export default function ChildDetail() {
               {child.firstName[0]}{child.lastName[0]}
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-gray-900">{child.firstName} {child.lastName}</h1>
+              <h1 className="text-[22px] font-bold text-gray-900">{child.firstName} {child.lastName}</h1>
               <p className="text-gray-500 text-sm">{child.sex} · {formatAge(child.dateOfBirth)}</p>
               {status && <NutritionalStatusBadge status={status} />}
             </div>
@@ -123,7 +123,7 @@ export default function ChildDetail() {
       </div>
 
       {tab === TAB.OVERVIEW && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 grid grid-cols-2 gap-4 text-sm">
+        <div className="bg-white rounded-xl border border-gray-200/70 p-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
           {[
             ['Date of Birth', new Date(child.dateOfBirth + 'T00:00:00').toLocaleDateString('en-PH')],
             ['Age',           formatAge(child.dateOfBirth)],
@@ -168,13 +168,13 @@ export default function ChildDetail() {
             <Link to={`/children/${id}/edit`} className="text-sm bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700">+ Add Measurement</Link>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="bg-white rounded-xl border border-gray-200/70 p-5">
             <h3 className="text-sm font-medium text-gray-500 mb-3">Growth Over Time</h3>
             <GrowthChart records={health} />
           </div>
 
           {health.length === 0 ? <p className="text-gray-400 text-sm">No records yet.</p> : health.map(r => (
-            <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4 flex gap-4 text-sm items-start">
+            <div key={r.id} className="bg-white rounded-xl border border-gray-200/70 p-4 flex gap-4 text-sm items-start">
               <div className="flex-1">
                 <p className="font-medium text-gray-900">{new Date(r.measurementDate + 'T00:00:00').toLocaleDateString('en-PH')}</p>
                 <p className="text-gray-500">Weight: {r.weightKg}kg · Height: {r.heightCm}cm</p>
@@ -202,7 +202,7 @@ export default function ChildDetail() {
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-500">Records</h3>
               {immunizations.map(r => (
-                <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4 flex gap-4 text-sm items-start">
+                <div key={r.id} className="bg-white rounded-xl border border-gray-200/70 p-4 flex gap-4 text-sm items-start">
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{r.vaccineName} · Dose {r.doseNumber}</p>
                     <p className="text-gray-500">{new Date(r.dateGiven + 'T00:00:00').toLocaleDateString('en-PH')}{r.administeredBy ? ` · ${r.administeredBy}` : ''}</p>
@@ -219,26 +219,26 @@ export default function ChildDetail() {
       )}
 
       {tab === TAB.ATTENDANCE && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200/70 overflow-x-auto">
           {att.length === 0 ? <p className="text-gray-400 text-sm p-4">No records yet.</p> : (
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+            <table className="w-full text-sm min-w-[480px]">
+              <thead className="bg-[#FAFAFA] text-gray-500 text-xs uppercase tracking-wide border-b border-gray-200/70">
                 <tr>
-                  <th className="text-left px-4 py-3">Date</th>
-                  <th className="text-left px-4 py-3">Status</th>
-                  <th className="text-left px-4 py-3">Time In</th>
-                  <th className="text-left px-4 py-3">Time Out</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Date</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Status</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Time In</th>
+                  <th className="text-left px-4 py-2.5 font-medium">Time Out</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-100">
                 {att.map(a => (
-                  <tr key={a.id}>
-                    <td className="px-4 py-3">{new Date(a.date + 'T00:00:00').toLocaleDateString('en-PH')}</td>
-                    <td className="px-4 py-3">
+                  <tr key={a.id} className="hover:bg-gray-50/60 transition-colors duration-150">
+                    <td className="px-4 py-2.5">{new Date(a.date + 'T00:00:00').toLocaleDateString('en-PH')}</td>
+                    <td className="px-4 py-2.5">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${a.status === 'present' ? 'bg-green-100 text-green-700' : a.status === 'absent' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{a.status}</span>
                     </td>
-                    <td className="px-4 py-3 text-gray-400">{a.timeIn ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-400">{a.timeOut ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-gray-400">{a.timeIn ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-gray-400">{a.timeOut ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>
