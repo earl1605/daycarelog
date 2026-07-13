@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      // Capture beforeinstallprompt as early as physically possible - it can
+      // fire before React finishes mounting and attaches its own listener,
+      // and a missed event is gone for the rest of the page's lifetime.
+      // This runs before any other script, so nothing can be missed.
+      window.__pwaInstallEvent = null
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault()
+        window.__pwaInstallEvent = e
+        window.dispatchEvent(new Event('pwa-install-ready'))
+      })
+      window.addEventListener('appinstalled', function () {
+        window.__pwaInstallEvent = null
+        window.dispatchEvent(new Event('pwa-install-done'))
+      })
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
