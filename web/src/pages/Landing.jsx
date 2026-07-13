@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import useInstallPrompt from '../hooks/useInstallPrompt'
 
 const features = [
   { icon: '📝', title: 'Digital Enrollment', desc: 'Paperless child registration with complete guardian and health information.' },
@@ -41,7 +43,14 @@ function useReveal() {
 export default function Landing() {
   const featRef  = useReveal()
   const stepsRef = useReveal()
+  const appRef   = useReveal()
   const ctaRef   = useReveal()
+  const { canPromptInstall, promptInstall, installed, isIos } = useInstallPrompt()
+
+  async function handleInstall() {
+    const accepted = await promptInstall()
+    if (accepted) toast.success('DaycareLog installed!')
+  }
 
   return (
     <div className="min-h-screen bg-animated-gradient text-white overflow-x-hidden">
@@ -151,6 +160,47 @@ export default function Landing() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section ref={appRef} className="relative z-10 py-24 px-6">
+        <div className="max-w-2xl mx-auto text-center reveal">
+          <span className="text-green-300 font-semibold text-sm uppercase tracking-widest text-shadow-soft">Get the App</span>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white mt-2 mb-4 text-shadow-strong">Download DaycareLog</h2>
+          <p className="text-green-100 mb-8 max-w-xl mx-auto font-medium">
+            Install it on your laptop or phone for one-tap access — no app store, no download size, works just like a native app.
+          </p>
+
+          <div className="flex items-center justify-center gap-10 mb-8">
+            <div className="flex flex-col items-center gap-2 text-white/80">
+              <span className="w-14 h-14 rounded-2xl glass flex items-center justify-center text-2xl">💻</span>
+              <span className="text-xs font-medium">Laptop</span>
+            </div>
+            <div className="flex flex-col items-center gap-2 text-white/80">
+              <span className="w-14 h-14 rounded-2xl glass flex items-center justify-center text-2xl">📱</span>
+              <span className="text-xs font-medium">Phone</span>
+            </div>
+          </div>
+
+          {installed ? (
+            <p className="inline-flex items-center gap-2 glass text-white font-semibold px-6 py-3.5 rounded-2xl">
+              ✓ Already installed on this device
+            </p>
+          ) : canPromptInstall ? (
+            <button
+              onClick={handleInstall}
+              className="bg-white text-primary-700 font-bold text-base px-8 py-4 rounded-2xl hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 duration-200"
+            >
+              ⬇ Download the App Now
+            </button>
+          ) : isIos ? (
+            <div className="glass text-white text-sm px-6 py-4 rounded-2xl max-w-sm mx-auto">
+              <p className="font-semibold mb-1">On iPhone/iPad:</p>
+              <p className="text-green-100">Tap the Share button in Safari, then "Add to Home Screen".</p>
+            </div>
+          ) : (
+            <p className="text-green-200 text-sm">Open this page in Chrome or Edge on your laptop or phone to install.</p>
+          )}
         </div>
       </section>
 
