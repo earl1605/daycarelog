@@ -98,6 +98,9 @@ public class UserService {
         if (req.getSuffix()      != null) user.setSuffix(req.getSuffix());
         if (req.getProfilePhoto() != null) user.setProfilePhoto(req.getProfilePhoto());
         if (req.getNewPassword() != null && !req.getNewPassword().isBlank()) {
+            if (req.getNewPassword().length() < 8) {
+                throw new RuntimeException("Password must be at least 8 characters");
+            }
             if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
                 throw new RuntimeException("Current password is incorrect");
             }

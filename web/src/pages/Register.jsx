@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import { validateEmailFormat, getEmailTypoSuggestion } from '../utils/emailValidation'
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
 import usePageTitle from '../hooks/usePageTitle'
 import toast from 'react-hot-toast'
 
@@ -59,7 +60,7 @@ export default function Register() {
     }
     const emailCheck = validateEmailFormat(email)
     if (!emailCheck.valid) { setEmailError(emailCheck.message); setFormError(emailCheck.message); return }
-    if (password.length < 6) { setFormError('Password must be at least 6 characters'); return }
+    if (password.length < 8) { setFormError('Password must be at least 8 characters'); return }
     if (password !== confirm) { setFormError('Passwords do not match'); return }
     setLoading(true)
     const { error } = await signUp(email, password, firstName.trim(), lastName.trim(), middleName.trim(), suffix.trim())
@@ -178,12 +179,13 @@ export default function Register() {
                 <label className="block text-xs font-medium text-gray-700 mb-1">Password <span className="text-red-400">*</span></label>
                 <div className="relative">
                   <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="Min. 6 chars" className={`${inputClass} pr-9`} autoComplete="new-password" />
+                    placeholder="Min. 8 chars" className={`${inputClass} pr-9`} autoComplete="new-password" />
                   <button type="button" onClick={() => setShowPass(p => !p)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
                     <EyeIcon open={showPass} />
                   </button>
                 </div>
+                <PasswordStrengthMeter password={password} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Confirm <span className="text-red-400">*</span></label>

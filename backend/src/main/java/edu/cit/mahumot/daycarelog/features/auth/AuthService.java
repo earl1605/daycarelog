@@ -29,6 +29,10 @@ public class AuthService {
     public void register(RegisterRequest req) {
         String email = emailRegistrationValidator.validate(req.getEmail());
 
+        if (req.getPassword() == null || req.getPassword().length() < 8) {
+            throw new RuntimeException("Password must be at least 8 characters");
+        }
+
         if (userRepository.existsByEmail(email)) {
             return;
         }

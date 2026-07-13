@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import { UsersIcon, KeyIcon, EyeIcon, EyeOffIcon, SunIcon, MoonIcon, LogOutIcon } from '../components/icons'
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
 import toast from 'react-hot-toast'
 
 function resizeImage(file, maxSize = 256) {
@@ -83,7 +84,7 @@ export default function Settings() {
 
   async function savePassword(e) {
     e.preventDefault()
-    if (newPass.length < 6) { toast.error('Password must be at least 6 characters'); return }
+    if (newPass.length < 8) { toast.error('Password must be at least 8 characters'); return }
     if (newPass !== confirm) { toast.error('Passwords do not match'); return }
     setSaving(true)
     try {
@@ -182,7 +183,7 @@ export default function Settings() {
             <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
               <KeyIcon width={16} height={16} className="text-primary-600" /> Change Password
             </h2>
-            <p className="text-xs text-gray-400 mt-1">Use at least 6 characters. You'll need your current password to confirm.</p>
+            <p className="text-xs text-gray-400 mt-1">Use at least 8 characters. You'll need your current password to confirm.</p>
           </div>
 
           {[['Current Password', curPass, setCurPass, 'curPass'], ['New Password', newPass, setNewPass, 'newPass'], ['Confirm New Password', confirm, setConfirm, 'confirm']].map(([label, val, setter, key]) => (
@@ -205,6 +206,7 @@ export default function Settings() {
                   {showPass[key] ? <EyeOffIcon width={17} height={17} /> : <EyeIcon width={17} height={17} />}
                 </button>
               </div>
+              {key === 'newPass' && <PasswordStrengthMeter password={val} />}
             </div>
           ))}
 
