@@ -86,16 +86,19 @@ export default function Register() {
           </span>
         </Link>
         <div>
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3 mb-5">
             {['👶', '🏥', '📋'].map((icon, i) => (
               <div key={i} className={`w-14 h-14 rounded-2xl glass flex items-center justify-center text-2xl animate-float animation-delay-${i * 200}`}>{icon}</div>
             ))}
           </div>
-          <h2 className="text-4xl font-extrabold leading-tight mb-4">Join hundreds of<br />barangay centers.</h2>
-          <p className="text-green-100 text-xl">Start tracking, monitoring, and reporting for your daycare center today — completely free.</p>
-          <ul className="mt-6 space-y-2 text-green-100 text-base">
+          <h2 className="text-4xl font-extrabold leading-tight mb-3">Join hundreds of<br />barangay centers.</h2>
+          <p className="text-green-100 text-xl leading-relaxed mb-5">Start tracking, monitoring, and reporting for your daycare center today — completely free.</p>
+          <ul className="space-y-2.5 text-green-100 text-base">
             {['Free to use', 'Secure & private', 'DOH-aligned reports', 'Works offline-friendly'].map(t => (
-              <li key={t} className="flex items-center gap-2"><span className="text-green-300">✓</span>{t}</li>
+              <li key={t} className="flex items-center gap-2.5">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-300/20 text-green-300 text-xs flex items-center justify-center">✓</span>
+                {t}
+              </li>
             ))}
           </ul>
         </div>
