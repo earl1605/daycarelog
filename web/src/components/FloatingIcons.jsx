@@ -64,17 +64,21 @@ function BlocksIcon(props) {
 
 const ICON_COMPONENTS = [HeartIcon, StarIcon, SunIcon, SmileIcon, BabyIcon, BlocksIcon]
 
-// This app's actual brand greens (tailwind.config.js primary scale) - a
-// light/dark pair from the real palette, not an arbitrary unrelated color.
-const COLORS = ['#4ade80', '#15803d']
+// White/near-white, matching the existing decorative circles on this page.
+// The landing background is bg-animated-gradient, which cycles through
+// #14532d/#166534/#15803d/#16a34a/#0d9488/#0891b2 - a brand-green icon
+// color would go invisible whenever the gradient lands on that same shade
+// (zero contrast against itself), so white is the only choice that stays
+// visible against every stop.
+const COLORS = ['#ffffff', '#dcfce7']
 
 const ICON_COUNT = 8
 const MIN_SIZE = 24
 const MAX_SIZE = 56
 const MIN_SPEED = 20 // px/s
 const MAX_SPEED = 60 // px/s
-const MIN_OPACITY = 0.15
-const MAX_OPACITY = 0.35
+const MIN_OPACITY = 0.25
+const MAX_OPACITY = 0.45
 
 function rand(min, max) {
   return min + Math.random() * (max - min)
