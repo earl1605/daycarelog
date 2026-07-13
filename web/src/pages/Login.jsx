@@ -48,7 +48,7 @@ export default function Login() {
             ))}
           </div>
           <h2 className="text-4xl font-extrabold leading-tight mb-4">Your barangay's<br />health data, simplified.</h2>
-          <p className="text-green-100 text-lg">Enrollment, attendance, nutritional monitoring — all in one place.</p>
+          <p className="text-green-100 text-xl">Enrollment, attendance, nutritional monitoring — all in one place.</p>
         </div>
         <p className="text-green-200 text-sm">© {new Date().getFullYear()} DaycareLog · Philippines</p>
       </div>

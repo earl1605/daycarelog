@@ -91,8 +91,8 @@ export default function Register() {
             ))}
           </div>
           <h2 className="text-4xl font-extrabold leading-tight mb-4">Join hundreds of<br />barangay centers.</h2>
-          <p className="text-green-100 text-lg">Start tracking, monitoring, and reporting for your daycare center today — completely free.</p>
-          <ul className="mt-6 space-y-2 text-green-100 text-sm">
+          <p className="text-green-100 text-xl">Start tracking, monitoring, and reporting for your daycare center today — completely free.</p>
+          <ul className="mt-6 space-y-2 text-green-100 text-base">
             {['Free to use', 'Secure & private', 'DOH-aligned reports', 'Works offline-friendly'].map(t => (
               <li key={t} className="flex items-center gap-2"><span className="text-green-300">✓</span>{t}</li>
             ))}

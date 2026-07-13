@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
-import { UsersIcon, KeyIcon, EyeIcon, EyeOffIcon } from '../components/icons'
+import { UsersIcon, KeyIcon, EyeIcon, EyeOffIcon, SunIcon, MoonIcon, LogOutIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
 function resizeImage(file, maxSize = 256) {
@@ -23,11 +25,14 @@ function resizeImage(file, maxSize = 256) {
 }
 
 export default function Settings() {
-  const { user, refreshUser } = useAuth()
+  const { user, refreshUser, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
+  const navigate = useNavigate()
   const [firstName,  setFirstName]  = useState(user?.firstName  ?? '')
   const [lastName,   setLastName]   = useState(user?.lastName   ?? '')
   const [middleName, setMiddleName] = useState(user?.middleName ?? '')
   const [suffix,     setSuffix]     = useState(user?.suffix     ?? '')
+  const [email,      setEmail]      = useState(user?.email      ?? '')
   const [curPass,    setCurPass]    = useState('')
   const [newPass,    setNewPass]    = useState('')
   const [confirm,    setConfirm]    = useState('')
@@ -37,6 +42,7 @@ export default function Settings() {
   const fileRef = useRef()
 
   const initial = (firstName?.[0] ?? user?.email?.[0] ?? 'U').toUpperCase()
+  const isDark = theme === 'dark'
 
   async function handlePhoto(e) {
     const file = e.target.files?.[0]
@@ -55,13 +61,24 @@ export default function Settings() {
   async function saveName(e) {
     e.preventDefault()
     if (!firstName.trim() || !lastName.trim()) { toast.error('First and last name are required'); return }
+    if (!email.trim()) { toast.error('Email is required'); return }
     setSaving(true)
     try {
-      await api.users.updateProfile(user.id, { firstName, lastName, middleName, suffix })
-      refreshUser({ firstName, lastName, middleName, suffix })
+      await api.users.updateProfile(user.id, { firstName, lastName, middleName, suffix, email })
+      refreshUser({ firstName, lastName, middleName, suffix, email })
       toast.success('Profile updated')
     } catch (err) { toast.error(err.message) }
     setSaving(false)
+  }
+
+  function selectTheme(target) {
+    if (target !== theme) toggleTheme()
+  }
+
+  function handleSignOut() {
+    signOut()
+    toast.success('Signed out')
+    navigate('/')
   }
 
   async function savePassword(e) {
@@ -89,9 +106,9 @@ export default function Settings() {
         <p className="text-gray-500 text-sm mt-1">Manage your profile, photo, and account security.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        <div className="bg-white rounded-xl border border-gray-200/70 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200/70 overflow-hidden flex flex-col">
           <div className="p-5 flex items-center gap-4 bg-[#FAFAFA] border-b border-gray-200/70">
             <button type="button" onClick={() => fileRef.current.click()}
               className="relative group w-16 h-16 rounded-full overflow-hidden ring-4 ring-white shadow-sm shrink-0">
@@ -113,7 +130,7 @@ export default function Settings() {
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
           </div>
 
-          <form onSubmit={saveName} className="p-5 space-y-4">
+          <form onSubmit={saveName} className="p-5 space-y-4 flex-1 flex flex-col">
             <div>
               <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
                 <UsersIcon width={16} height={16} className="text-primary-600" /> Personal Information
@@ -146,9 +163,13 @@ export default function Settings() {
                   <option value="V">V</option>
                 </select>
               </div>
+              <div className="col-span-2">
+                <label className={labelClass}>Email <span className="text-red-400">*</span></label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} placeholder="you@example.com" />
+              </div>
             </div>
 
-            <div className="flex justify-end pt-1">
+            <div className="flex justify-end pt-1 mt-auto">
               <button type="submit" disabled={saving} className={btnClass}>
                 {saving ? 'Saving…' : 'Save Changes'}
               </button>
@@ -156,7 +177,7 @@ export default function Settings() {
           </form>
         </div>
 
-        <form onSubmit={savePassword} className="bg-white rounded-xl border border-gray-200/70 p-5 space-y-4">
+        <form onSubmit={savePassword} className="bg-white rounded-xl border border-gray-200/70 p-5 space-y-4 flex flex-col">
           <div>
             <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
               <KeyIcon width={16} height={16} className="text-primary-600" /> Change Password
@@ -187,12 +208,47 @@ export default function Settings() {
             </div>
           ))}
 
-          <div className="flex justify-end pt-1">
+          <div className="flex justify-end pt-1 mt-auto">
             <button type="submit" disabled={saving} className={btnClass}>
               {saving ? 'Saving…' : 'Update Password'}
             </button>
           </div>
         </form>
+
+        <div className="bg-white rounded-xl border border-gray-200/70 p-5 space-y-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
+              {isDark ? <MoonIcon width={16} height={16} className="text-primary-600" /> : <SunIcon width={16} height={16} className="text-primary-600" />} Appearance
+            </h2>
+            <p className="text-xs text-gray-400 mt-1">Choose how DaycareLog looks on this device.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => selectTheme('light')}
+              className={`flex flex-col items-center gap-2 rounded-lg border-2 py-3 transition-colors duration-150 ${!isDark ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+              <SunIcon width={20} height={20} className={!isDark ? 'text-primary-600' : 'text-gray-400'} />
+              <span className={`text-sm font-medium ${!isDark ? 'text-primary-700' : 'text-gray-600'}`}>Light</span>
+            </button>
+            <button type="button" onClick={() => selectTheme('dark')}
+              className={`flex flex-col items-center gap-2 rounded-lg border-2 py-3 transition-colors duration-150 ${isDark ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+              <MoonIcon width={20} height={20} className={isDark ? 'text-primary-600' : 'text-gray-400'} />
+              <span className={`text-sm font-medium ${isDark ? 'text-primary-700' : 'text-gray-600'}`}>Dark</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200/70 p-5 space-y-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-[15px] font-bold text-gray-900">
+              <LogOutIcon width={16} height={16} className="text-primary-600" /> Session
+            </h2>
+            <p className="text-xs text-gray-400 mt-1">Signed in as <span className="font-medium text-gray-600">{user?.email}</span>.</p>
+          </div>
+          <button type="button" onClick={handleSignOut}
+            className="inline-flex items-center gap-1.5 border border-gray-200 text-gray-700 text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-50 transition-colors duration-150">
+            <LogOutIcon width={15} height={15} /> Sign out of this device
+          </button>
+        </div>
 
       </div>
     </div>
