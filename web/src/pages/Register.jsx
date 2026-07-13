@@ -133,12 +133,12 @@ export default function Register() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">First Name <span className="text-red-400">*</span></label>
                 <input type="text" value={firstName} onChange={handleCapitalizedNameInput(setFirstName)}
-                  placeholder="Juan" className={inputClass} autoComplete="given-name" autoCapitalize="words" />
+                  placeholder="Christian Earl" className={inputClass} autoComplete="given-name" autoCapitalize="words" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Last Name <span className="text-red-400">*</span></label>
                 <input type="text" value={lastName} onChange={handleCapitalizedNameInput(setLastName)}
-                  placeholder="dela Cruz" className={inputClass} autoComplete="family-name" autoCapitalize="words" />
+                  placeholder="Mahumot" className={inputClass} autoComplete="family-name" autoCapitalize="words" />
               </div>
             </div>
 
@@ -146,7 +146,7 @@ export default function Register() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Middle Name</label>
                 <input type="text" value={middleName} onChange={handleCapitalizedNameInput(setMiddleName)}
-                  placeholder="Santos" className={inputClass} autoComplete="additional-name" autoCapitalize="words" />
+                  placeholder="Villahermosa" className={inputClass} autoComplete="additional-name" autoCapitalize="words" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Suffix</label>
