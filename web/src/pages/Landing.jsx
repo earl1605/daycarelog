@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import useInstallPrompt from '../hooks/useInstallPrompt'
@@ -46,10 +46,21 @@ export default function Landing() {
   const appRef   = useReveal()
   const ctaRef   = useReveal()
   const { canPromptInstall, promptInstall, installed, isIos } = useInstallPrompt()
+  const [showHelp, setShowHelp] = useState(false)
 
   async function handleInstall() {
-    const accepted = await promptInstall()
-    if (accepted) toast.success('DaycareLog installed!')
+    if (installed) {
+      toast('Already installed on this device.', { icon: '✓' })
+      return
+    }
+    if (canPromptInstall) {
+      const accepted = await promptInstall()
+      if (accepted) toast.success('DaycareLog installed!')
+      return
+    }
+    // beforeinstallprompt hasn't fired yet (browser engagement heuristics,
+    // or this is iOS where it never fires) - show manual steps instead.
+    setShowHelp(true)
   }
 
   return (
@@ -182,24 +193,29 @@ export default function Landing() {
             </div>
           </div>
 
-          {installed ? (
-            <p className="inline-flex items-center gap-2 glass text-white font-semibold px-6 py-3.5 rounded-2xl">
-              ✓ Already installed on this device
-            </p>
-          ) : canPromptInstall ? (
-            <button
-              onClick={handleInstall}
-              className="bg-white text-primary-700 font-bold text-base px-8 py-4 rounded-2xl hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 duration-200"
-            >
-              ⬇ Download the App Now
-            </button>
-          ) : isIos ? (
-            <div className="glass text-white text-sm px-6 py-4 rounded-2xl max-w-sm mx-auto">
-              <p className="font-semibold mb-1">On iPhone/iPad:</p>
-              <p className="text-green-100">Tap the Share button in Safari, then "Add to Home Screen".</p>
+          <button
+            onClick={handleInstall}
+            disabled={installed}
+            className="bg-white text-primary-700 font-bold text-base px-8 py-4 rounded-2xl hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 duration-200 disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-xl disabled:cursor-default"
+          >
+            {installed ? '✓ Already Installed' : '⬇ Download the App Now'}
+          </button>
+
+          {showHelp && (
+            <div className="glass text-white text-sm px-6 py-4 rounded-2xl max-w-sm mx-auto mt-5 text-left animate-fade-in">
+              {isIos ? (
+                <>
+                  <p className="font-semibold mb-1">On iPhone/iPad:</p>
+                  <p className="text-green-100">Tap the Share button in Safari, then "Add to Home Screen".</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold mb-1">Your browser hasn't offered the one-click install yet — do it manually:</p>
+                  <p className="text-green-100">On laptop — click the install icon (⊕ or a small monitor) at the right end of the address bar.</p>
+                  <p className="text-green-100 mt-1.5">On phone — open the ⋮ menu and tap "Install app" or "Add to Home screen".</p>
+                </>
+              )}
             </div>
-          ) : (
-            <p className="text-green-200 text-sm">Open this page in Chrome or Edge on your laptop or phone to install.</p>
           )}
         </div>
       </section>
