@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import useInstallPrompt from '../hooks/useInstallPrompt'
+import FloatingIcons from '../components/FloatingIcons'
 
 const features = [
   { icon: '📝', title: 'Digital Enrollment', desc: 'Paperless child registration with complete guardian and health information.' },
@@ -75,6 +76,8 @@ export default function Landing() {
         <div className="absolute top-2/3 left-10 w-48 h-48 rounded-full bg-white/[0.03] animate-float animation-delay-1000" />
         <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full bg-white/[0.03] animate-float-slow animation-delay-800" />
       </div>
+
+      <FloatingIcons />
 
       <nav className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 md:px-12 py-3 md:py-4 z-20 bg-black/10 backdrop-blur-sm">
         <span className="flex items-center gap-2 sm:gap-3">
