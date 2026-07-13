@@ -94,7 +94,7 @@ export default function VerifyEmail() {
                     Enter your email to get a new link
                   </label>
                   <input type="email" value={resendEmail} onChange={e => setResendEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder="you@daycarelog.com"
                     className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition" />
                 </div>
                 <button type="submit"

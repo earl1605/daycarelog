@@ -166,7 +166,7 @@ export default function Settings() {
               </div>
               <div className="col-span-2">
                 <label className={labelClass}>Email <span className="text-red-400">*</span></label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} placeholder="you@example.com" />
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} placeholder="you@daycarelog.com" />
               </div>
             </div>
 

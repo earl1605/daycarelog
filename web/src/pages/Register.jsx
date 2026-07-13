@@ -167,7 +167,7 @@ export default function Register() {
               <input type="email" value={email}
                 onChange={e => { setEmail(e.target.value); setEmailError(''); setEmailSuggestion('') }}
                 onBlur={handleEmailBlur}
-                placeholder="you@example.com" className={inputClass} autoComplete="email" />
+                placeholder="you@daycarelog.com" className={inputClass} autoComplete="email" />
               {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
               {emailSuggestion && (
                 <button type="button" onClick={acceptEmailSuggestion}
