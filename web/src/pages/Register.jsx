@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import { validateEmailFormat, getEmailTypoSuggestion } from '../utils/emailValidation'
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
+import FloatingIcons from '../components/FloatingIcons'
 import usePageTitle from '../hooks/usePageTitle'
 import toast from 'react-hot-toast'
 
@@ -76,7 +77,8 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex bg-animated-gradient">
-      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 text-white">
+      <FloatingIcons />
+      <div className="relative z-10 hidden lg:flex flex-col justify-between w-1/2 p-12 text-white">
         <Link to="/" className="flex items-center gap-3">
           <img src="/favicon.svg" alt="DaycareLog" className="w-11 h-11 flex-shrink-0" />
           <span className="font-extrabold text-4xl tracking-wide">
@@ -105,7 +107,7 @@ export default function Register() {
         <p className="text-green-200 text-sm">© {new Date().getFullYear()} DaycareLog · Philippines</p>
       </div>
 
-      <div className="flex-1 flex items-start justify-center p-4 py-6 overflow-y-auto">
+      <div className="relative z-10 flex-1 flex items-start justify-center p-4 py-6 overflow-y-auto">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl px-5 sm:px-7 py-5 animate-scale-in my-auto">
           <div className="flex lg:hidden items-center gap-2.5 mb-3">
             <img src="/favicon.svg" alt="DaycareLog" className="w-9 h-9 flex-shrink-0" />

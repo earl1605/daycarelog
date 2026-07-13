@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import usePageTitle from '../hooks/usePageTitle'
+import FloatingIcons from '../components/FloatingIcons'
 import toast from 'react-hot-toast'
 
 export default function Login() {
@@ -32,7 +33,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex bg-animated-gradient">
-      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 text-white">
+      <FloatingIcons />
+      <div className="relative z-10 hidden lg:flex flex-col justify-between w-1/2 p-12 text-white">
         <Link to="/" className="flex items-center gap-3">
           <img src="/favicon.svg" alt="DaycareLog" className="w-11 h-11 flex-shrink-0" />
           <span className="font-extrabold text-4xl tracking-wide">
@@ -53,7 +55,7 @@ export default function Login() {
         <p className="text-green-200 text-sm">© {new Date().getFullYear()} DaycareLog · Philippines</p>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <div className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 sm:p-8 animate-scale-in">
           <div className="flex lg:hidden items-center gap-2.5 mb-6">
             <img src="/favicon.svg" alt="DaycareLog" className="w-9 h-9 flex-shrink-0" />
