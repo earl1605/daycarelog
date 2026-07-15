@@ -27,6 +27,12 @@ public class ChildService {
     }
 
     public Child create(ChildRequest req, Long userId) {
+        String status = req.getEnrollmentStatus() != null ? req.getEnrollmentStatus() : "active";
+        if ("active".equals(status) && childRepository.existsByFirstNameIgnoreCaseAndLastNameIgnoreCaseAndDateOfBirthAndEnrollmentStatus(
+                req.getFirstName(), req.getLastName(), req.getDateOfBirth(), "active")) {
+            throw new RuntimeException(req.getFirstName() + " " + req.getLastName()
+                    + " is already actively enrolled with the same date of birth.");
+        }
         Child child = Child.builder()
                 .firstName(req.getFirstName())
                 .lastName(req.getLastName())
@@ -34,7 +40,7 @@ public class ChildService {
                 .sex(req.getSex())
                 .address(req.getAddress())
                 .enrollmentDate(req.getEnrollmentDate())
-                .enrollmentStatus(req.getEnrollmentStatus() != null ? req.getEnrollmentStatus() : "active")
+                .enrollmentStatus(status)
                 .allergies(req.getAllergies())
                 .medicalConditions(req.getMedicalConditions())
                 .bloodType(req.getBloodType())
@@ -45,6 +51,12 @@ public class ChildService {
 
     public Child update(Long id, ChildRequest req) {
         Child child = findById(id);
+        String status = req.getEnrollmentStatus() != null ? req.getEnrollmentStatus() : child.getEnrollmentStatus();
+        if ("active".equals(status) && childRepository.existsByFirstNameIgnoreCaseAndLastNameIgnoreCaseAndDateOfBirthAndEnrollmentStatusAndIdNot(
+                req.getFirstName(), req.getLastName(), req.getDateOfBirth(), "active", id)) {
+            throw new RuntimeException(req.getFirstName() + " " + req.getLastName()
+                    + " is already actively enrolled with the same date of birth.");
+        }
         child.setFirstName(req.getFirstName());
         child.setLastName(req.getLastName());
         child.setDateOfBirth(req.getDateOfBirth());
