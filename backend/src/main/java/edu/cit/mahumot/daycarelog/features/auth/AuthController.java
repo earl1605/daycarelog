@@ -1,5 +1,6 @@
 package edu.cit.mahumot.daycarelog.features.auth;
 
+import edu.cit.mahumot.daycarelog.common.email.EmailFormatValidator;
 import edu.cit.mahumot.daycarelog.common.email.EmailValidationException;
 import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
 import edu.cit.mahumot.daycarelog.features.users.User;
@@ -20,13 +21,16 @@ public class AuthController {
     private final VerificationService verificationService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final EmailFormatValidator emailFormatValidator;
 
     public AuthController(AuthService authService, VerificationService verificationService,
-                           UserRepository userRepository, JwtUtil jwtUtil) {
+                           UserRepository userRepository, JwtUtil jwtUtil,
+                           EmailFormatValidator emailFormatValidator) {
         this.authService = authService;
         this.verificationService = verificationService;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+        this.emailFormatValidator = emailFormatValidator;
     }
 
     @PostMapping("/register")
@@ -35,12 +39,33 @@ public class AuthController {
             authService.register(req);
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "message", "Registration received. Please check your email to verify your account."));
+        } catch (EmailAlreadyRegisteredException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage(), "code", e.getCode()));
         } catch (EmailValidationException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(Map.of("message", e.getMessage(), "code", e.getCode()));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    // Public, unauthenticated - lets the registration form tell the user an
+    // email is taken before they submit the whole form. Deliberately reveals
+    // registration status (see EmailAlreadyRegisteredException) - this app
+    // has chosen UX over anti-enumeration resistance for this one flow.
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+        String normalized;
+        try {
+            normalized = emailFormatValidator.normalizeAndValidate(email);
+        } catch (EmailValidationException e) {
+            // Malformed address - let full validation on submit report the
+            // real problem instead of erroring out of a background check.
+            return ResponseEntity.ok(Map.of("available", true));
+        }
+        boolean available = !userRepository.existsByEmail(normalized);
+        return ResponseEntity.ok(Map.of("available", available));
     }
 
     @PostMapping("/login")

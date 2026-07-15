@@ -19,6 +19,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -89,26 +90,60 @@ class RegistrationEmailGuardIntegrationTest {
     }
 
     @Test
-    void registeringWithAnAlreadyRegisteredEmailReturnsTheSameGenericResponseAsSuccessWithNoNewVerificationEmail() throws Exception {
+    void registeringWithAnAlreadyRegisteredEmailReturns409AndSendsNoNewVerificationEmail() throws Exception {
         Map<String, Object> body = registerBody(GMAIL);
 
-        String firstResponse = mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token").doesNotExist())
-                .andExpect(jsonPath("$.user").doesNotExist())
-                .andReturn().getResponse().getContentAsString();
+                .andExpect(jsonPath("$.user").doesNotExist());
 
-        String secondResponse = mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(body)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.token").doesNotExist())
-                .andExpect(jsonPath("$.user").doesNotExist())
-                .andReturn().getResponse().getContentAsString();
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"));
 
-        assertThat(secondResponse).isEqualTo(firstResponse);
         verify(emailService, times(1)).sendVerificationEmail(eq(GMAIL), any(), anyString(), anyString());
+    }
+
+    @Test
+    void registeringWithAnAlreadyRegisteredEmailInDifferentCasingIsStillCaughtAsADuplicate() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(registerBody(GMAIL))))
+                .andExpect(status().isCreated());
+
+        String shoutedCase = GMAIL.substring(0, GMAIL.indexOf('@')).toUpperCase() + GMAIL.substring(GMAIL.indexOf('@'));
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(registerBody(shoutedCase))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"));
+
+        verify(emailService, times(1)).sendVerificationEmail(eq(GMAIL), any(), anyString(), anyString());
+    }
+
+    @Test
+    void checkEmailReportsAvailableForAnUnregisteredAddressAndUnavailableOnceRegistered() throws Exception {
+        mockMvc.perform(get("/api/auth/check-email").param("email", GMAIL))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(true));
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(registerBody(GMAIL))))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/auth/check-email").param("email", GMAIL))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(false));
+
+        // Case-insensitive, matching how registration itself compares emails.
+        mockMvc.perform(get("/api/auth/check-email").param("email", GMAIL.toUpperCase()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(false));
     }
 }

@@ -45,6 +45,7 @@ export const api = {
     verifyByToken:        token       => request('/auth/verify-email', { method: 'POST', body: JSON.stringify({ token }) }),
     verifyByCode:         (email, code) => request('/auth/verify-email', { method: 'POST', body: JSON.stringify({ email, code }) }),
     resendVerification:   email       => request('/auth/resend-verification', { method: 'POST', body: JSON.stringify({ email }) }),
+    checkEmail:            email       => request(`/auth/check-email?email=${encodeURIComponent(email)}`),
     me:                   ()          => request('/auth/me'),
     refreshToken:         ()          => request('/auth/refresh-token', { method: 'POST' }),
     logout:               ()          => request('/auth/logout', { method: 'POST' }),

@@ -5,6 +5,7 @@ import edu.cit.mahumot.daycarelog.features.users.User;
 import edu.cit.mahumot.daycarelog.features.users.UserRepository;
 import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
 import edu.cit.mahumot.daycarelog.features.verification.VerificationService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ public class AuthService {
         }
 
         if (userRepository.existsByEmail(email)) {
-            return;
+            throw new EmailAlreadyRegisteredException();
         }
 
         User user = User.builder()
@@ -47,7 +48,14 @@ public class AuthService {
                 .role("staff")
                 .emailVerified(false)
                 .build();
-        user = userRepository.save(user);
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            // Two simultaneous registrations for the same email raced past the
+            // existsByEmail check above - the DB's unique constraint is the
+            // real guard, so map this to the same user-facing error.
+            throw new EmailAlreadyRegisteredException();
+        }
         verificationService.issueVerification(user);
     }
 

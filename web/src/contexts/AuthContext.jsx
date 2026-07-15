@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
       const res = await api.auth.register(email, password, firstName, lastName, middleName, suffix)
       return { data: res, error: null }
     } catch (e) {
-      return { data: null, error: { message: e.message } }
+      return { data: null, error: { message: e.message, code: e.code } }
     }
   }
 

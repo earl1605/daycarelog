@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { api } from '../lib/api'
 import { handleCapitalizedNameInput } from '../utils/capitalizeFirstLetters'
 import { validateEmailFormat, getEmailTypoSuggestion } from '../utils/emailValidation'
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
@@ -40,11 +41,19 @@ export default function Register() {
   const [formError,   setFormError]   = useState('')
   const [emailError,      setEmailError]      = useState('')
   const [emailSuggestion, setEmailSuggestion] = useState('')
+  const [emailTaken,      setEmailTaken]      = useState(false)
+  const lastCheckedEmail = useRef('')
 
-  function handleEmailBlur() {
+  async function handleEmailBlur() {
     const result = validateEmailFormat(email)
     setEmailError(result.valid ? '' : result.message)
     setEmailSuggestion(getEmailTypoSuggestion(email) || '')
+    if (!result.valid || email === lastCheckedEmail.current) return
+    lastCheckedEmail.current = email
+    try {
+      const { available } = await api.auth.checkEmail(email)
+      if (email === lastCheckedEmail.current) setEmailTaken(!available)
+    } catch (_) { /* best-effort - the real check happens again on submit */ }
   }
 
   function acceptEmailSuggestion() {
@@ -67,8 +76,12 @@ export default function Register() {
     const { error } = await signUp(email, password, firstName.trim(), lastName.trim(), middleName.trim(), suffix.trim())
     setLoading(false)
     if (error) {
-      setFormError(error.message)
-      toast.error(error.message)
+      if (error.code === 'EMAIL_ALREADY_REGISTERED') {
+        setEmailTaken(true)
+      } else {
+        setFormError(error.message)
+        toast.error(error.message)
+      }
     } else {
       toast.success('Account created! Check your email to verify it.')
       navigate(`/check-email?email=${encodeURIComponent(email)}`)
@@ -167,7 +180,7 @@ export default function Register() {
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Email address <span className="text-red-400">*</span></label>
               <input type="email" value={email}
-                onChange={e => { setEmail(e.target.value); setEmailError(''); setEmailSuggestion('') }}
+                onChange={e => { setEmail(e.target.value); setEmailError(''); setEmailSuggestion(''); setEmailTaken(false) }}
                 onBlur={handleEmailBlur}
                 placeholder="you@daycarelog.com" className={inputClass} autoComplete="email" />
               {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
@@ -176,6 +189,12 @@ export default function Register() {
                   className="text-xs text-primary-600 hover:underline mt-1">
                   Did you mean <span className="font-semibold">{emailSuggestion}</span>?
                 </button>
+              )}
+              {emailTaken && (
+                <p className="text-xs text-red-600 mt-1">
+                  This email is already registered.{' '}
+                  <Link to="/login" className="font-semibold hover:underline">Log in instead</Link>
+                </p>
               )}
             </div>
 
