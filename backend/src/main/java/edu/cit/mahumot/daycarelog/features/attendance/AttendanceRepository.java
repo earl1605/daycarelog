@@ -12,4 +12,5 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<Attendance> findByDateBetween(LocalDate start, LocalDate end);
     List<Attendance> findByChildIdAndDateBetween(Long childId, LocalDate start, LocalDate end);
     List<Attendance> findByChildIdInOrderByDateDesc(List<Long> childIds);
+    void deleteByChildId(Long childId);
 }

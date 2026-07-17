@@ -9,4 +9,5 @@ public interface GuardianRepository extends JpaRepository<Guardian, Long> {
     List<Guardian> findByUserIdIsNotNull();
     boolean existsByChildIdAndUserId(Long childId, Long userId);
     void deleteByUserId(Long userId);
+    void deleteByChildId(Long childId);
 }

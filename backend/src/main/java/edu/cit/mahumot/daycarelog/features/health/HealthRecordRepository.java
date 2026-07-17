@@ -10,4 +10,5 @@ public interface HealthRecordRepository extends JpaRepository<HealthRecord, Long
     List<HealthRecord> findByMeasurementDateBetweenAndDeletedAtIsNull(LocalDate start, LocalDate end);
     List<HealthRecord> findByChildIdInAndDeletedAtIsNullOrderByMeasurementDateDesc(List<Long> childIds);
     List<HealthRecord> findByDeletedAtIsNotNullOrderByDeletedAtDesc();
+    void deleteByChildId(Long childId);
 }

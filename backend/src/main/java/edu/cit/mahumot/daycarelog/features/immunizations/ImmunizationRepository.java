@@ -9,4 +9,5 @@ public interface ImmunizationRepository extends JpaRepository<Immunization, Long
     List<Immunization> findByChildIdInAndDeletedAtIsNullOrderByDateGivenDesc(List<Long> childIds);
     boolean existsByChildIdAndVaccineNameAndDoseNumberAndDeletedAtIsNull(Long childId, String vaccineName, Integer doseNumber);
     List<Immunization> findByDeletedAtIsNotNullOrderByDeletedAtDesc();
+    void deleteByChildId(Long childId);
 }

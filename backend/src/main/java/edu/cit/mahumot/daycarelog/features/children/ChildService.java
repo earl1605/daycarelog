@@ -1,6 +1,11 @@
 package edu.cit.mahumot.daycarelog.features.children;
 
+import edu.cit.mahumot.daycarelog.features.attendance.AttendanceRepository;
+import edu.cit.mahumot.daycarelog.features.guardians.GuardianRepository;
+import edu.cit.mahumot.daycarelog.features.health.HealthRecordRepository;
+import edu.cit.mahumot.daycarelog.features.immunizations.ImmunizationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -8,9 +13,19 @@ import java.util.List;
 public class ChildService {
 
     private final ChildRepository childRepository;
+    private final HealthRecordRepository healthRecordRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final ImmunizationRepository immunizationRepository;
+    private final GuardianRepository guardianRepository;
 
-    public ChildService(ChildRepository childRepository) {
+    public ChildService(ChildRepository childRepository, HealthRecordRepository healthRecordRepository,
+                         AttendanceRepository attendanceRepository, ImmunizationRepository immunizationRepository,
+                         GuardianRepository guardianRepository) {
         this.childRepository = childRepository;
+        this.healthRecordRepository = healthRecordRepository;
+        this.attendanceRepository = attendanceRepository;
+        this.immunizationRepository = immunizationRepository;
+        this.guardianRepository = guardianRepository;
     }
 
     public List<Child> findAll() {
@@ -70,7 +85,12 @@ public class ChildService {
         return childRepository.save(child);
     }
 
+    @Transactional
     public void delete(Long id) {
+        healthRecordRepository.deleteByChildId(id);
+        attendanceRepository.deleteByChildId(id);
+        immunizationRepository.deleteByChildId(id);
+        guardianRepository.deleteByChildId(id);
         childRepository.deleteById(id);
     }
 }
