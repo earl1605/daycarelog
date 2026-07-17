@@ -83,9 +83,10 @@ export default function Dashboard() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-[22px] font-bold text-gray-900">
+        <h1 className="text-[22px] font-bold text-gray-900 flex items-center gap-2">
           Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},{' '}
-          {user?.fullName?.split(' ')[0] ?? 'there'} 👋
+          {user?.fullName?.split(' ')[0] ?? 'there'}
+          <img src="/favicon.svg" alt="" className="w-6 h-6 rounded-[6px]" />
         </h1>
         <p className="text-gray-500 text-sm mt-1">
           {new Date().toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
