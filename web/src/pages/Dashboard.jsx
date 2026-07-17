@@ -7,7 +7,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
 import { computeNutritionalTrend, computeImmunizationDetail } from '../utils/healthTrends'
 import StatCard from '../components/StatCard'
-import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, BarChartIcon, PlusIcon } from '../components/icons'
+import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, BarChartIcon, PlusIcon, WaveIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
 // Status-severity colors (good/warning/serious/critical), not arbitrary categorical hues.
@@ -86,7 +86,7 @@ export default function Dashboard() {
         <h1 className="text-[22px] font-bold text-gray-900 flex items-center gap-2">
           Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},{' '}
           {user?.fullName?.split(' ')[0] ?? 'there'}
-          <img src="/favicon.svg" alt="" className="w-6 h-6 rounded-[6px]" />
+          <WaveIcon width={22} height={22} className="text-amber-500" strokeWidth={2} />
         </h1>
         <p className="text-gray-500 text-sm mt-1">
           {new Date().toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}

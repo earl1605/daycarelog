@@ -220,3 +220,16 @@ export function EyeOffIcon(props) {
     </svg>
   )
 }
+
+export function WaveIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M8.5 12V6a1.4 1.4 0 0 1 2.8 0v5" />
+      <path d="M11.3 11V4.3a1.4 1.4 0 0 1 2.8 0V11" />
+      <path d="M14.1 11.2V5.6a1.4 1.4 0 0 1 2.8 0V13" />
+      <path d="M16.9 13v-2.6a1.4 1.4 0 0 1 2.8 0V16a6 6 0 0 1-6 6h-1.6a6 6 0 0 1-5.2-3L4.8 15a1.4 1.4 0 0 1 2.4-1.4l1.3 1.9" />
+      <path d="M4.3 4.8c-.8.7-1.2 1.6-1.3 2.7" />
+      <path d="M7 2.7c-1.1.8-1.7 2-1.8 3.5" />
+    </svg>
+  )
+}
