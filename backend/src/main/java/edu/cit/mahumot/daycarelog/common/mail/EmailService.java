@@ -76,6 +76,37 @@ public class EmailService {
         }
     }
 
+    public void sendPasswordResetEmail(String toEmail, String recipientName, String rawToken, String rawCode) {
+        String link = webBaseUrl + "/reset-password?token=" + rawToken;
+        String subject = "Reset your DaycareLog password";
+        String html = buildResetHtml(recipientName, link, rawCode);
+
+        if (!brevoApiKey.isBlank()) {
+            sendViaBrevo(toEmail, subject, html);
+            return;
+        }
+
+        if (isConsoleMode()) {
+            log.info(
+                    "[MAIL_MODE=console] Password reset email for {}\nSubject: {}\nLink: {}\nCode: {}",
+                    toEmail, subject, link, rawCode
+            );
+            return;
+        }
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("Failed to send password reset email to {}", toEmail, e);
+        }
+    }
+
     private void sendViaBrevo(String toEmail, String subject, String html) {
         try {
             FromAddress from = parseFromAddress();
@@ -152,6 +183,48 @@ public class EmailService {
                           <p style="font-size:12px;color:#9ca3af;margin:0;">
                             The link expires in 24 hours and the code expires in 15 minutes.
                             If you didn't create a DaycareLog account, you can safely ignore this email.
+                          </p>
+                        </td></tr>
+                      </table>
+                    </td></tr>
+                  </table>
+                </body>
+                </html>
+                """.formatted(greeting, link, code);
+    }
+
+    private String buildResetHtml(String name, String link, String code) {
+        String greeting = (name == null || name.isBlank()) ? "there" : name;
+        return """
+                <!DOCTYPE html>
+                <html>
+                <body style="margin:0;padding:0;background:#f4f6f6;font-family:Arial,Helvetica,sans-serif;">
+                  <table width="100%%" cellpadding="0" cellspacing="0" style="background:#f4f6f6;padding:24px 0;">
+                    <tr><td align="center">
+                      <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
+                        <tr><td style="background:#085454;padding:24px 32px;">
+                          <span style="color:#ffffff;font-size:22px;font-weight:800;">DaycareLog</span>
+                        </td></tr>
+                        <tr><td style="padding:32px;">
+                          <p style="font-size:16px;color:#111827;margin:0 0 16px;">Hi %s,</p>
+                          <p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 24px;">
+                            We received a request to reset your DaycareLog password.
+                            Click the button below, or enter the 6-digit code if you're on the mobile app.
+                          </p>
+                          <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+                            <tr><td style="background:#22c59a;border-radius:8px;">
+                              <a href="%s" style="display:inline-block;padding:12px 28px;color:#085454;font-weight:700;font-size:14px;text-decoration:none;">
+                                Reset my password
+                              </a>
+                            </td></tr>
+                          </table>
+                          <p style="font-size:13px;color:#6b7280;margin:0 0 8px;">Or enter this code in the app:</p>
+                          <p style="font-family:'Courier New',monospace;font-size:32px;font-weight:700;letter-spacing:8px;color:#085454;background:#f0fdfa;border-radius:8px;padding:16px;text-align:center;margin:0 0 24px;">
+                            %s
+                          </p>
+                          <p style="font-size:12px;color:#9ca3af;margin:0;">
+                            The link expires in 30 minutes and the code expires in 15 minutes.
+                            If you didn't request a password reset, you can safely ignore this email - your password will not be changed.
                           </p>
                         </td></tr>
                       </table>

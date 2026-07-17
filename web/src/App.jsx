@@ -10,6 +10,8 @@ import Login              from './pages/Login'
 import Register           from './pages/Register'
 import CheckEmail         from './pages/CheckEmail'
 import VerifyEmail        from './pages/VerifyEmail'
+import ForgotPassword     from './pages/ForgotPassword'
+import ResetPassword      from './pages/ResetPassword'
 import Dashboard          from './pages/Dashboard'
 import Children           from './pages/Children'
 import ChildForm          from './pages/ChildForm'
@@ -36,6 +38,8 @@ export default function App() {
         <Route path="/register"     element={<Register />} />
         <Route path="/check-email"  element={<CheckEmail />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password"  element={<ResetPassword />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>

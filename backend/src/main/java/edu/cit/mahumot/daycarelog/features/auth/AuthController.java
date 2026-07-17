@@ -3,6 +3,9 @@ package edu.cit.mahumot.daycarelog.features.auth;
 import edu.cit.mahumot.daycarelog.common.email.EmailFormatValidator;
 import edu.cit.mahumot.daycarelog.common.email.EmailValidationException;
 import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
+import edu.cit.mahumot.daycarelog.features.passwordreset.ForgotPasswordRequest;
+import edu.cit.mahumot.daycarelog.features.passwordreset.PasswordResetService;
+import edu.cit.mahumot.daycarelog.features.passwordreset.ResetPasswordRequest;
 import edu.cit.mahumot.daycarelog.features.users.User;
 import edu.cit.mahumot.daycarelog.features.users.UserRepository;
 import edu.cit.mahumot.daycarelog.features.verification.VerificationException;
@@ -19,15 +22,17 @@ public class AuthController {
 
     private final AuthService authService;
     private final VerificationService verificationService;
+    private final PasswordResetService passwordResetService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final EmailFormatValidator emailFormatValidator;
 
     public AuthController(AuthService authService, VerificationService verificationService,
-                           UserRepository userRepository, JwtUtil jwtUtil,
-                           EmailFormatValidator emailFormatValidator) {
+                           PasswordResetService passwordResetService, UserRepository userRepository,
+                           JwtUtil jwtUtil, EmailFormatValidator emailFormatValidator) {
         this.authService = authService;
         this.verificationService = verificationService;
+        this.passwordResetService = passwordResetService;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.emailFormatValidator = emailFormatValidator;
@@ -106,6 +111,31 @@ public class AuthController {
         }
         return ResponseEntity.ok(Map.of(
                 "message", "If that email needs verification, we've sent a new code and link."));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest req) {
+        try {
+            passwordResetService.requestReset(req.getEmail());
+        } catch (VerificationException e) {
+            return errorResponse(e);
+        }
+        return ResponseEntity.ok(Map.of(
+                "message", "If that email has an account, we've sent password reset instructions."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest req) {
+        try {
+            if (req.getToken() != null && !req.getToken().isBlank()) {
+                passwordResetService.resetByToken(req.getToken(), req.getNewPassword());
+            } else {
+                passwordResetService.resetByCode(req.getEmail(), req.getCode(), req.getNewPassword());
+            }
+        } catch (VerificationException e) {
+            return errorResponse(e);
+        }
+        return ResponseEntity.ok(Map.of("message", "Your password has been reset. You can now sign in."));
     }
 
     @GetMapping("/me")

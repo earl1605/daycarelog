@@ -11,6 +11,8 @@ public class VerificationToken {
 
     public static final String TYPE_EMAIL_LINK = "EMAIL_LINK";
     public static final String TYPE_EMAIL_CODE = "EMAIL_CODE";
+    public static final String TYPE_PASSWORD_RESET_LINK = "PASSWORD_RESET_LINK";
+    public static final String TYPE_PASSWORD_RESET_CODE = "PASSWORD_RESET_CODE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
