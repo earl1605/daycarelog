@@ -34,6 +34,15 @@ public class ActivityLogController {
         return "ok";
     }
 
+    // Second diagnostic: a path with ZERO textual relation to "activity-logs",
+    // to test whether ANY brand-new bare top-level path added in this same
+    // batch has this problem, or whether it's specific to the activity-logs
+    // prefix somehow colliding with the sibling /recent rule.
+    @GetMapping("/api/zzz-diagnostic")
+    public String zzzDiagnostic() {
+        return "ok";
+    }
+
     // ADMIN only (see SecurityConfig) - the full filterable audit log.
     @GetMapping("/api/activity-logs")
     public Page<ActivityLogResponse> search(
