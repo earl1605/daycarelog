@@ -43,6 +43,7 @@ export default function Register() {
   const [emailSuggestion, setEmailSuggestion] = useState('')
   const [emailTaken,      setEmailTaken]      = useState(false)
   const lastCheckedEmail = useRef('')
+  const confirmInputRef = useRef(null)
 
   async function handleEmailBlur() {
     const result = validateEmailFormat(email)
@@ -60,6 +61,19 @@ export default function Register() {
     setEmail(emailSuggestion)
     setEmailSuggestion('')
     setEmailError('')
+  }
+
+  // Chrome/Edge sometimes duplicate a suggested password into Confirm the
+  // moment the browser fills Password, without the user ever typing into
+  // Confirm themselves - so a submission can look "complete and matching"
+  // when the user hasn't actually confirmed anything. index.css attaches a
+  // no-op animation to the :-webkit-autofill pseudo-class, which lets us
+  // catch that as a real event instead of an indistinguishable input change.
+  function handleConfirmAutofill(e) {
+    if (e.animationName !== 'onAutoFillStart') return
+    setConfirm('')
+    setFormError('Your browser auto-filled Confirm - please type your password there yourself.')
+    confirmInputRef.current?.focus()
   }
 
   async function handleSubmit(e) {
@@ -214,7 +228,8 @@ export default function Register() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Confirm <span className="text-red-400">*</span></label>
                 <div className="relative">
-                  <input type={showConfirm ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)}
+                  <input ref={confirmInputRef} type={showConfirm ? 'text' : 'password'} value={confirm}
+                    onChange={e => setConfirm(e.target.value)} onAnimationStart={handleConfirmAutofill}
                     placeholder="Re-enter" className={`${inputClass} pr-9`} autoComplete="off" />
                   <button type="button" onClick={() => setShowConfirm(p => !p)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">

@@ -73,6 +73,18 @@
   50%       { background-position: 100% 50%; }
 }
 
+/* Chrome/Edge/Safari apply :-webkit-autofill to a field the moment their
+   password manager fills it (silently, or via a suggestion the user picked)
+   - but they never fire a real input/change event we can distinguish from
+   typing. Attaching a no-op animation to that pseudo-class lets us catch an
+   animationstart event as a reliable signal "this field was autofilled,
+   not typed" (see Register.jsx's onAnimationStart on the Confirm field). */
+@keyframes onAutoFillStart { from {} to {} }
+input:-webkit-autofill {
+  animation-name: onAutoFillStart;
+  animation-duration: 0.001s;
+}
+
 .glass {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px);
