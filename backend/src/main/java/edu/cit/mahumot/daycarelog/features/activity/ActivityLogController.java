@@ -44,6 +44,9 @@ public class ActivityLogController {
     }
 
     // ADMIN only (see SecurityConfig) - the full filterable audit log.
+    // DIAGNOSTIC: temporarily bypassing activityLogService.search() (the
+    // custom @Query path) to test whether that's the actual culprit behind
+    // the persistent 403, vs. the already-proven-working findRecent() path.
     @GetMapping("/api/activity-logs")
     public Page<ActivityLogResponse> search(
             @RequestParam(required = false) String action,
@@ -53,7 +56,7 @@ public class ActivityLogController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return activityLogService.search(action, entityType, userId, from, to, PageRequest.of(page, size));
+        return activityLogService.findRecent(PageRequest.of(page, size));
     }
 
     // ADMIN and STAFF (see SecurityConfig) - unscoped, same as every other
