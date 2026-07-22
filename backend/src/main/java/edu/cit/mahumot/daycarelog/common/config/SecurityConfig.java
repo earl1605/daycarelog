@@ -61,8 +61,11 @@ public class SecurityConfig {
                 // (reuses GuardianService.isGuardianOfChild).
                 .requestMatchers(HttpMethod.GET, "/api/children/*/history").authenticated()
 
-                .requestMatchers(HttpMethod.GET, "/api/activity-logs").hasRole("ADMIN")
+                // DIAGNOSTIC: temporary, see ActivityLogController.ping(). Remove together.
+                .requestMatchers(HttpMethod.GET, "/api/activity-logs-ping").hasRole("ADMIN")
+
                 .requestMatchers(HttpMethod.GET, "/api/activity-logs/recent").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers(HttpMethod.GET, "/api/activity-logs").hasRole("ADMIN")
 
                 // Recycle Bin: admin-only, and must be declared before the broader ADMIN+STAFF
                 // rules below -- /permanent in particular would otherwise be caught by the

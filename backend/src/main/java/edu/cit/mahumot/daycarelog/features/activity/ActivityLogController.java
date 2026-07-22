@@ -25,6 +25,15 @@ public class ActivityLogController {
         this.jwtUtil = jwtUtil;
     }
 
+    // Temporary diagnostic endpoint - trivial, zero-parameter, to isolate
+    // whether the bare "/api/activity-logs" 403 is about this specific path
+    // string vs. something about search()'s parameter list. Remove once the
+    // root cause of the 403 on GET /api/activity-logs is found.
+    @GetMapping("/api/activity-logs-ping")
+    public String ping() {
+        return "ok";
+    }
+
     // ADMIN only (see SecurityConfig) - the full filterable audit log.
     @GetMapping("/api/activity-logs")
     public Page<ActivityLogResponse> search(
