@@ -4,6 +4,7 @@ import edu.cit.mahumot.daycarelog.common.security.JwtUtil;
 import edu.cit.mahumot.daycarelog.features.guardians.GuardianService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,28 +26,7 @@ public class ActivityLogController {
         this.jwtUtil = jwtUtil;
     }
 
-    // Temporary diagnostic endpoint - trivial, zero-parameter, to isolate
-    // whether the bare "/api/activity-logs" 403 is about this specific path
-    // string vs. something about search()'s parameter list. Remove once the
-    // root cause of the 403 on GET /api/activity-logs is found.
-    @GetMapping("/api/activity-logs-ping")
-    public String ping() {
-        return "ok";
-    }
-
-    // Second diagnostic: a path with ZERO textual relation to "activity-logs",
-    // to test whether ANY brand-new bare top-level path added in this same
-    // batch has this problem, or whether it's specific to the activity-logs
-    // prefix somehow colliding with the sibling /recent rule.
-    @GetMapping("/api/zzz-diagnostic")
-    public String zzzDiagnostic() {
-        return "ok";
-    }
-
     // ADMIN only (see SecurityConfig) - the full filterable audit log.
-    // DIAGNOSTIC: temporarily bypassing activityLogService.search() (the
-    // custom @Query path) to test whether that's the actual culprit behind
-    // the persistent 403, vs. the already-proven-working findRecent() path.
     @GetMapping("/api/activity-logs")
     public Page<ActivityLogResponse> search(
             @RequestParam(required = false) String action,
@@ -56,7 +36,8 @@ public class ActivityLogController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return activityLogService.findRecent(PageRequest.of(page, size));
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return activityLogService.search(action, entityType, userId, from, to, pageable);
     }
 
     // ADMIN and STAFF (see SecurityConfig) - unscoped, same as every other

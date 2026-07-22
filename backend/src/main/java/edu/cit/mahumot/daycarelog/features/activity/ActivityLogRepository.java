@@ -3,12 +3,9 @@ package edu.cit.mahumot.daycarelog.features.activity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.time.LocalDateTime;
-
-public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> {
+public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long>, JpaSpecificationExecutor<ActivityLog> {
 
     Page<ActivityLog> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
@@ -18,22 +15,9 @@ public interface ActivityLogRepository extends JpaRepository<ActivityLog, Long> 
 
     Page<ActivityLog> findByChildIdOrderByCreatedAtDesc(Long childId, Pageable pageable);
 
-    // Every filter is optional (null = "don't filter on this"). Matches the
-    // one existing @Query precedent in the codebase (UserRepository) more
-    // closely than introducing Specifications, which has zero precedent here.
-    @Query("""
-            SELECT a FROM ActivityLog a
-            WHERE (:action IS NULL OR a.action = :action)
-              AND (:entityType IS NULL OR a.entityType = :entityType)
-              AND (:userId IS NULL OR a.userId = :userId)
-              AND (:from IS NULL OR a.createdAt >= :from)
-              AND (:to IS NULL OR a.createdAt <= :to)
-            ORDER BY a.createdAt DESC
-            """)
-    Page<ActivityLog> search(@Param("action") String action,
-                              @Param("entityType") String entityType,
-                              @Param("userId") Long userId,
-                              @Param("from") LocalDateTime from,
-                              @Param("to") LocalDateTime to,
-                              Pageable pageable);
+    // search(...) in ActivityLogService builds a Specification for the optional
+    // multi-field filter instead of a hand-written JPQL @Query - see the comment
+    // there for why: a "(:param IS NULL OR field = :param)" JPQL pattern hit a
+    // PostgreSQL parameter-type-inference issue in production that a type-safe
+    // Criteria API query (what Specification generates) can't have.
 }

@@ -61,10 +61,6 @@ public class SecurityConfig {
                 // (reuses GuardianService.isGuardianOfChild).
                 .requestMatchers(HttpMethod.GET, "/api/children/*/history").authenticated()
 
-                // DIAGNOSTIC: temporary, see ActivityLogController. Remove together.
-                .requestMatchers(HttpMethod.GET, "/api/activity-logs-ping").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/zzz-diagnostic").hasRole("ADMIN")
-
                 .requestMatchers(HttpMethod.GET, "/api/activity-logs/recent").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers(HttpMethod.GET, "/api/activity-logs").hasRole("ADMIN")
 
