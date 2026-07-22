@@ -51,9 +51,10 @@ public class HealthRecordController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
         try {
-            healthRecordService.delete(id);
+            Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+            healthRecordService.delete(id, userId);
             return ResponseEntity.ok(Map.of("message", "Moved to Recycle Bin"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

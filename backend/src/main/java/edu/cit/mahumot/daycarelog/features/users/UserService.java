@@ -1,6 +1,9 @@
 package edu.cit.mahumot.daycarelog.features.users;
 
 import edu.cit.mahumot.daycarelog.common.util.TempPasswordGenerator;
+import edu.cit.mahumot.daycarelog.features.activity.ActivityActions;
+import edu.cit.mahumot.daycarelog.features.activity.ActivityEntityTypes;
+import edu.cit.mahumot.daycarelog.features.activity.ActivityLogService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,26 +17,33 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ActivityLogService activityLogService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ActivityLogService activityLogService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.activityLogService = activityLogService;
     }
 
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
-    public User updateRole(Long id, String role) {
+    public User updateRole(Long id, String role, Long requesterId) {
         if (role == null || !ALLOWED_ROLES.contains(role.toLowerCase().trim())) {
             throw new RuntimeException("Role must be 'admin' or 'staff'");
         }
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setRole(role.toLowerCase().trim());
-        return userRepository.save(user);
+        String oldRole = user.getRole();
+        String newRole = role.toLowerCase().trim();
+        user.setRole(newRole);
+        user = userRepository.save(user);
+        activityLogService.log(requesterId, ActivityActions.USER_ROLE_CHANGED, ActivityEntityTypes.USER, user.getId(),
+                null, "Changed " + user.getFullName() + "'s role from " + oldRole + " to " + newRole);
+        return user;
     }
 
-    public CreatedUser createUser(CreateUserRequest req) {
+    public CreatedUser createUser(CreateUserRequest req, Long requesterId) {
         if (req.getEmail() == null || req.getEmail().isBlank()) {
             throw new RuntimeException("Email is required");
         }
@@ -55,6 +65,8 @@ public class UserService {
                 .role(role)
                 .build();
         user = userRepository.save(user);
+        activityLogService.log(requesterId, ActivityActions.USER_CREATED, ActivityEntityTypes.USER, user.getId(),
+                null, "Created " + role + " account for " + user.getFullName());
         return new CreatedUser(user, tempPassword);
     }
 
@@ -65,13 +77,19 @@ public class UserService {
             throw new RuntimeException("Cannot deactivate the only active admin account");
         }
         target.setIsActive(false);
-        return userRepository.save(target);
+        target = userRepository.save(target);
+        activityLogService.log(requesterId, ActivityActions.USER_DEACTIVATED, ActivityEntityTypes.USER, target.getId(),
+                null, "Deactivated " + target.getFullName() + "'s account");
+        return target;
     }
 
-    public User reactivateUser(Long targetId) {
+    public User reactivateUser(Long targetId, Long requesterId) {
         User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("User not found"));
         target.setIsActive(true);
-        return userRepository.save(target);
+        target = userRepository.save(target);
+        activityLogService.log(requesterId, ActivityActions.USER_REACTIVATED, ActivityEntityTypes.USER, target.getId(),
+                null, "Reactivated " + target.getFullName() + "'s account");
+        return target;
     }
 
     public String resetPassword(Long targetId) {
@@ -115,6 +133,9 @@ public class UserService {
         if ("admin".equals(target.getRole()) && userRepository.countByRole("admin") <= 1) {
             throw new RuntimeException("Cannot delete the only admin account");
         }
+        String name = target.getFullName();
         userRepository.deleteById(targetId);
+        activityLogService.log(requesterId, ActivityActions.USER_DELETED, ActivityEntityTypes.USER, targetId,
+                null, "Deleted account for " + name);
     }
 }

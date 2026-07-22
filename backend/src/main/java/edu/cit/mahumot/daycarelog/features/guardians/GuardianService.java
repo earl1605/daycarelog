@@ -2,6 +2,9 @@ package edu.cit.mahumot.daycarelog.features.guardians;
 
 import edu.cit.mahumot.daycarelog.common.email.EmailFormatValidator;
 import edu.cit.mahumot.daycarelog.common.email.EmailRegistrationValidator;
+import edu.cit.mahumot.daycarelog.features.activity.ActivityActions;
+import edu.cit.mahumot.daycarelog.features.activity.ActivityEntityTypes;
+import edu.cit.mahumot.daycarelog.features.activity.ActivityLogService;
 import edu.cit.mahumot.daycarelog.features.guardians.GuardianAccountResponse.ChildSummary;
 import edu.cit.mahumot.daycarelog.features.users.User;
 import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
@@ -27,12 +30,14 @@ public class GuardianService {
     private final VerificationService verificationService;
     private final EmailRegistrationValidator emailRegistrationValidator;
     private final EmailFormatValidator emailFormatValidator;
+    private final ActivityLogService activityLogService;
 
     public GuardianService(GuardianRepository guardianRepository, UserRepository userRepository,
                             ChildRepository childRepository, PasswordEncoder passwordEncoder,
                             VerificationService verificationService,
                             EmailRegistrationValidator emailRegistrationValidator,
-                            EmailFormatValidator emailFormatValidator) {
+                            EmailFormatValidator emailFormatValidator,
+                            ActivityLogService activityLogService) {
         this.guardianRepository = guardianRepository;
         this.userRepository = userRepository;
         this.childRepository = childRepository;
@@ -40,6 +45,7 @@ public class GuardianService {
         this.verificationService = verificationService;
         this.emailRegistrationValidator = emailRegistrationValidator;
         this.emailFormatValidator = emailFormatValidator;
+        this.activityLogService = activityLogService;
     }
 
     public List<Guardian> findByChild(Long childId) {
@@ -54,7 +60,7 @@ public class GuardianService {
         return guardianRepository.existsByChildIdAndUserId(childId, userId);
     }
 
-    public CreatedGuardian addGuardian(Long childId, GuardianRequest req) {
+    public CreatedGuardian addGuardian(Long childId, GuardianRequest req, Long requesterId) {
         if (req.getName() == null || req.getName().isBlank()) {
             throw new RuntimeException("Guardian name is required");
         }
@@ -105,16 +111,20 @@ public class GuardianService {
         }
 
         guardian = guardianRepository.save(guardian);
+        activityLogService.log(requesterId, ActivityActions.GUARDIAN_CREATED, ActivityEntityTypes.GUARDIAN,
+                guardian.getId(), childId, "Added guardian " + guardian.getName());
         return new CreatedGuardian(guardian, tempPassword);
     }
 
-    public void removeGuardian(Long childId, Long guardianId) {
+    public void removeGuardian(Long childId, Long guardianId, Long requesterId) {
         Guardian guardian = guardianRepository.findById(guardianId)
                 .orElseThrow(() -> new RuntimeException("Guardian not found"));
         if (!guardian.getChildId().equals(childId)) {
             throw new RuntimeException("Guardian does not belong to this child");
         }
         guardianRepository.deleteById(guardianId);
+        activityLogService.log(requesterId, ActivityActions.GUARDIAN_DELETED, ActivityEntityTypes.GUARDIAN,
+                guardianId, childId, "Removed guardian " + guardian.getName());
     }
 
     public List<GuardianAccountResponse> findAllAccounts() {

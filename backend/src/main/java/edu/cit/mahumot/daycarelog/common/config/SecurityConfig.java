@@ -56,6 +56,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/immunizations/mine").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/immunizations/schedule").authenticated()
 
+                // Same pattern as the /mine endpoints above: broad "authenticated" here,
+                // fine-grained PARENT-vs-own-child scoping done in ActivityLogController
+                // (reuses GuardianService.isGuardianOfChild).
+                .requestMatchers(HttpMethod.GET, "/api/children/*/history").authenticated()
+
+                .requestMatchers(HttpMethod.GET, "/api/activity-logs").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/activity-logs/recent").hasAnyRole("ADMIN", "STAFF")
+
                 // Recycle Bin: admin-only, and must be declared before the broader ADMIN+STAFF
                 // rules below -- /permanent in particular would otherwise be caught by the
                 // wildcard DELETE "/api/health-records/**" / "/api/immunizations/**" rules,

@@ -55,17 +55,20 @@ public class ChildController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody ChildRequest req) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody ChildRequest req,
+                                    @RequestHeader("Authorization") String authHeader) {
         try {
-            return ResponseEntity.ok(childService.update(id, req));
+            Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+            return ResponseEntity.ok(childService.update(id, req, userId));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        childService.delete(id);
+    public ResponseEntity<?> delete(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+        Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+        childService.delete(id, userId);
         return ResponseEntity.ok(Map.of("message", "Deleted"));
     }
 }

@@ -1,5 +1,8 @@
 package edu.cit.mahumot.daycarelog.features.health;
 
+import edu.cit.mahumot.daycarelog.features.activity.ActivityActions;
+import edu.cit.mahumot.daycarelog.features.activity.ActivityEntityTypes;
+import edu.cit.mahumot.daycarelog.features.activity.ActivityLogService;
 import edu.cit.mahumot.daycarelog.features.children.Child;
 import edu.cit.mahumot.daycarelog.features.children.ChildRepository;
 import org.springframework.stereotype.Service;
@@ -13,10 +16,13 @@ public class HealthRecordService {
 
     private final HealthRecordRepository healthRecordRepository;
     private final ChildRepository childRepository;
+    private final ActivityLogService activityLogService;
 
-    public HealthRecordService(HealthRecordRepository healthRecordRepository, ChildRepository childRepository) {
+    public HealthRecordService(HealthRecordRepository healthRecordRepository, ChildRepository childRepository,
+                                ActivityLogService activityLogService) {
         this.healthRecordRepository = healthRecordRepository;
         this.childRepository = childRepository;
+        this.activityLogService = activityLogService;
     }
 
     public List<HealthRecord> findAll() {
@@ -48,10 +54,14 @@ public class HealthRecordService {
                 .remarks(req.getRemarks())
                 .recordedBy(userId)
                 .build();
-        return healthRecordRepository.save(record);
+        record = healthRecordRepository.save(record);
+        activityLogService.log(userId, ActivityActions.HEALTH_RECORD_CREATED, ActivityEntityTypes.HEALTH_RECORD,
+                record.getId(), req.getChildId(),
+                "Recorded health measurement for " + child.getFirstName() + " " + child.getLastName());
+        return record;
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Long userId) {
         HealthRecord record = healthRecordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Health record not found"));
         if (record.getDeletedAt() != null) {
@@ -59,6 +69,11 @@ public class HealthRecordService {
         }
         record.setDeletedAt(LocalDateTime.now());
         healthRecordRepository.save(record);
+        String childName = childRepository.findById(record.getChildId())
+                .map(c -> c.getFirstName() + " " + c.getLastName())
+                .orElse("child #" + record.getChildId());
+        activityLogService.log(userId, ActivityActions.HEALTH_RECORD_DELETED, ActivityEntityTypes.HEALTH_RECORD,
+                record.getId(), record.getChildId(), "Deleted health record for " + childName);
     }
 
     public List<HealthRecord> findTrashed() {
