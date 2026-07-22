@@ -5,10 +5,12 @@ import { formatAge, classifyNutritionalStatus } from '../utils/nutritionalStatus
 import NutritionalStatusBadge from '../components/NutritionalStatusBadge'
 import ImmunizationChecklist from '../components/ImmunizationChecklist'
 import GrowthChart from '../components/GrowthChart'
-import { AlertTriangleIcon, TrashIcon } from '../components/icons'
+import { AlertTriangleIcon, TrashIcon, ClockIcon } from '../components/icons'
+import { formatManilaDateTime, formatRelativeTime } from '../utils/date'
+import { activityIcon, activityColor } from '../utils/activityMeta'
 import toast from 'react-hot-toast'
 
-const TAB = { OVERVIEW: 'overview', HEALTH: 'health', IMMUNIZATIONS: 'immunizations', ATTENDANCE: 'attendance' }
+const TAB = { OVERVIEW: 'overview', HEALTH: 'health', IMMUNIZATIONS: 'immunizations', ATTENDANCE: 'attendance', HISTORY: 'history' }
 
 // Server computes nutritional_status as NORMAL/UNDERWEIGHT/SEVERELY_UNDERWEIGHT/OVERWEIGHT
 // (see HealthRecordService) -- map to the {label, color} shape NutritionalStatusBadge expects.
@@ -29,6 +31,10 @@ export default function ChildDetail() {
   const [schedule,       setSchedule]     = useState([])
   const [tab,     setTab]     = useState(TAB.OVERVIEW)
   const [loading, setLoading] = useState(true)
+  const [historyItems,      setHistoryItems]      = useState([])
+  const [historyPageNum,    setHistoryPageNum]    = useState(0)
+  const [historyHasMore,    setHistoryHasMore]    = useState(false)
+  const [historyLoadingMore, setHistoryLoadingMore] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -37,10 +43,26 @@ export default function ChildDetail() {
       api.attendance.getByChild(id),
       api.immunizations.getByChild(id),
       api.immunizations.schedule(),
-    ]).then(([c, h, a, im, sch]) => { setChild(c); setHealth(h); setAtt(a); setImmunizations(im); setSchedule(sch) })
+      api.activity.childHistory(id, 0, 20),
+    ]).then(([c, h, a, im, sch, hist]) => {
+      setChild(c); setHealth(h); setAtt(a); setImmunizations(im); setSchedule(sch)
+      setHistoryItems(hist.content); setHistoryHasMore(!hist.last); setHistoryPageNum(0)
+    })
       .catch(() => toast.error('Failed to load'))
       .finally(() => setLoading(false))
   }, [id])
+
+  async function loadMoreHistory() {
+    setHistoryLoadingMore(true)
+    try {
+      const next = historyPageNum + 1
+      const res = await api.activity.childHistory(id, next, 20)
+      setHistoryItems(prev => [...prev, ...res.content])
+      setHistoryPageNum(next)
+      setHistoryHasMore(!res.last)
+    } catch (e) { toast.error(e.message) }
+    setHistoryLoadingMore(false)
+  }
 
   async function handleDeleteImmunization(immId) {
     if (!window.confirm('Move this immunization record to the Recycle Bin?')) return
@@ -79,6 +101,7 @@ export default function ChildDetail() {
     { key: TAB.HEALTH,   label: `Health (${health.length})` },
     { key: TAB.IMMUNIZATIONS, label: `Immunizations (${immunizations.length})` },
     { key: TAB.ATTENDANCE, label: `Attendance (${att.length})` },
+    { key: TAB.HISTORY, label: 'History' },
   ]
 
   return (
@@ -214,6 +237,46 @@ export default function ChildDetail() {
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      )}
+
+      {tab === TAB.HISTORY && (
+        <div className="bg-white rounded-xl border border-gray-200/70 p-5">
+          {historyItems.length === 0 ? (
+            <div className="text-center py-12">
+              <span className="inline-flex w-10 h-10 rounded-full bg-gray-100 text-gray-400 items-center justify-center mb-2">
+                <ClockIcon width={18} height={18} />
+              </span>
+              <p className="text-gray-400 text-sm">No history yet</p>
+            </div>
+          ) : (
+            <ul className="space-y-0">
+              {historyItems.map((item, i) => {
+                const Icon = activityIcon(item.entityType)
+                const isLast = i === historyItems.length - 1
+                return (
+                  <li key={item.id} className="flex gap-3 pb-5 relative">
+                    {!isLast && <span className="absolute left-4 top-8 bottom-0 w-px bg-gray-200" />}
+                    <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 ${activityColor(item.action)}`}>
+                      <Icon width={15} height={15} />
+                    </span>
+                    <div className="min-w-0 flex-1 pt-1">
+                      <p className="text-sm text-gray-800 leading-snug">{item.description}</p>
+                      <p className="text-xs text-gray-400 mt-0.5" title={formatManilaDateTime(item.createdAt)}>
+                        {item.actorName} · {formatRelativeTime(item.createdAt)}
+                      </p>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          {historyHasMore && (
+            <button onClick={loadMoreHistory} disabled={historyLoadingMore}
+              className="w-full text-sm text-primary-700 font-medium py-2 rounded-lg hover:bg-primary-50 transition-colors duration-150 disabled:opacity-50">
+              {historyLoadingMore ? 'Loading…' : 'Load more'}
+            </button>
           )}
         </div>
       )}

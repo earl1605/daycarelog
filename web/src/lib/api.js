@@ -109,4 +109,13 @@ export const api = {
     resetPassword:  id          => request(`/users/${id}/reset-password`, { method: 'PUT' }),
     delete:         id          => request(`/users/${id}`, { method: 'DELETE' }),
   },
+  activity: {
+    recent:  (size = 8) => request(`/activity-logs/recent?size=${size}`),
+    search:  (params = {}) => {
+      const qs = new URLSearchParams()
+      Object.entries(params).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== '') qs.set(k, v) })
+      return request(`/activity-logs?${qs.toString()}`)
+    },
+    childHistory: (childId, page = 0, size = 20) => request(`/children/${childId}/history?page=${page}&size=${size}`),
+  },
 }

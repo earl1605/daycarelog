@@ -7,6 +7,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { toLocalDateString } from '../utils/date'
 import { computeNutritionalTrend, computeImmunizationDetail } from '../utils/healthTrends'
 import StatCard from '../components/StatCard'
+import RecentActivityWidget from '../components/RecentActivityWidget'
 import { UsersIcon, CheckIcon, ClipboardIcon, CalendarIcon, BarChartIcon, PlusIcon, WaveIcon } from '../components/icons'
 import toast from 'react-hot-toast'
 
@@ -100,6 +101,8 @@ export default function Dashboard() {
         <StatCard icon={CalendarIcon}  label="Attendance Rate"
           value={active > 0 ? `${Math.round((presentToday / active) * 100)}%` : '—'} color="amber" />
       </div>
+
+      <RecentActivityWidget />
 
       <div className="bg-white rounded-xl border border-gray-200/70 p-5">
         <div className="flex items-center justify-between mb-3">

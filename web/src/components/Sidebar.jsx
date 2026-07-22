@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import ThemeToggle from './ThemeToggle'
 import {
   HomeIcon, UsersIcon, ClipboardIcon, HeartIcon,
-  BarChartIcon, SettingsIcon, ChevronDownIcon, LogOutIcon, TrashIcon,
+  BarChartIcon, SettingsIcon, ChevronDownIcon, LogOutIcon, TrashIcon, ClockIcon,
 } from './icons'
 
 const groups = [
@@ -47,6 +47,7 @@ const parentGroups = [
 
 const adminItems = [
   { to: '/users',        icon: UsersIcon, label: 'Users' },
+  { to: '/history',      icon: ClockIcon, label: 'Activity History' },
   { to: '/recycle-bin',  icon: TrashIcon, label: 'Recycle Bin' },
 ]
 

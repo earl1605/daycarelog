@@ -21,6 +21,7 @@ import HealthRecords      from './pages/HealthRecords'
 import ImmunizationForm   from './pages/ImmunizationForm'
 import Reports            from './pages/Reports'
 import Users              from './pages/Users'
+import History            from './pages/History'
 import RecycleBin         from './pages/RecycleBin'
 import Guardians          from './pages/Guardians'
 import Settings           from './pages/Settings'
@@ -55,6 +56,7 @@ export default function App() {
               <Route path="/reports"           element={<Reports />} />
               <Route element={<AdminRoute />}>
                 <Route path="/users"           element={<Users />} />
+                <Route path="/history"         element={<History />} />
                 <Route path="/recycle-bin"     element={<RecycleBin />} />
               </Route>
             </Route>

@@ -202,6 +202,15 @@ export function EyeIcon(props) {
   )
 }
 
+export function ClockIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3.2 2" />
+    </svg>
+  )
+}
+
 export function MailIcon(props) {
   return (
     <svg {...base} {...props}>
