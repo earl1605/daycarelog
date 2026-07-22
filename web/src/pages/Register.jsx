@@ -215,7 +215,7 @@ export default function Register() {
                 <label className="block text-xs font-medium text-gray-700 mb-1">Confirm <span className="text-red-400">*</span></label>
                 <div className="relative">
                   <input type={showConfirm ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)}
-                    placeholder="Re-enter" className={`${inputClass} pr-9`} autoComplete="new-password" />
+                    placeholder="Re-enter" className={`${inputClass} pr-9`} autoComplete="off" />
                   <button type="button" onClick={() => setShowConfirm(p => !p)}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
                     <EyeIcon open={showConfirm} />
