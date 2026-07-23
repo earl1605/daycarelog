@@ -61,7 +61,7 @@ public class SecurityConfig {
                 // (reuses GuardianService.isGuardianOfChild).
                 .requestMatchers(HttpMethod.GET, "/api/children/*/history").authenticated()
 
-                .requestMatchers(HttpMethod.GET, "/api/activity-logs/recent").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers(HttpMethod.GET, "/api/activity-logs/recent").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/activity-logs").hasRole("ADMIN")
 
                 // Recycle Bin: admin-only, and must be declared before the broader ADMIN+STAFF

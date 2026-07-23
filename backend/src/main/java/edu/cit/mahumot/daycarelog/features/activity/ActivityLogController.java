@@ -40,10 +40,8 @@ public class ActivityLogController {
         return activityLogService.search(action, entityType, userId, from, to, pageable);
     }
 
-    // ADMIN and STAFF (see SecurityConfig) - unscoped, same as every other
-    // operational endpoint (children/attendance/health-records) that STAFF
-    // already has full system-wide visibility into. Only the filterable
-    // /api/activity-logs above is Admin-only.
+    // ADMIN only (see SecurityConfig) - same restriction as the filterable
+    // /api/activity-logs endpoint above.
     @GetMapping("/api/activity-logs/recent")
     public Page<ActivityLogResponse> recent(@RequestParam(defaultValue = "10") int size) {
         return activityLogService.findRecent(PageRequest.of(0, size));

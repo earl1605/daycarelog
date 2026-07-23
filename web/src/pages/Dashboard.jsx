@@ -16,7 +16,7 @@ const STATUS_HEX = { Normal: '#0ca30c', Underweight: '#ec835a', 'Severely Underw
 const IMMUNIZATION_BUCKET_HEX = { 'Fully Immunized': '#0ca30c', 'Partially Immunized': '#fab219', 'Not Started': '#d03b3b' }
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [children,     setChildren]     = useState([])
@@ -102,7 +102,7 @@ export default function Dashboard() {
           value={active > 0 ? `${Math.round((presentToday / active) * 100)}%` : '—'} color="amber" />
       </div>
 
-      <RecentActivityWidget />
+      {isAdmin && <RecentActivityWidget />}
 
       <div className="bg-white rounded-xl border border-gray-200/70 p-5">
         <div className="flex items-center justify-between mb-3">
